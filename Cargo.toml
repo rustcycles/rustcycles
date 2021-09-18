@@ -6,4 +6,4 @@ resolver = "2"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 
 [dependencies]
-rg3d = "0.22"
+rg3d = "0.23.0"

@@ -58,7 +58,7 @@ struct GameState {
     /// TODO d_speed, pause
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     game_time: f32,
-    arena: Handle<Scene>,
+    scene: Handle<Scene>,
     camera: Handle<Node>,
 }
 
@@ -84,11 +84,11 @@ impl GameState {
         )
         .build(&mut scene.graph);
 
-        let arena = engine.scenes.add(scene);
+        let scene = engine.scenes.add(scene);
 
         Self {
             game_time: 0.0,
-            arena,
+            scene,
             camera,
         }
     }

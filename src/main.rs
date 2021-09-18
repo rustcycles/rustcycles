@@ -98,7 +98,7 @@ fn main() {
             Event::WindowEvent { event, .. } => {
                 match event {
                     WindowEvent::Resized(size) => {
-                        engine.renderer.set_frame_size(size.into());
+                        engine.renderer.set_frame_size(size.into()).unwrap();
                     }
                     WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit;

@@ -46,19 +46,23 @@ impl Client {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
-            let scene = &mut self.engine.scenes[self.gs.scene];
-
-            let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
-            let x = yaw * Vector3::x_axis();
-            let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
-            scene.graph[self.gs.camera]
-                .local_transform_mut()
-                .set_rotation(pitch * yaw);
+            self.update_gamelogic(dt);
 
             self.engine.update(dt);
         }
 
         self.engine.get_window().request_redraw();
+    }
+
+    fn update_gamelogic(&mut self, dt: f32) {
+        let scene = &mut self.engine.scenes[self.gs.scene];
+
+        let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
+        let x = yaw * Vector3::x_axis();
+        let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
+        scene.graph[self.gs.camera]
+            .local_transform_mut()
+            .set_rotation(pitch * yaw);
     }
 }
 

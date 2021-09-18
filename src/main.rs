@@ -1,4 +1,5 @@
 mod client;
+mod common;
 mod server;
 
 use rg3d::{
@@ -8,35 +9,54 @@ use rg3d::{
     event_loop::{ControlFlow, EventLoop},
     gui::node::StubNode,
     scene::{
-        base::BaseBuilder,
-        camera::{Camera, CameraBuilder},
-        node::Node,
-        transform::TransformBuilder,
-        Scene,
+        base::BaseBuilder, camera::CameraBuilder, node::Node, transform::TransformBuilder, Scene,
     },
     window::WindowBuilder,
 };
 
 type GameEngine = Engine<(), StubNode>;
 
-// struct Client {
-//     /// Wall clock time
-//     clock: Instant,
-//     /// This gamelogic frame's time in seconds.
-//     ///
-//     /// This does *not* have to run at the same speed as real world time.
-//     /// TODO d_speed, pause
-//     game_time: f32,
-// }
+struct Client {
+    engine: GameEngine,
+    gs: GameState,
+    ps: PlayerState,
+}
 
-// impl Client {
-//     fn new() -> Self {
-//         Self {}
-//     }
-// }
+impl Client {
+    fn new(engine: GameEngine, gs: GameState) -> Self {
+        Self {
+            engine,
+            gs,
+            ps: PlayerState::new(),
+        }
+    }
+
+    fn update(&mut self, elapsed: f32) {
+        let dt = 1.0 / 60.0; // TODO configurable
+
+        // TODO read these (again), verify what works best in practise:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
+
+        let game_time_target = elapsed;
+        while self.gs.game_time + dt < game_time_target {
+            self.gs.game_time += dt;
+
+            // TODO gamelogic here
+
+            self.engine.update(dt);
+        }
+
+        self.engine.get_window().request_redraw();
+    }
+}
 
 struct GameState {
-    // LATER using f32 for time might lead to instability if a match is left running for a day or so
+    /// This gamelogic frame's time in seconds.
+    ///
+    /// This does *not* have to run at the same speed as real world time.
+    /// TODO d_speed, pause
+    /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     game_time: f32,
     arena: Handle<Scene>,
     camera: Handle<Node>,
@@ -74,16 +94,39 @@ impl GameState {
     }
 }
 
+/// State of the local player
+#[derive(Debug)]
+struct PlayerState {
+    pitch: f32,
+    yaw: f32,
+}
+
+impl PlayerState {
+    fn new() -> Self {
+        Self {
+            pitch: 0.0,
+            yaw: 0.0,
+        }
+    }
+}
+
+#[derive(Debug)]
+struct Input {
+    forward: bool,
+    backward: bool,
+    left: bool,
+    right: bool,
+}
+
 fn main() {
     let window_builder = WindowBuilder::new().with_title("RustCycles");
     let event_loop = EventLoop::new();
     // LATER no vsync
     let mut engine = GameEngine::new(window_builder, &event_loop, true).unwrap();
-    let mut gs = rg3d::core::futures::executor::block_on(GameState::new(&mut engine));
+    let gs = rg3d::core::futures::executor::block_on(GameState::new(&mut engine));
+    let mut client = Client::new(engine, gs);
 
     let clock = Instant::now();
-    let dt = 1.0 / 60.0; // TODO configurable
-
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in acse it changes.
         *control_flow = ControlFlow::Poll;
@@ -98,7 +141,7 @@ fn main() {
             Event::WindowEvent { event, .. } => {
                 match event {
                     WindowEvent::Resized(size) => {
-                        engine.renderer.set_frame_size(size.into()).unwrap();
+                        client.engine.renderer.set_frame_size(size.into()).unwrap();
                     }
                     WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit;
@@ -147,11 +190,15 @@ fn main() {
                         // Is it limited by my polling rate? Would it be helpful to teach players how to increase it?
                         // Sometimes i get 4 events every 16 ms. Detect this.
                         // https://github.com/martin-t/rustcycles/issues/1
-                        println!(
-                            "{} DeviceEvent::MouseMotion {:?}",
-                            clock.elapsed().as_secs_f32(),
-                            delta
-                        );
+                        // println!(
+                        //     "{} DeviceEvent::MouseMotion {:?}",
+                        //     clock.elapsed().as_secs_f32(),
+                        //     delta
+                        // );
+                        client.ps.yaw += delta.0 as f32; // LATER Normalize to [0, 2*PI) or something
+
+                        // LATER We should use degrees for all user facing values but we must make sure to avoid conversion errors. Maybe add struct Deg(f32);?
+                        client.ps.pitch = (client.ps.pitch + delta.1 as f32).clamp(-90.0, 90.0);
                     }
                     _ => {}
                 }
@@ -161,23 +208,10 @@ fn main() {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
-                // TODO read these (again), verify what works best in practise:
-                // https://gafferongames.com/post/fix_your_timestep/
-                // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
-
-                let game_time_target = clock.elapsed().as_secs_f32();
-                while gs.game_time + dt < game_time_target {
-                    gs.game_time += dt;
-
-                    // TODO gamelogic here
-
-                    engine.update(dt);
-                }
-
-                engine.get_window().request_redraw();
+                client.update(clock.elapsed().as_secs_f32());
             }
             Event::RedrawRequested(_) => {
-                engine.render().unwrap(); // LATER only crash if failed multiple times
+                client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
             Event::RedrawEventsCleared => {}
             Event::LoopDestroyed => println!("bye"),

@@ -1,23 +1,87 @@
+mod client;
+mod server;
+
 use rg3d::{
-    core::instant::Instant,
-    engine::Engine,
+    core::{algebra::Vector3, instant::Instant, pool::Handle},
+    engine::{resource_manager::MaterialSearchOptions, Engine},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     gui::node::StubNode,
+    scene::{
+        base::BaseBuilder,
+        camera::{Camera, CameraBuilder},
+        node::Node,
+        transform::TransformBuilder,
+        Scene,
+    },
     window::WindowBuilder,
 };
 
 type GameEngine = Engine<(), StubNode>;
+
+// struct Client {
+//     /// Wall clock time
+//     clock: Instant,
+//     /// This gamelogic frame's time in seconds.
+//     ///
+//     /// This does *not* have to run at the same speed as real world time.
+//     /// TODO d_speed, pause
+//     game_time: f32,
+// }
+
+// impl Client {
+//     fn new() -> Self {
+//         Self {}
+//     }
+// }
+
+struct GameState {
+    // LATER using f32 for time might lead to instability if a match is left running for a day or so
+    game_time: f32,
+    arena: Handle<Scene>,
+    camera: Handle<Node>,
+}
+
+impl GameState {
+    async fn new(engine: &mut GameEngine) -> Self {
+        let mut scene = Scene::new();
+        engine
+            .resource_manager
+            .request_model(
+                "data/arena/arena.rgs",
+                MaterialSearchOptions::UsePathDirectly,
+            )
+            .await
+            .unwrap()
+            .instantiate_geometry(&mut scene);
+
+        let camera = CameraBuilder::new(
+            BaseBuilder::new().with_local_transform(
+                TransformBuilder::new()
+                    .with_local_position(Vector3::new(0.0, 1.0, -3.0))
+                    .build(),
+            ),
+        )
+        .build(&mut scene.graph);
+
+        let arena = engine.scenes.add(scene);
+
+        Self {
+            game_time: 0.0,
+            arena,
+            camera,
+        }
+    }
+}
 
 fn main() {
     let window_builder = WindowBuilder::new().with_title("RustCycles");
     let event_loop = EventLoop::new();
     // LATER no vsync
     let mut engine = GameEngine::new(window_builder, &event_loop, true).unwrap();
+    let mut gs = rg3d::core::futures::executor::block_on(GameState::new(&mut engine));
 
-    // TODO using f32 for time might lead to instability if a match is left running for a day or so
     let clock = Instant::now();
-    let mut game_time = 0.0;
     let dt = 1.0 / 60.0; // TODO configurable
 
     event_loop.run(move |event, _, control_flow| {
@@ -102,8 +166,8 @@ fn main() {
                 // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
                 let game_time_target = clock.elapsed().as_secs_f32();
-                while game_time + dt < game_time_target {
-                    game_time += dt;
+                while gs.game_time + dt < game_time_target {
+                    gs.game_time += dt;
 
                     // TODO gamelogic here
 

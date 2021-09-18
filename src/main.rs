@@ -3,7 +3,11 @@ mod common;
 mod server;
 
 use rg3d::{
-    core::{algebra::Vector3, instant::Instant, pool::Handle},
+    core::{
+        algebra::{Rotation, UnitQuaternion, Vector3},
+        instant::Instant,
+        pool::Handle,
+    },
     engine::{resource_manager::MaterialSearchOptions, Engine},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -42,7 +46,14 @@ impl Client {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
-            // TODO gamelogic here
+            let scene = &mut self.engine.scenes[self.gs.scene];
+
+            let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
+            let x = yaw * Vector3::x_axis();
+            let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
+            scene.graph[self.gs.camera]
+                .local_transform_mut()
+                .set_rotation(pitch * yaw);
 
             self.engine.update(dt);
         }
@@ -195,7 +206,9 @@ fn main() {
                         //     clock.elapsed().as_secs_f32(),
                         //     delta
                         // );
-                        client.ps.yaw += delta.0 as f32; // LATER Normalize to [0, 2*PI) or something
+
+                        // Subtract, don't add the delta - rotations follow the right hand rule
+                        client.ps.yaw -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
 
                         // LATER We should use degrees for all user facing values but we must make sure to avoid conversion errors. Maybe add struct Deg(f32);?
                         client.ps.pitch = (client.ps.pitch + delta.1 as f32).clamp(-90.0, 90.0);

@@ -108,9 +108,9 @@ fn main() {
                     // TODO gamelogic here
 
                     engine.update(dt);
-
-                    engine.get_window().request_redraw();
                 }
+
+                engine.get_window().request_redraw();
             }
             Event::RedrawRequested(_) => {
                 engine.render().unwrap(); // LATER only crash if failed multiple times

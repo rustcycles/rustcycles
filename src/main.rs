@@ -197,7 +197,7 @@ fn main() {
             // Using device event for mouse motion because
             // - it reports delta, not position
             // - it doesn't care whether we're at the edge of the screen
-            // TODO(privacy) make sure we're not handling mouse movement when minimized
+            // TODO(privacy) make sure we're not handling mouse movement when minimized (and especially not sending to server)
             Event::DeviceEvent { event, .. } => {
                 match event {
                     DeviceEvent::MouseMotion { delta } => {

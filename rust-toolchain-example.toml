@@ -1,0 +1,6 @@
+# This is to be used together with .cargo/config-example.toml - more info there.
+
+[toolchain]
+# We don't use any nightly features, this is only for -Zshare-generics,
+# so there's no need to request a specific nightly - anything reasonably recent will do.
+channel = "nightly"

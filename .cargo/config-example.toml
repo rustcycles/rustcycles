@@ -1,0 +1,32 @@
+# This is from https://github.com/bevyengine/bevy/blob/main/.cargo/config_fast_builds
+# Explanation: https://bevyengine.org/learn/book/getting-started/setup/ - CTRL+F Enable Fast Compiles (Optional)
+# To get faster compile times, rename this to config.toml and rust-toolchain-example.toml to rust-toolchain.toml
+# You can use symlinks to get potential future updates - run these in project root:
+#   ln -s rust-toolchain-example.toml rust-toolchain.toml
+#   cd .cargo
+#   ln -s config-example.toml config.toml
+
+# NOTE: For maximum performance, you need a nightly compiler
+# If you are using rust stable, remove the "-Zshare-generics=y" below.
+
+[target.x86_64-unknown-linux-gnu]
+linker = "/usr/bin/clang"
+rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]
+
+# NOTE: you must manually install https://github.com/michaeleisel/zld on mac. you can easily do this with the "brew" package manager:
+# `brew install michaeleisel/zld/zld`
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld", "-Zshare-generics=y"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld", "-Zshare-generics=y"]
+
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
+rustflags = ["-Zshare-generics=n"]
+
+# Optional: bevy suggests reducing debug to 1 (line number tables), matklad / rust-analyzer suggests 0.
+# In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
+# Seems to have no effect for me on linux.
+[profile.dev]
+debug = 0

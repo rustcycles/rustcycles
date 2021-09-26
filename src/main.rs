@@ -9,7 +9,7 @@ use rg3d::{
         pool::Handle,
     },
     engine::{resource_manager::MaterialSearchOptions, Engine},
-    event::{DeviceEvent, Event, WindowEvent},
+    event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     gui::node::StubNode,
     scene::{
@@ -21,7 +21,7 @@ use rg3d::{
 // TODO MVP:
 //  - [x] Arena and wheel models
 //  - [x] Rotate the camera
-//  - [ ] Move the camera
+//  - [x] Move the camera
 //  - [ ] Render wheel at player pos
 //  - [ ] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
@@ -68,12 +68,29 @@ impl Client {
     fn update_gamelogic(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
+        let camera = &mut scene.graph[self.gs.camera];
+
         let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
         let x = yaw * Vector3::x_axis();
         let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
-        scene.graph[self.gs.camera]
-            .local_transform_mut()
-            .set_rotation(pitch * yaw);
+        camera.local_transform_mut().set_rotation(pitch * yaw);
+
+        let mut pos = *camera.local_transform().position().get();
+        let speed = 10.0;
+        if self.ps.input.forward {
+            // TODO normalize?
+            pos += camera.look_vector() * dt * speed;
+        }
+        if self.ps.input.backward {
+            pos += -camera.look_vector() * dt * speed;
+        }
+        if self.ps.input.left {
+            pos += camera.side_vector() * dt * speed;
+        }
+        if self.ps.input.right {
+            pos += -camera.side_vector() * dt * speed;
+        }
+        camera.local_transform_mut().set_position(pos);
     }
 }
 
@@ -123,6 +140,7 @@ impl GameState {
 /// State of the local player
 #[derive(Debug)]
 struct PlayerState {
+    input: Input,
     pitch: f32,
     yaw: f32,
 }
@@ -130,13 +148,15 @@ struct PlayerState {
 impl PlayerState {
     fn new() -> Self {
         Self {
+            input: Input::default(),
             pitch: 0.0,
             yaw: 0.0,
         }
     }
 }
 
-#[derive(Debug)]
+// LATER Bitfield?
+#[derive(Debug, Clone, Default)]
 struct Input {
     forward: bool,
     backward: bool,
@@ -180,11 +200,27 @@ fn main() {
                         // LATER pause/unpause
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
-                        println!(
-                            "{} keyboard input {:?}",
-                            clock.elapsed().as_secs_f32(),
-                            input
-                        );
+                        // NOTE: This event is repeated if the key is held.
+                        // There can be more `state: Pressed` events before a `state: Released`.
+                        // println!(
+                        //     "{} keyboard input {:?}",
+                        //     clock.elapsed().as_secs_f32(),
+                        //     input
+                        // );
+
+                        // Use scancodes, not virtual keys, because they don't depend on layout.
+                        const W: ScanCode = 17;
+                        const A: ScanCode = 30;
+                        const S: ScanCode = 31;
+                        const D: ScanCode = 32;
+                        let pressed = input.state == ElementState::Pressed;
+                        match input.scancode {
+                            W => client.ps.input.forward = pressed,
+                            A => client.ps.input.left = pressed,
+                            S => client.ps.input.backward = pressed,
+                            D => client.ps.input.right = pressed,
+                            _ => {}
+                        }
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         println!(

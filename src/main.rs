@@ -225,7 +225,8 @@ fn main() {
                         // Subtract, don't add the delta - rotations follow the right hand rule
                         client.ps.yaw -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
 
-                        // LATER We should use degrees for all user facing values but we must make sure to avoid conversion errors. Maybe add struct Deg(f32);?
+                        // TODO We should use degrees (or degrees per second) for all user facing values but we must make sure to avoid conversion errors.
+                        // Maybe add struct Deg(f32);?
                         client.ps.pitch = (client.ps.pitch + delta.1 as f32).clamp(-90.0, 90.0);
                     }
                     _ => {}

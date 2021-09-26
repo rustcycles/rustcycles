@@ -18,6 +18,17 @@ use rg3d::{
     window::WindowBuilder,
 };
 
+// TODO MVP:
+//  - [x] Arena and wheel models
+//  - [x] Rotate the camera
+//  - [ ] Move the camera
+//  - [ ] Render wheel at player pos
+//  - [ ] Primitive networking to force client/server split
+//  - [ ] Driving and collisions
+//  - [ ] Trails
+
+// TOTO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
+
 type GameEngine = Engine<(), StubNode>;
 
 struct Client {

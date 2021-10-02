@@ -5,15 +5,18 @@ mod server;
 use rg3d::{
     core::{
         algebra::{Rotation, UnitQuaternion, Vector3},
+        color::Color,
         instant::Instant,
         pool::Handle,
     },
-    engine::{resource_manager::MaterialSearchOptions, Engine},
+    engine::{resource_manager::MaterialSearchOptions, Engine, RigidBodyHandle},
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     gui::node::StubNode,
+    physics::prelude::{ColliderBuilder, RigidBodyBuilder},
     scene::{
-        base::BaseBuilder, camera::CameraBuilder, node::Node, transform::TransformBuilder, Scene,
+        base::BaseBuilder, camera::CameraBuilder, debug::Line, node::Node,
+        transform::TransformBuilder, Scene,
     },
     window::WindowBuilder,
 };
@@ -70,11 +73,13 @@ impl Client {
 
         let camera = &mut scene.graph[self.gs.camera];
 
+        // Turning
         let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
         let x = yaw * Vector3::x_axis();
         let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
+        // Movement
         let mut pos = *camera.local_transform().position().get();
         let speed = 10.0;
         if self.ps.input.forward {
@@ -91,6 +96,15 @@ impl Client {
             pos += -camera.side_vector() * dt * speed;
         }
         camera.local_transform_mut().set_position(pos);
+
+        // Debug
+        scene.drawing_context.clear_lines();
+        let wheel = scene.physics.bodies.get(&self.gs.wheel).unwrap();
+        scene.drawing_context.add_line(Line {
+            begin: wheel.position().translation.vector,
+            end: wheel.position().translation.vector + Vector3::new(0.0, 100.0, 0.0),
+            color: Color::RED,
+        })
     }
 }
 
@@ -102,6 +116,7 @@ struct GameState {
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     game_time: f32,
     scene: Handle<Scene>,
+    wheel: RigidBodyHandle,
     camera: Handle<Node>,
 }
 
@@ -118,6 +133,18 @@ impl GameState {
             .unwrap()
             .instantiate_geometry(&mut scene);
 
+        let wheel_rb_handle = scene.physics.add_body(
+            RigidBodyBuilder::new_dynamic()
+                .lock_rotations()
+                .translation(Vector3::new(0.0, 5.0, 0.0))
+                .build(),
+        );
+
+        scene.physics.add_collider(
+            ColliderBuilder::capsule_y(0.25, 0.2).build(),
+            &wheel_rb_handle,
+        );
+
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
                 TransformBuilder::new()
@@ -132,6 +159,7 @@ impl GameState {
         Self {
             game_time: 0.0,
             scene,
+            wheel: wheel_rb_handle,
             camera,
         }
     }

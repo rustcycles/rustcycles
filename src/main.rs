@@ -60,7 +60,7 @@ impl Client {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
-            self.update_gamelogic(dt);
+            self.gamelogic_tick(dt);
 
             self.engine.update(dt);
         }
@@ -68,7 +68,7 @@ impl Client {
         self.engine.get_window().request_redraw();
     }
 
-    fn update_gamelogic(&mut self, dt: f32) {
+    fn gamelogic_tick(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         let camera = &mut scene.graph[self.gs.camera];

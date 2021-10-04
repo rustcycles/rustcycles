@@ -274,6 +274,7 @@ fn main() {
             // - it doesn't care whether we're at the edge of the screen
             // TODO(privacy) make sure we're not handling mouse movement when minimized (and especially not sending to server)
             Event::DeviceEvent { event, .. } => {
+                #[allow(clippy::single_match)] // Symmetry with WindowEvent
                 match event {
                     DeviceEvent::MouseMotion { delta } => {
                         // LATER This event normally happens every 4 ms for me when moving the mouse. Print stats.

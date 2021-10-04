@@ -29,6 +29,9 @@ use rg3d::{
 //  - [ ] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
+// TODO 0.1:
+//  - [ ] readme
+//  - [ ] CI, audit, badges
 
 // TOTO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
 

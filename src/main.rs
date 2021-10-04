@@ -105,7 +105,7 @@ impl Client {
         let wheel = scene.physics.bodies.get(&self.gs.wheel).unwrap();
         scene.drawing_context.add_line(Line {
             begin: wheel.position().translation.vector,
-            end: wheel.position().translation.vector + Vector3::new(0.0, 100.0, 0.0),
+            end: wheel.position().translation.vector + Vector3::new(0.0, 1.0, 0.0),
             color: Color::RED,
         })
     }

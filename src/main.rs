@@ -33,7 +33,9 @@ use rg3d::{
 //  - [ ] Readme
 //  - [ ] CI, audit, badges
 //  - [ ] CI artifacts - allow downloading from GH
-//  - [ ] Poles use trimesh collider - perf?
+//  - [ ] Trimesh colliders
+//      - [ ] Poles - there's many - check perf
+//      - [ ] Everything - is it posuble to tunnel through at high speeds?
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?

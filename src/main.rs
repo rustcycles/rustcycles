@@ -109,12 +109,20 @@ impl Client {
 
         // Debug
         scene.drawing_context.clear_lines();
-        let wheel = scene.physics.bodies.get(&self.gs.wheel).unwrap();
-        scene.drawing_context.add_line(Line {
-            begin: wheel.position().translation.vector,
-            end: wheel.position().translation.vector + Vector3::new(0.0, 1.0, 0.0),
-            color: Color::RED,
-        })
+
+        let mut debug_line = |handle| {
+            let rustcycle = &scene.graph[handle];
+            let pos = rustcycle.global_position();
+            scene.drawing_context.add_line(Line {
+                begin: pos,
+                end: pos + Vector3::new(0.0, 1.0, 0.0),
+                color: Color::RED,
+            });
+        };
+        debug_line(self.gs.rustcycle1);
+        debug_line(self.gs.rustcycle2);
+
+        scene.physics.draw(&mut scene.drawing_context);
     }
 }
 
@@ -126,7 +134,8 @@ struct GameState {
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     game_time: f32,
     scene: Handle<Scene>,
-    wheel: RigidBodyHandle,
+    rustcycle1: Handle<Node>,
+    rustcycle2: Handle<Node>,
     camera: Handle<Node>,
 }
 
@@ -143,17 +152,45 @@ impl GameState {
             .unwrap()
             .instantiate_geometry(&mut scene);
 
-        let wheel_rb_handle = scene.physics.add_body(
+        let rustcycle1_handle = engine
+            .resource_manager
+            .request_model(
+                "data/rustcycle/rustcycle.fbx",
+                MaterialSearchOptions::RecursiveUp,
+            )
+            .await
+            .unwrap()
+            .instantiate_geometry(&mut scene);
+        let rustcycle_body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
                 .lock_rotations()
-                .translation(Vector3::new(0.0, 5.0, 0.0))
+                .translation(Vector3::new(-1.0, 5.0, 0.0))
                 .build(),
         );
-
         scene.physics.add_collider(
             ColliderBuilder::capsule_y(0.25, 0.2).build(),
-            &wheel_rb_handle,
+            &rustcycle_body_handle,
         );
+        scene
+            .physics_binder
+            .bind(rustcycle1_handle, rustcycle_body_handle);
+
+        let rustcycle2_handle = engine
+            .resource_manager
+            .request_model(
+                "data/rustcycle/rustcycle.rgs",
+                MaterialSearchOptions::RecursiveUp,
+            )
+            .await
+            .unwrap()
+            .instantiate_geometry(&mut scene);
+
+        let wheel_handle = scene.graph.find_by_name(rustcycle2_handle, "rustcycle.fbx");
+        let body_handle = scene.physics_binder.body_of(wheel_handle).unwrap();
+        let body = scene.physics.bodies.get_mut(body_handle).unwrap();
+        body.lock_rotations(true, true);
+        body.set_position(Vector3::new(1.0, 1.0, 0.0).into(), true);
+        // FIXME what happens to the root node's pos?
 
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
@@ -169,7 +206,8 @@ impl GameState {
         Self {
             game_time: 0.0,
             scene,
-            wheel: wheel_rb_handle,
+            rustcycle1: rustcycle1_handle,
+            rustcycle2: rustcycle2_handle,
             camera,
         }
     }

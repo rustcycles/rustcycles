@@ -14,7 +14,7 @@ RustCycles is a third person shooter that's about movement, not aim. You have to
 
 ## Development
 
-You need [git LFS](https://git-lfs.github.com/) to clone this repo.
+Install [git LFS](https://git-lfs.github.com/) before cloning this repo.
 
 After that, just use `cargo run`.
 

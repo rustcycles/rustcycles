@@ -1,13 +1,12 @@
 <div align="center">
     <h1>RustCycles</h1>
-    <br />
     A fast multiplayer shooter on wheels
 </div>
 <br />
 
 TODO badges
 
-TODO screenshot
+![Gameplay](media/screenshot.jpg)
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
 

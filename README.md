@@ -1,12 +1,17 @@
-# RustCycles
+<div align="center">
+    <h1>RustCycles</h1>
+    <br />
+    A fast multiplayer shooter on wheels
+</div>
+<br />
 
-TODO
+TODO badges
 
-## Dependencies
+TODO screenshot
 
-TODO
+RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
 
-## Fast compiles
+## Development
 
 You can make the game compile significantly faster and iterate quicker:
 

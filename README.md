@@ -13,14 +13,20 @@ RustCycles is a third person shooter that's about movement, not aim. You have to
 
 ## Development
 
-You can make the game compile significantly faster and iterate quicker:
+You need [git LFS](https://git-lfs.github.com/) to clone this repo.
 
-### Use nightly, lld and -Zshare-generics
+After that, just use `cargo run`.
+
+### Fast compiles (optional)
+
+You can make the game compile significantly faster (around 2 seconds) and iterate quicker:
+
+#### Use nightly, lld and -Zshare-generics
 
 - Run this in project root: `ln -s rust-toolchain-example.toml rust-toolchain.toml; cd .cargo; ln -s config-example.toml config.toml; cd -`
 - Reduction from 12 s to 2.5 s
 
-### Prevent rust-analyzer from locking the `target` directory
+#### Prevent rust-analyzer from locking the `target` directory
 
 Add this to your VSCode config (or something similar for your editor):
 

@@ -30,7 +30,8 @@ use rg3d::{
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:
-//  - [ ] Readme
+//  - [x] Readme
+//  - [ ] GH social preview (screenshot)
 //  - [ ] CI, audit, badges
 //  - [ ] CI artifacts - allow downloading from GH
 //  - [ ] Trimesh colliders

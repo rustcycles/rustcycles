@@ -4,9 +4,11 @@
 </div>
 <br />
 
-TODO badges
+[![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/cXU5HzDXM5)
+[![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)
+[![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
 
-![Gameplay](media/screenshot.jpg)
+![Gameplay](media/screenshot.png)
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
 

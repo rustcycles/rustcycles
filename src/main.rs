@@ -26,12 +26,12 @@ use rg3d::{
 //  - [x] Rotate the camera
 //  - [x] Move the camera
 //  - [ ] Render wheel at player pos
-//  - [ ] Primitive networking to force client/server split
+//  - [ ] Primitive networking to force client/server split (QUIC?)
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:
 //  - [x] Readme
-//  - [ ] GH social preview (screenshot)
+//  - [x] GH social preview (screenshot)
 //  - [ ] CI, audit, badges
 //  - [ ] CI artifacts - allow downloading from GH
 //  - [ ] Trimesh colliders
@@ -41,7 +41,7 @@ use rg3d::{
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
 
-// TOTO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
+// TODO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
 
 type GameEngine = Engine<(), StubNode>;
 

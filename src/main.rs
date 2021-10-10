@@ -192,7 +192,7 @@ impl GameState {
                 .build(),
         );
         scene.physics.add_collider(
-            ColliderBuilder::capsule_y(0.25, 0.2).build(),
+            ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
             &rustcycle_body_handle,
         );
         scene
@@ -213,7 +213,7 @@ impl GameState {
         let body_handle = scene.physics_binder.body_of(wheel_handle).unwrap();
         let body = scene.physics.bodies.get_mut(body_handle).unwrap();
         body.lock_rotations(true, true);
-        body.set_position(Vector3::new(1.0, 1.0, 0.0).into(), true);
+        body.set_position(Vector3::new(1.0, 5.0, 0.0).into(), true);
         // FIXME what happens to the root node's pos?
 
         let camera = CameraBuilder::new(

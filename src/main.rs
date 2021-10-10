@@ -36,7 +36,7 @@ use rg3d::{
 //  - [ ] CI artifacts - allow downloading from GH
 //  - [ ] Trimesh colliders
 //      - [ ] Poles - there's many - check perf
-//      - [ ] Everything - is it posuble to tunnel through at high speeds?
+//      - [ ] Everything - is it possible to tunnel through at high speeds?
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?

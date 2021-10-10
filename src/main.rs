@@ -38,6 +38,7 @@ use rg3d::{
 //  - [ ] Trimesh colliders
 //      - [ ] Poles - there's many - check perf
 //      - [ ] Everything - is it possible to tunnel through at high speeds?
+//          - Yes - try CCD?
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
@@ -93,21 +94,34 @@ impl Client {
 
         // Movement
         let mut pos = *camera.local_transform().position().get();
-        let speed = 10.0;
+        let camera_speed = 10.0;
         if self.ps.input.forward {
             // TODO normalize?
-            pos += camera.look_vector() * dt * speed;
+            pos += camera.look_vector() * dt * camera_speed;
         }
         if self.ps.input.backward {
-            pos += -camera.look_vector() * dt * speed;
+            pos += -camera.look_vector() * dt * camera_speed;
         }
         if self.ps.input.left {
-            pos += camera.side_vector() * dt * speed;
+            pos += camera.side_vector() * dt * camera_speed;
         }
         if self.ps.input.right {
-            pos += -camera.side_vector() * dt * speed;
+            pos += -camera.side_vector() * dt * camera_speed;
         }
         camera.local_transform_mut().set_position(pos);
+
+        // Testing physics
+        if self.ps.input.fire1 {
+            let wheel_accel = camera.look_vector() * dt * 50.0;
+            let mut accel = |handle| {
+                let body = scene.physics.bodies.get_mut(&handle).unwrap();
+                let mut linvel = *body.linvel();
+                linvel += wheel_accel;
+                body.set_linvel(linvel, true);
+            };
+            accel(self.gs.rustcycle1_body);
+            accel(self.gs.rustcycle2_body);
+        }
 
         // Debug
         scene.drawing_context.clear_lines();
@@ -160,7 +174,9 @@ struct GameState {
     game_time: f32,
     scene: Handle<Scene>,
     rustcycle1: Handle<Node>,
+    rustcycle1_body: RigidBodyHandle,
     rustcycle2: Handle<Node>,
+    rustcycle2_body: RigidBodyHandle,
     camera: Handle<Node>,
 }
 
@@ -186,19 +202,20 @@ impl GameState {
             .await
             .unwrap()
             .instantiate_geometry(&mut scene);
-        let rustcycle_body_handle = scene.physics.add_body(
+        let rustcycle1_body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
                 .lock_rotations()
                 .translation(Vector3::new(-1.0, 5.0, 0.0))
                 .build(),
         );
         scene.physics.add_collider(
+            // Size from rusty-editor's Fit Collider
             ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
-            &rustcycle_body_handle,
+            &rustcycle1_body_handle,
         );
         scene
             .physics_binder
-            .bind(rustcycle1_handle, rustcycle_body_handle);
+            .bind(rustcycle1_handle, rustcycle1_body_handle);
 
         let rustcycle2_handle = engine
             .resource_manager
@@ -211,8 +228,12 @@ impl GameState {
             .instantiate_geometry(&mut scene);
 
         let wheel_handle = scene.graph.find_by_name(rustcycle2_handle, "rustcycle.fbx");
-        let body_handle = scene.physics_binder.body_of(wheel_handle).unwrap();
-        let body = scene.physics.bodies.get_mut(body_handle).unwrap();
+        let rustcycle2_body_handle = *scene.physics_binder.body_of(wheel_handle).unwrap();
+        let body = scene
+            .physics
+            .bodies
+            .get_mut(&rustcycle2_body_handle)
+            .unwrap();
         body.lock_rotations(true, true);
         body.set_position(Vector3::new(1.0, 5.0, 0.0).into(), true);
         // FIXME what happens to the root node's pos?
@@ -232,7 +253,9 @@ impl GameState {
             game_time: 0.0,
             scene,
             rustcycle1: rustcycle1_handle,
+            rustcycle1_body: rustcycle1_body_handle,
             rustcycle2: rustcycle2_handle,
+            rustcycle2_body: rustcycle2_body_handle,
             camera,
         }
     }
@@ -259,6 +282,7 @@ impl PlayerState {
 // LATER Bitfield?
 #[derive(Debug, Clone, Default)]
 struct Input {
+    fire1: bool,
     forward: bool,
     backward: bool,
     left: bool,
@@ -338,6 +362,14 @@ fn main() {
                             state,
                             button
                         );
+
+                        let pressed = state == ElementState::Pressed;
+                        match button {
+                            rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,
+                            rg3d::event::MouseButton::Right => {}
+                            rg3d::event::MouseButton::Middle => {}
+                            rg3d::event::MouseButton::Other(_) => {}
+                        }
                     }
                     _ => {}
                 }

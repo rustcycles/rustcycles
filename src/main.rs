@@ -111,17 +111,40 @@ impl Client {
         // Debug
         scene.drawing_context.clear_lines();
 
-        let mut debug_line = |handle| {
+        let mut debug_cross = |handle| {
             let rustcycle = &scene.graph[handle];
             let pos = rustcycle.global_position();
+
+            let dir = Vector3::new(1.0, 1.0, 1.0) * 0.25;
             scene.drawing_context.add_line(Line {
-                begin: pos,
-                end: pos + Vector3::new(0.0, 1.0, 0.0),
+                begin: pos - dir,
+                end: pos + dir,
+                color: Color::RED,
+            });
+
+            let dir = Vector3::new(-1.0, 1.0, 1.0) * 0.25;
+            scene.drawing_context.add_line(Line {
+                begin: pos - dir,
+                end: pos + dir,
+                color: Color::RED,
+            });
+
+            let dir = Vector3::new(1.0, 1.0, -1.0) * 0.25;
+            scene.drawing_context.add_line(Line {
+                begin: pos - dir,
+                end: pos + dir,
+                color: Color::RED,
+            });
+
+            let dir = Vector3::new(-1.0, 1.0, -1.0) * 0.25;
+            scene.drawing_context.add_line(Line {
+                begin: pos - dir,
+                end: pos + dir,
                 color: Color::RED,
             });
         };
-        debug_line(self.gs.rustcycle1);
-        debug_line(self.gs.rustcycle2);
+        debug_cross(self.gs.rustcycle1);
+        debug_cross(self.gs.rustcycle2);
 
         scene.physics.draw(&mut scene.drawing_context);
     }

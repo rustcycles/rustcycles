@@ -300,8 +300,8 @@ fn main() {
                         // LATER pause/unpause
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
-                        // NOTE: This event is repeated if the key is held.
-                        // There can be more `state: Pressed` events before a `state: Released`.
+                        // NOTE: This event is repeated if the key is held, that means
+                        // there can be more `state: Pressed` events before a `state: Released`.
                         // println!(
                         //     "{} keyboard input {:?}",
                         //     clock.elapsed().as_secs_f32(),

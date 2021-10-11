@@ -13,6 +13,8 @@
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
 
+_**This is not even a prototype yet. But don't be disappointed, bookmark it and come back a few months later ;)**_
+
 ## Development
 
 Install [git LFS](https://git-lfs.github.com/) before cloning this repo.

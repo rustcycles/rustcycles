@@ -18,7 +18,7 @@ use rg3d::{
         base::BaseBuilder, camera::CameraBuilder, debug::Line, node::Node,
         transform::TransformBuilder, Scene,
     },
-    window::WindowBuilder,
+    window::{Fullscreen, WindowBuilder},
 };
 
 // TODO MVP:
@@ -290,7 +290,9 @@ struct Input {
 }
 
 fn main() {
-    let window_builder = WindowBuilder::new().with_title("RustCycles");
+    let window_builder = WindowBuilder::new()
+        .with_title("RustCycles")
+        .with_fullscreen(Some(Fullscreen::Borderless(None)));
     let event_loop = EventLoop::new();
     // LATER no vsync
     let mut engine = GameEngine::new(window_builder, &event_loop, true).unwrap();

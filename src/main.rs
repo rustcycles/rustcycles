@@ -183,6 +183,13 @@ struct GameState {
 impl GameState {
     async fn new(engine: &mut GameEngine) -> Self {
         let mut scene = Scene::new();
+        // This is needed because the default 1 causes the wheel to randomly stutter/stop
+        // when just sliding on completely smooth floor.
+        // LATER Find a good value, 10 is probably overkill.
+        //  Compare how much the wheel with CCD enabled slown down compared to disabled.
+        scene.physics.integration_parameters.max_ccd_substeps = 10;
+        // LATER allow changing scene.physics.integration_parameters.dt ?
+
         engine
             .resource_manager
             .request_model(
@@ -204,12 +211,13 @@ impl GameState {
             .instantiate_geometry(&mut scene);
         let rustcycle1_body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
+                .ccd_enabled(true)
                 .lock_rotations()
                 .translation(Vector3::new(-1.0, 5.0, 0.0))
                 .build(),
         );
         scene.physics.add_collider(
-            // Size from rusty-editor's Fit Collider
+            // Size manually copied from the result of rusty-editor's Fit Collider
             ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
             &rustcycle1_body_handle,
         );

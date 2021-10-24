@@ -111,8 +111,12 @@ impl Client {
         camera.local_transform_mut().set_position(pos);
 
         // Testing physics
-        if self.ps.input.fire1 {
-            let wheel_accel = camera.look_vector() * dt * 50.0;
+        if self.ps.input.fire1 || self.ps.input.fire2 {
+            let wheel_accel = if self.ps.input.fire1 {
+                camera.look_vector() * dt * 50.0
+            } else {
+                -camera.look_vector() * dt * 50.0
+            };
             let mut accel = |handle| {
                 let body = scene.physics.bodies.get_mut(&handle).unwrap();
                 let mut linvel = *body.linvel();
@@ -162,6 +166,36 @@ impl Client {
         debug_cross(self.gs.rustcycle2);
 
         scene.physics.draw(&mut scene.drawing_context);
+
+        let pos1 = scene
+            .physics
+            .bodies
+            .get(&self.gs.rustcycle1_body)
+            .unwrap()
+            .position()
+            .translation
+            .vector;
+        let pos2 = scene
+            .physics
+            .bodies
+            .get(&self.gs.rustcycle2_body)
+            .unwrap()
+            .position()
+            .translation
+            .vector;
+        scene.drawing_context.add_line(Line {
+            begin: pos1,
+            end: pos2,
+            color: Color::GREEN,
+        });
+        let diff = pos1 - pos2;
+        let my_center = Vector3::new(0.0, 3.0, 0.0);
+        scene.drawing_context.add_line(Line {
+            begin: my_center,
+            end: my_center + diff,
+            color: Color::GREEN,
+        });
+        dbg!(diff);
     }
 }
 
@@ -184,10 +218,11 @@ impl GameState {
     async fn new(engine: &mut GameEngine) -> Self {
         let mut scene = Scene::new();
         // This is needed because the default 1 causes the wheel to randomly stutter/stop
-        // when just sliding on completely smooth floor.
-        // LATER Find a good value, 10 is probably overkill.
-        //  Compare how much the wheel with CCD enabled slown down compared to disabled.
-        scene.physics.integration_parameters.max_ccd_substeps = 10;
+        // when just sliding on completely smooth floor. The higher the value, the less it slows down.
+        // 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
+        // It never completely goes away, even with 100.
+        // LATER Maybe there is a way to solve this by filtering collisions with the floor?
+        scene.physics.integration_parameters.max_ccd_substeps = 1;
         // LATER allow changing scene.physics.integration_parameters.dt ?
 
         engine
@@ -291,6 +326,7 @@ impl PlayerState {
 #[derive(Debug, Clone, Default)]
 struct Input {
     fire1: bool,
+    fire2: bool,
     forward: bool,
     backward: bool,
     left: bool,
@@ -376,7 +412,7 @@ fn main() {
                         let pressed = state == ElementState::Pressed;
                         match button {
                             rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,
-                            rg3d::event::MouseButton::Right => {}
+                            rg3d::event::MouseButton::Right => client.ps.input.fire2 = pressed,
                             rg3d::event::MouseButton::Middle => {}
                             rg3d::event::MouseButton::Other(_) => {}
                         }

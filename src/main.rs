@@ -47,14 +47,14 @@ use rg3d::{
 
 type GameEngine = Engine<(), StubNode>;
 
-struct Client {
-    engine: GameEngine,
+struct Client<'e> {
+    engine: &'e mut GameEngine,
     gs: GameState,
     ps: PlayerState,
 }
 
-impl Client {
-    fn new(engine: GameEngine, gs: GameState) -> Self {
+impl<'e> Client<'e> {
+    fn new(engine: &'e mut GameEngine, gs: GameState) -> Self {
         Self {
             engine,
             gs,
@@ -330,8 +330,9 @@ fn main() {
         .with_fullscreen(Some(Fullscreen::Borderless(None)));
     let event_loop = EventLoop::new();
     // LATER no vsync
-    let mut engine = GameEngine::new(window_builder, &event_loop, true).unwrap();
-    let gs = rg3d::core::futures::executor::block_on(GameState::new(&mut engine));
+    let engine = GameEngine::new(window_builder, &event_loop, true).unwrap();
+    let engine = Box::leak(Box::new(engine)); // LATER Something cleaner?
+    let gs = rg3d::core::futures::executor::block_on(GameState::new(engine));
     let mut client = Client::new(engine, gs);
 
     let clock = Instant::now();

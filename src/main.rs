@@ -123,16 +123,16 @@ impl Client {
                 linvel += wheel_accel;
                 body.set_linvel(linvel, true);
             };
-            accel(self.gs.rustcycle1_body);
-            accel(self.gs.rustcycle2_body);
+            accel(self.gs.cycle1.body_handle);
+            accel(self.gs.cycle2.body_handle);
         }
 
         // Debug
         scene.drawing_context.clear_lines();
 
         let mut debug_cross = |handle| {
-            let rustcycle = &scene.graph[handle];
-            let pos = rustcycle.global_position();
+            let cycle = &scene.graph[handle];
+            let pos = cycle.global_position();
 
             let dir = Vector3::new(1.0, 1.0, 1.0) * 0.25;
             scene.drawing_context.add_line(Line {
@@ -162,15 +162,15 @@ impl Client {
                 color: Color::RED,
             });
         };
-        debug_cross(self.gs.rustcycle1);
-        debug_cross(self.gs.rustcycle2);
+        debug_cross(self.gs.cycle1.node_handle);
+        debug_cross(self.gs.cycle2.node_handle);
 
         scene.physics.draw(&mut scene.drawing_context);
 
         let pos1 = scene
             .physics
             .bodies
-            .get(&self.gs.rustcycle1_body)
+            .get(&self.gs.cycle1.body_handle)
             .unwrap()
             .position()
             .translation
@@ -178,7 +178,7 @@ impl Client {
         let pos2 = scene
             .physics
             .bodies
-            .get(&self.gs.rustcycle2_body)
+            .get(&self.gs.cycle2.body_handle)
             .unwrap()
             .position()
             .translation
@@ -199,6 +199,44 @@ impl Client {
     }
 }
 
+struct Cycle {
+    node_handle: Handle<Node>,
+    body_handle: RigidBodyHandle,
+}
+
+impl Cycle {
+    async fn new(engine: &mut GameEngine, scene: &mut Scene, pos: Vector3<f32>, ccd: bool) -> Self {
+        let node_handle = engine
+            .resource_manager
+            .request_model(
+                "data/rustcycle/rustcycle.fbx",
+                MaterialSearchOptions::RecursiveUp,
+            )
+            .await
+            .unwrap()
+            .instantiate_geometry(scene);
+        let body_handle = scene.physics.add_body(
+            RigidBodyBuilder::new_dynamic()
+                .ccd_enabled(ccd)
+                .lock_rotations()
+                .translation(pos)
+                .build(),
+        );
+        scene.physics.add_collider(
+            // Size manually copied from the result of rusty-editor's Fit Collider
+            // LATER Remove rustcycle.rgs?
+            ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
+            &body_handle,
+        );
+        scene.physics_binder.bind(node_handle, body_handle);
+
+        Cycle {
+            node_handle,
+            body_handle,
+        }
+    }
+}
+
 struct GameState {
     /// This gamelogic frame's time in seconds.
     ///
@@ -207,10 +245,8 @@ struct GameState {
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     game_time: f32,
     scene: Handle<Scene>,
-    rustcycle1: Handle<Node>,
-    rustcycle1_body: RigidBodyHandle,
-    rustcycle2: Handle<Node>,
-    rustcycle2_body: RigidBodyHandle,
+    cycle1: Cycle,
+    cycle2: Cycle,
     camera: Handle<Node>,
 }
 
@@ -235,51 +271,8 @@ impl GameState {
             .unwrap()
             .instantiate_geometry(&mut scene);
 
-        let rustcycle1_handle = engine
-            .resource_manager
-            .request_model(
-                "data/rustcycle/rustcycle.fbx",
-                MaterialSearchOptions::RecursiveUp,
-            )
-            .await
-            .unwrap()
-            .instantiate_geometry(&mut scene);
-        let rustcycle1_body_handle = scene.physics.add_body(
-            RigidBodyBuilder::new_dynamic()
-                .ccd_enabled(true)
-                .lock_rotations()
-                .translation(Vector3::new(-1.0, 5.0, 0.0))
-                .build(),
-        );
-        scene.physics.add_collider(
-            // Size manually copied from the result of rusty-editor's Fit Collider
-            ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
-            &rustcycle1_body_handle,
-        );
-        scene
-            .physics_binder
-            .bind(rustcycle1_handle, rustcycle1_body_handle);
-
-        let rustcycle2_handle = engine
-            .resource_manager
-            .request_model(
-                "data/rustcycle/rustcycle.rgs",
-                MaterialSearchOptions::RecursiveUp,
-            )
-            .await
-            .unwrap()
-            .instantiate_geometry(&mut scene);
-
-        let wheel_handle = scene.graph.find_by_name(rustcycle2_handle, "rustcycle.fbx");
-        let rustcycle2_body_handle = *scene.physics_binder.body_of(wheel_handle).unwrap();
-        let body = scene
-            .physics
-            .bodies
-            .get_mut(&rustcycle2_body_handle)
-            .unwrap();
-        body.lock_rotations(true, true);
-        body.set_position(Vector3::new(1.0, 5.0, 0.0).into(), true);
-        // FIXME what happens to the root node's pos?
+        let cycle1 = Cycle::new(engine, &mut scene, Vector3::new(-1.0, 5.0, 0.0), true).await;
+        let cycle2 = Cycle::new(engine, &mut scene, Vector3::new(1.0, 5.0, 0.0), false).await;
 
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
@@ -295,10 +288,8 @@ impl GameState {
         Self {
             game_time: 0.0,
             scene,
-            rustcycle1: rustcycle1_handle,
-            rustcycle1_body: rustcycle1_body_handle,
-            rustcycle2: rustcycle2_handle,
-            rustcycle2_body: rustcycle2_body_handle,
+            cycle1,
+            cycle2,
             camera,
         }
     }

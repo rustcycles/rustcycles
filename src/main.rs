@@ -195,7 +195,6 @@ impl<'e> Client<'e> {
             end: my_center + diff,
             color: Color::GREEN,
         });
-        dbg!(diff);
     }
 }
 

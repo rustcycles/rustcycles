@@ -26,6 +26,8 @@ impl GameState {
         // when just sliding on completely smooth floor. The higher the value, the less it slows down.
         // 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
         // It never completely goes away, even with 100.
+        // NOTE: It might not actually be the floor that's causing it,
+        // it seems to happen when passing between poles.
         // LATER Maybe there is a way to solve this by filtering collisions with the floor?
         scene.physics.integration_parameters.max_ccd_substeps = 1;
         // LATER allow changing scene.physics.integration_parameters.dt ?

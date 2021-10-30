@@ -2,7 +2,7 @@ mod client;
 mod common;
 mod server;
 
-use std::env;
+use std::{env, process::Command, thread, time::Duration};
 
 use rg3d::{
     core::instant::Instant,
@@ -47,16 +47,36 @@ fn main() {
     let mut args = env::args();
     args.next().unwrap(); // Skip program name
     match args.next().as_deref() {
-        None => common_main(),
+        None => client_server_main(),
         Some("client") => client_main(),
         Some("server") => server_main(),
         Some(_) => panic!("expected no args or 'client' or 'server'"),
     }
 }
 
-/// Run client and server in the same process
-fn common_main() {
-    todo!()
+/// Run both client and server.
+///
+/// This currently just a convenience for quicker testing
+/// but eventually should allow running singleplayer games
+/// without most of the overhead of the client-server split.
+fn client_server_main() {
+    // LATER Find a way to run client and server in one process,
+    // maybe even one thread - sharing GameState woul be ideal for singleplayer.
+    //
+    // This is broken - most input gets ignored (on Kubuntu):
+    // thread::spawn(|| {
+    //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
+    //     server_main(EventLoop::new_any_thread());
+    // });
+    // thread::sleep(Duration::from_secs(1));
+    // client_main();
+
+    let path = env::args().next().unwrap();
+    let mut server = Command::new(&path).arg("server").spawn().unwrap();
+    thread::sleep(Duration::from_millis(500));
+    let mut client = Command::new(&path).arg("client").spawn().unwrap();
+    client.wait().unwrap();
+    server.kill().unwrap();
 }
 
 fn client_main() {

@@ -44,14 +44,13 @@ impl Client {
         }
     }
 
-    pub(crate) fn update(&mut self, elapsed: f32) {
+    pub(crate) fn update(&mut self, game_time_target: f32) {
         let dt = 1.0 / 60.0; // TODO configurable
 
         // TODO read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
-        let game_time_target = elapsed;
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 

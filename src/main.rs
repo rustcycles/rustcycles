@@ -2,8 +2,11 @@ mod client;
 mod common;
 mod server;
 
+use std::env;
+
 use rg3d::{
     core::instant::Instant,
+    dpi::LogicalSize,
     engine::Engine,
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -12,6 +15,7 @@ use rg3d::{
 };
 
 use client::Client;
+use server::Server;
 
 // TODO MVP:
 //  - [x] Arena and wheel models
@@ -40,6 +44,22 @@ use client::Client;
 type GameEngine = Engine<(), StubNode>;
 
 fn main() {
+    let mut args = env::args();
+    args.next().unwrap(); // Skip program name
+    match args.next().as_deref() {
+        None => common_main(),
+        Some("client") => client_main(),
+        Some("server") => server_main(),
+        Some(_) => panic!("expected no args or 'client' or 'server'"),
+    }
+}
+
+/// Run client and server in the same process
+fn common_main() {
+    todo!()
+}
+
+fn client_main() {
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles")
         .with_fullscreen(Some(Fullscreen::Borderless(None)));
@@ -58,6 +78,7 @@ fn main() {
         // TODO Send important input to server immediately (keyboard and mouse button changes, mouse movement up to those changes)
         // LATER Is there a way to not waste CPU cycles so much?
 
+        #[allow(clippy::single_match)]
         match event {
             Event::NewEvents(_) => {}
             Event::WindowEvent { event, .. } => {
@@ -130,7 +151,6 @@ fn main() {
             // - it doesn't care whether we're at the edge of the screen
             // TODO(privacy) make sure we're not handling mouse movement when minimized (and especially not sending to server)
             Event::DeviceEvent { event, .. } => {
-                #[allow(clippy::single_match)] // Symmetry with WindowEvent
                 match event {
                     DeviceEvent::MouseMotion { delta } => {
                         // LATER This event normally happens every 4 ms for me when moving the mouse. Print stats.
@@ -163,6 +183,47 @@ fn main() {
             Event::RedrawRequested(_) => {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
+            Event::RedrawEventsCleared => {}
+            Event::LoopDestroyed => println!("bye"),
+        }
+    });
+}
+
+fn server_main() {
+    // LATER Headless - do all this without creating a window.
+    let window_builder = WindowBuilder::new()
+        .with_title("RustCycles server")
+        .with_inner_size(LogicalSize::new(400, 100));
+    let event_loop = EventLoop::new();
+    // LATER Does vsync have any effect here?
+    let engine = GameEngine::new(window_builder, &event_loop, false).unwrap();
+    let mut server = rg3d::core::futures::executor::block_on(Server::new(engine));
+
+    // Render pure black just once so the window doesn't look broken.
+    server.engine.render().unwrap();
+
+    let clock = Instant::now();
+    event_loop.run(move |event, _, control_flow| {
+        // Default control_flow is ControllFlow::Poll but let's be explicit in acse it changes.
+        *control_flow = ControlFlow::Poll;
+
+        #[allow(clippy::single_match)]
+        match event {
+            Event::NewEvents(_) => {}
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit;
+                }
+                _ => {}
+            },
+            Event::DeviceEvent { .. } => {}
+            Event::UserEvent(_) => {}
+            Event::Suspended => {}
+            Event::Resumed => {}
+            Event::MainEventsCleared => {
+                server.update(clock.elapsed().as_secs_f32());
+            }
+            Event::RedrawRequested(_) => {}
             Event::RedrawEventsCleared => {}
             Event::LoopDestroyed => println!("bye"),
         }

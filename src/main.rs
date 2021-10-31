@@ -56,7 +56,7 @@ fn main() {
 
 /// Run both client and server.
 ///
-/// This currently just a convenience for quicker testing
+/// This is currently just a convenience for quicker testing
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
 fn client_server_main() {

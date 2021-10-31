@@ -23,7 +23,7 @@ use server::Server;
 //  - [x] Arena and wheel models
 //  - [x] Rotate the camera
 //  - [x] Move the camera
-//  - [ ] Render wheel at player pos
+//  - [x] Render wheel at player pos
 //  - [ ] Primitive networking to force client/server split (QUIC?)
 //  - [ ] Driving and collisions
 //  - [ ] Trails

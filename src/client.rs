@@ -1,3 +1,5 @@
+use std::{io::Write, net::TcpStream};
+
 use rg3d::{
     core::{
         algebra::{Rotation, UnitQuaternion, Vector3},
@@ -24,6 +26,10 @@ pub(crate) struct Client {
 
 impl Client {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
+        let mut stream = TcpStream::connect("127.0.0.1:26000").unwrap();
+        stream.write_all(b"Test").unwrap();
+        drop(stream);
+
         let gs = GameState::new(&mut engine).await;
 
         let scene = &mut engine.scenes[gs.scene];

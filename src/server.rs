@@ -1,3 +1,5 @@
+use std::{io::Read, net::TcpListener};
+
 use crate::{
     common::{GameState, Input},
     GameEngine,
@@ -12,6 +14,14 @@ pub(crate) struct Server {
 impl Server {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
         let gs = GameState::new(&mut engine).await;
+
+        let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
+        //listener.set_nonblocking(true);
+        let (mut stream, addr) = listener.accept().unwrap();
+        println!("S accept {}", addr);
+        let mut buf = Vec::new();
+        stream.read_to_end(&mut buf).unwrap();
+        println!("S read_to_end {:?}", buf);
 
         Self {
             engine,

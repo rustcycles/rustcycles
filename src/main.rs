@@ -25,6 +25,8 @@ use server::Server;
 //  - [x] Move the camera
 //  - [x] Render wheel at player pos
 //  - [ ] Primitive networking to force client/server split (QUIC?)
+//      - https://crates.io/crates/bincode
+//      - https://docs.rs/tokio-util/0.6.9/tokio_util/index.html
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:

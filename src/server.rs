@@ -16,11 +16,11 @@ impl Server {
         let gs = GameState::new(&mut engine).await;
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
-        //listener.set_nonblocking(true);
+        //listener.set_nonblocking(true).unwrap();
         let (mut stream, addr) = listener.accept().unwrap();
         println!("S accept {}", addr);
         let mut buf = Vec::new();
-        stream.read_to_end(&mut buf).unwrap();
+        stream.read_to_end(&mut buf).unwrap(); // FIXME
         println!("S read_to_end {:?}", buf);
 
         Self {

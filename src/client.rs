@@ -22,13 +22,13 @@ pub(crate) struct Client {
     pub(crate) gs: GameState,
     pub(crate) ps: PlayerState,
     pub(crate) camera: Handle<Node>,
+    stream: TcpStream,
 }
 
 impl Client {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
         let mut stream = TcpStream::connect("127.0.0.1:26000").unwrap();
         stream.write_all(b"Test").unwrap();
-        drop(stream);
 
         let gs = GameState::new(&mut engine).await;
 
@@ -47,6 +47,7 @@ impl Client {
             gs,
             ps: PlayerState::new(),
             camera,
+            stream,
         }
     }
 

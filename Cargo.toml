@@ -21,3 +21,6 @@ panic = "abort"
 
 [dependencies]
 rg3d = "0.23.0"
+structopt = "0.3.25"
+strum = "0.22"
+strum_macros = "0.22"

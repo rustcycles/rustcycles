@@ -13,6 +13,8 @@ use rg3d::{
     gui::node::StubNode,
     window::{Fullscreen, WindowBuilder},
 };
+use structopt::StructOpt;
+use strum_macros::EnumString;
 
 use client::Client;
 use server::Server;
@@ -43,14 +45,31 @@ use server::Server;
 
 type GameEngine = Engine<(), StubNode>;
 
+#[derive(StructOpt, Debug)]
+struct Opts {
+    /// Use a window instead of fullscreen (doesn't apply to server)
+    #[structopt(long)]
+    windowed: bool,
+
+    #[structopt(subcommand)]
+    endpoint: Option<Endpoint>,
+}
+
+#[derive(StructOpt, Debug, EnumString)]
+enum Endpoint {
+    /// Run only the game client
+    Client,
+    /// Run only the game server
+    Server,
+}
+
 fn main() {
-    let mut args = env::args();
-    args.next().unwrap(); // Skip program name
-    match args.next().as_deref() {
-        None => client_server_main(),
-        Some("client") => client_main(),
-        Some("server") => server_main(),
-        Some(_) => panic!("expected no args or 'client' or 'server'"),
+    let opts = Opts::from_args();
+
+    match opts.endpoint {
+        None => client_server_main(opts),
+        Some(Endpoint::Client) => client_main(opts),
+        Some(Endpoint::Server) => server_main(),
     }
 }
 
@@ -59,7 +78,7 @@ fn main() {
 /// This is currently just a convenience for quicker testing
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
-fn client_server_main() {
+fn client_server_main(opts: Opts) {
     // LATER Find a way to run client and server in one process,
     // maybe even one thread - sharing GameState woul be ideal for singleplayer.
     //
@@ -72,17 +91,28 @@ fn client_server_main() {
     // client_main();
 
     let path = env::args().next().unwrap();
+
     let mut server = Command::new(&path).arg("server").spawn().unwrap();
+
     thread::sleep(Duration::from_millis(500));
-    let mut client = Command::new(&path).arg("client").spawn().unwrap();
+
+    let mut client_cmd = Command::new(&path);
+    if opts.windowed {
+        client_cmd.arg("--windowed");
+    }
+    client_cmd.arg("client");
+    let mut client = client_cmd.spawn().unwrap();
+
+    // We wanna close just the client and automatically close the server that way.
     client.wait().unwrap();
     server.kill().unwrap();
 }
 
-fn client_main() {
-    let window_builder = WindowBuilder::new()
-        .with_title("RustCycles")
-        .with_fullscreen(Some(Fullscreen::Borderless(None)));
+fn client_main(opts: Opts) {
+    let mut window_builder = WindowBuilder::new().with_title("RustCycles");
+    if !opts.windowed {
+        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
+    }
     let event_loop = EventLoop::new();
     // LATER no vsync
     let engine = GameEngine::new(window_builder, &event_loop, true).unwrap();

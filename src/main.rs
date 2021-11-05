@@ -11,6 +11,7 @@ use rg3d::{
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     gui::node::StubNode,
+    utils::log::{Log, MessageKind},
     window::{Fullscreen, WindowBuilder},
 };
 use structopt::StructOpt;
@@ -111,6 +112,12 @@ fn client_server_main(opts: Opts) {
 }
 
 fn client_main(opts: Opts) {
+    // LATER Switch rg3d to a more standard logger
+    // or at least add a level below INFO so load times can remain as INFO
+    // and the other messages are hidden by default.
+    // Also used in server_main().
+    Log::set_verbosity(MessageKind::Warning);
+
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
     if !opts.windowed {
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
@@ -242,6 +249,9 @@ fn client_main(opts: Opts) {
 }
 
 fn server_main() {
+    // See note in client_main().
+    Log::set_verbosity(MessageKind::Warning);
+
     // LATER Headless - do all this without creating a window.
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles server")

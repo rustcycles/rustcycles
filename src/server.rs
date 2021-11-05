@@ -17,6 +17,7 @@ impl Server {
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
         //listener.set_nonblocking(true).unwrap();
+        // TODO set_nodelay ?
         let (mut stream, addr) = listener.accept().unwrap();
         println!("S accept {}", addr);
         let mut buf = Vec::new();

@@ -27,7 +27,14 @@ pub(crate) struct Client {
 
 impl Client {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
-        let mut stream = TcpStream::connect("127.0.0.1:26000").unwrap();
+        let mut connect_attempts = 0;
+        let mut stream = loop {
+            connect_attempts += 1;
+            if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
+                println!("C connect attempts: {}", connect_attempts);
+                break stream;
+            }
+        };
         stream.write_all(b"Test").unwrap();
 
         let gs = GameState::new(&mut engine).await;

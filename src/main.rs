@@ -97,8 +97,6 @@ fn client_server_main(opts: Opts) {
 
     let mut server = Command::new(&path).arg("server").spawn().unwrap();
 
-    thread::sleep(Duration::from_millis(500));
-
     let mut client_cmd = Command::new(&path);
     if opts.windowed {
         client_cmd.arg("--windowed");

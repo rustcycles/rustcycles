@@ -28,14 +28,15 @@ pub(crate) struct Client {
 impl Client {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
         let mut connect_attempts = 0;
-        let mut stream = loop {
+        let stream = loop {
             connect_attempts += 1;
+            // LATER Limit the number of attempts.
             if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
                 println!("C connect attempts: {}", connect_attempts);
                 break stream;
             }
+            // LATER Maybe add a short delay (test local vs remove server)?
         };
-        stream.write_all(b"Test").unwrap();
 
         let gs = GameState::new(&mut engine).await;
 
@@ -73,12 +74,15 @@ impl Client {
             self.tick(dt);
 
             self.engine.update(dt);
+
+            // LATER sending (some) input should happen as soon as we receive it
+            self.network_send();
         }
 
         self.engine.get_window().request_redraw();
     }
 
-    pub(crate) fn tick(&mut self, dt: f32) {
+    fn tick(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         let camera = &mut scene.graph[self.camera];
@@ -175,6 +179,10 @@ impl Client {
             end: my_center + diff,
             color: Color::GREEN,
         });
+    }
+
+    fn network_send(&mut self) {
+        self.stream.write_all(b"Test            ").unwrap();
     }
 }
 

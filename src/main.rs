@@ -2,7 +2,7 @@ mod client;
 mod common;
 mod server;
 
-use std::{env, process::Command, thread, time::Duration};
+use std::{env, process::Command};
 
 use rg3d::{
     core::instant::Instant,

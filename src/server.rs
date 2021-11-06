@@ -1,6 +1,6 @@
 use std::{
     io::{ErrorKind, Read},
-    net::{TcpListener, TcpStream},
+    net::{SocketAddr, TcpListener, TcpStream},
 };
 
 use crate::{
@@ -18,6 +18,7 @@ pub(crate) struct Server {
 
 struct RemoteClient {
     stream: TcpStream,
+    addr: SocketAddr,
 }
 
 impl Server {
@@ -63,7 +64,7 @@ impl Server {
                 // TODO set_nodelay to disable Nagle'a algo? (also on Client)
                 stream.set_nonblocking(true).unwrap(); // TODO needed?
                 println!("S accept {}", addr);
-                let client = RemoteClient { stream };
+                let client = RemoteClient { stream, addr };
                 self.clients.push(client);
             }
             Err(err) => match err.kind() {
@@ -78,7 +79,7 @@ impl Server {
             match res {
                 Ok(_) => {
                     let s = String::from_utf8(buf.to_vec()).unwrap();
-                    println!("S received: {:?}", s);
+                    println!("S received from {}: {:?}", client.addr, s);
                 }
                 Err(err) => match err.kind() {
                     ErrorKind::WouldBlock => {}

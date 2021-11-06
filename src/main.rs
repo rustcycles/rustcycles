@@ -25,13 +25,7 @@ use server::Server;
 //  - [x] Rotate the camera
 //  - [x] Move the camera
 //  - [x] Render wheel at player pos
-//  - [ ] Primitive networking to force client/server split (QUIC?)
-//      - https://crates.io/crates/bincode
-//      - https://docs.rs/tokio-util/0.6.9/tokio_util/index.html
-//      - https://crates.io/crates/laminar
-//      - https://crates.io/crates/quiche
-//      - https://crates.io/crates/quinn
-//          - take ideas from https://crates.io/crates/harlequinn ?
+//  - [ ] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:
@@ -47,9 +41,6 @@ use server::Server;
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
-//  - [ ] Security
-//      - [ ] bincode::config::Bounded
-//      - [ ] QUIC offsers some mitigations? (slowloris, DDoS, ...)
 
 // TODO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
 

@@ -29,6 +29,9 @@ use server::Server;
 //      - https://crates.io/crates/bincode
 //      - https://docs.rs/tokio-util/0.6.9/tokio_util/index.html
 //      - https://crates.io/crates/laminar
+//      - https://crates.io/crates/quiche
+//      - https://crates.io/crates/quinn
+//          - take ideas from https://crates.io/crates/harlequinn ?
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:

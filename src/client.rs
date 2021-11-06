@@ -1,4 +1,8 @@
-use std::{io::Write, net::TcpStream};
+use std::{
+    io::{ErrorKind, Read, Write},
+    mem,
+    net::TcpStream,
+};
 
 use rg3d::{
     core::{
@@ -13,7 +17,7 @@ use rg3d::{
 };
 
 use crate::{
-    common::{GameState, Input},
+    common::{GameState, Input, ServerPacket},
     GameEngine,
 };
 
@@ -23,6 +27,7 @@ pub(crate) struct Client {
     pub(crate) ps: PlayerState,
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
+    server_packet: ServerPacket,
 }
 
 impl Client {
@@ -57,6 +62,7 @@ impl Client {
             ps: PlayerState::new(),
             camera,
             stream,
+            server_packet: ServerPacket::default(),
         }
     }
 
@@ -117,40 +123,45 @@ impl Client {
         // Debug
         scene.drawing_context.clear_lines();
 
-        let mut debug_cross = |handle| {
-            let cycle = &scene.graph[handle];
-            let pos = cycle.global_position();
+        let pos1 = scene.graph[self.gs.cycle1.node_handle].global_position();
+        let pos2 = scene.graph[self.gs.cycle2.node_handle].global_position();
 
+        let mut debug_cross = |pos, color| {
             let dir = Vector3::new(1.0, 1.0, 1.0) * 0.25;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
-                color: Color::RED,
+                color,
             });
 
             let dir = Vector3::new(-1.0, 1.0, 1.0) * 0.25;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
-                color: Color::RED,
+                color,
             });
 
             let dir = Vector3::new(1.0, 1.0, -1.0) * 0.25;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
-                color: Color::RED,
+                color,
             });
 
             let dir = Vector3::new(-1.0, 1.0, -1.0) * 0.25;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
-                color: Color::RED,
+                color,
             });
         };
-        debug_cross(self.gs.cycle1.node_handle);
-        debug_cross(self.gs.cycle2.node_handle);
+
+        debug_cross(pos1, Color::RED);
+        debug_cross(pos2, Color::RED);
+        for &cycle in &self.gs.cycles {
+            // TODO actually use
+            debug_cross(cycle, Color::GREEN);
+        }
 
         scene.physics.draw(&mut scene.drawing_context);
 
@@ -184,7 +195,23 @@ impl Client {
         });
     }
 
-    fn network_receive(&mut self) {}
+    fn network_receive(&mut self) {
+        let mut buf = [0; mem::size_of::<ServerPacket>()];
+        loop {
+            let res = self.stream.read_exact(&mut buf);
+            match res {
+                Ok(_) => {
+                    self.server_packet = bincode::deserialize(&buf).unwrap();
+                }
+                Err(err) => match err.kind() {
+                    ErrorKind::WouldBlock => {
+                        break;
+                    }
+                    _ => panic!("network error (read): {}", err),
+                },
+            }
+        }
+    }
 
     fn network_send(&mut self) {
         let data = bincode::serialize(&self.ps.input).unwrap();

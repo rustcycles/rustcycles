@@ -18,6 +18,7 @@ pub(crate) struct GameState {
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,
+    pub(crate) cycles: Vec<Vector3<f32>>,
     pub(crate) cycle1: Cycle,
     pub(crate) cycle2: Cycle,
 }
@@ -53,6 +54,7 @@ impl GameState {
         Self {
             game_time: 0.0,
             scene,
+            cycles: Vec::new(),
             cycle1,
             cycle2,
         }
@@ -162,4 +164,9 @@ impl Debug for Input {
         write!(f, "}}")?;
         Ok(())
     }
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub(crate) struct ServerPacket {
+    positions: Vec<Vector3<f32>>,
 }

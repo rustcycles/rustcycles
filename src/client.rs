@@ -37,6 +37,7 @@ impl Client {
             }
             // LATER Maybe add a short delay (test local vs remove server)?
         };
+        stream.set_nonblocking(true).unwrap();
 
         let gs = GameState::new(&mut engine).await;
 
@@ -68,6 +69,8 @@ impl Client {
 
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
+
+            self.network_receive();
 
             self.gs.tick(&mut self.engine, dt, self.ps.input);
 
@@ -180,6 +183,8 @@ impl Client {
             color: Color::GREEN,
         });
     }
+
+    fn network_receive(&mut self) {}
 
     fn network_send(&mut self) {
         self.stream.write_all(b"Test            ").unwrap();

@@ -28,6 +28,7 @@ use server::Server;
 //  - [ ] Primitive networking to force client/server split (QUIC?)
 //      - https://crates.io/crates/bincode
 //      - https://docs.rs/tokio-util/0.6.9/tokio_util/index.html
+//      - https://crates.io/crates/laminar
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:

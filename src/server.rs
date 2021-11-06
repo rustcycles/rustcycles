@@ -21,7 +21,7 @@ impl Server {
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
         //listener.set_nonblocking(true).unwrap();
-        // TODO set_nodelay ?
+        // TODO set_nodelay (also on client)?
         let (stream, addr) = listener.accept().unwrap();
         stream.set_nonblocking(true).unwrap();
         println!("S accept {}", addr);
@@ -50,9 +50,9 @@ impl Server {
             self.gs.tick(&mut self.engine, dt, self.input);
 
             self.engine.update(dt);
-        }
 
-        // TODO Send updates to clients
+            self.network_send();
+        }
     }
 
     fn network_receive(&mut self) {
@@ -69,4 +69,6 @@ impl Server {
             },
         }
     }
+
+    fn network_send(&mut self) {}
 }

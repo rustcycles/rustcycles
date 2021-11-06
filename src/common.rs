@@ -1,10 +1,12 @@
+use std::fmt::{self, Debug, Formatter};
+
 use rg3d::{
     core::{algebra::Vector3, pool::Handle},
     engine::{resource_manager::MaterialSearchOptions, RigidBodyHandle},
     physics::prelude::{ColliderBuilder, RigidBodyBuilder},
     scene::{node::Node, Scene},
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::GameEngine;
 
@@ -124,7 +126,7 @@ impl Cycle {
 }
 
 // LATER Bitfield?
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
@@ -132,4 +134,32 @@ pub(crate) struct Input {
     pub(crate) backward: bool,
     pub(crate) left: bool,
     pub(crate) right: bool,
+    // ^ when adding fields, also add them to Debug
+}
+
+impl Debug for Input {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        // Only output the pressed buttons so it's more readable.
+        write!(f, "Input {{ ")?;
+        if self.fire1 {
+            write!(f, "fire1 ")?;
+        }
+        if self.fire2 {
+            write!(f, "fire2 ")?;
+        }
+        if self.forward {
+            write!(f, "forward ")?;
+        }
+        if self.backward {
+            write!(f, "backward ")?;
+        }
+        if self.left {
+            write!(f, "left ")?;
+        }
+        if self.right {
+            write!(f, "right ")?;
+        }
+        write!(f, "}}")?;
+        Ok(())
+    }
 }

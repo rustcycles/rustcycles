@@ -239,7 +239,7 @@ fn client_main(opts: Opts) {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
             Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => println!("bye"),
+            Event::LoopDestroyed => println!("C bye"),
         }
     });
 }
@@ -283,7 +283,7 @@ fn server_main() {
             }
             Event::RedrawRequested(_) => {}
             Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => println!("bye"),
+            Event::LoopDestroyed => println!("S bye"),
         }
     });
 }

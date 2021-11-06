@@ -74,7 +74,7 @@ impl Server {
         }
 
         for client in &mut self.clients {
-            let mut buf = [0; 16];
+            let mut buf = [0; 6];
             let res = client.stream.read_exact(&mut buf);
             match res {
                 Ok(_) => {

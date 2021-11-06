@@ -187,7 +187,8 @@ impl Client {
     fn network_receive(&mut self) {}
 
     fn network_send(&mut self) {
-        self.stream.write_all(b"Test            ").unwrap();
+        let data = bincode::serialize(&self.ps.input).unwrap();
+        self.stream.write_all(&data).unwrap();
     }
 }
 

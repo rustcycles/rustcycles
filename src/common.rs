@@ -4,6 +4,7 @@ use rg3d::{
     physics::prelude::{ColliderBuilder, RigidBodyBuilder},
     scene::{node::Node, Scene},
 };
+use serde::{Serialize, Deserialize};
 
 use crate::GameEngine;
 
@@ -123,7 +124,7 @@ impl Cycle {
 }
 
 // LATER Bitfield?
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,

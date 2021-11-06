@@ -75,16 +75,21 @@ impl Server {
 
         for client in &mut self.clients {
             let mut buf = [0; 6];
-            let res = client.stream.read_exact(&mut buf);
-            match res {
-                Ok(_) => {
-                    let s = String::from_utf8(buf.to_vec()).unwrap();
-                    println!("S received from {}: {:?}", client.addr, s);
+            loop {
+                // We're reading in a loop in case more packets arrive in one frame.
+                let res = client.stream.read_exact(&mut buf);
+                match res {
+                    Ok(_) => {
+                        let input: Input = bincode::deserialize(&buf).unwrap();
+                        println!("S received from {}: {:?}", client.addr, input);
+                    }
+                    Err(err) => match err.kind() {
+                        ErrorKind::WouldBlock => {
+                            break;
+                        }
+                        _ => panic!("network error (read): {}", err),
+                    },
                 }
-                Err(err) => match err.kind() {
-                    ErrorKind::WouldBlock => {}
-                    _ => panic!("network error (read): {}", err),
-                },
             }
         }
     }

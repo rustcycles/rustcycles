@@ -57,20 +57,8 @@ impl GameState {
             .await
             .unwrap();
 
-        let cycle1 = Cycle::construct(
-            engine,
-            &mut scene,
-            &cycle_model,
-            Vector3::new(-1.0, 5.0, 0.0),
-            true,
-        );
-        let cycle2 = Cycle::construct(
-            engine,
-            &mut scene,
-            &cycle_model,
-            Vector3::new(1.0, 5.0, 0.0),
-            false,
-        );
+        let cycle1 = Cycle::construct(&mut scene, &cycle_model, Vector3::new(-1.0, 5.0, 0.0), true);
+        let cycle2 = Cycle::construct(&mut scene, &cycle_model, Vector3::new(1.0, 5.0, 0.0), false);
 
         let scene = engine.scenes.add(scene);
 
@@ -115,7 +103,6 @@ pub(crate) struct Cycle {
 
 impl Cycle {
     pub(crate) fn construct(
-        engine: &mut GameEngine,
         scene: &mut Scene,
         model: &Model,
         pos: Vector3<f32>,

@@ -43,6 +43,7 @@ impl Server {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
+            self.accept_new_connections();
             self.network_receive();
 
             // TODO input
@@ -55,20 +56,6 @@ impl Server {
     }
 
     fn network_receive(&mut self) {
-        match self.listener.accept() {
-            Ok((stream, addr)) => {
-                // TODO set_nodelay to disable Nagle'a algo? (also on Client)
-                stream.set_nonblocking(true).unwrap(); // TODO needed?
-                println!("S accept {}", addr);
-                let client = RemoteClient::new(stream, addr);
-                self.clients.push(client);
-            }
-            Err(err) => match err.kind() {
-                ErrorKind::WouldBlock => {}
-                _ => panic!("network error (accept): {}", err),
-            },
-        }
-
         for client in &mut self.clients {
             // TODO Read from network properly.
             // Using size of Input is also probably wrong,
@@ -90,6 +77,22 @@ impl Server {
                     },
                 }
             }
+        }
+    }
+
+    fn accept_new_connections(&mut self) {
+        match self.listener.accept() {
+            Ok((stream, addr)) => {
+                // TODO set_nodelay to disable Nagle'a algo? (also on Client)
+                stream.set_nonblocking(true).unwrap(); // TODO needed?
+                println!("S accept {}", addr);
+                let client = RemoteClient::new(stream, addr);
+                self.clients.push(client);
+            }
+            Err(err) => match err.kind() {
+                ErrorKind::WouldBlock => {}
+                _ => panic!("network error (accept): {}", err),
+            },
         }
     }
 

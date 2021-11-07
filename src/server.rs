@@ -55,6 +55,22 @@ impl Server {
         }
     }
 
+    fn accept_new_connections(&mut self) {
+        match self.listener.accept() {
+            Ok((stream, addr)) => {
+                // TODO set_nodelay to disable Nagle'a algo? (also on Client)
+                stream.set_nonblocking(true).unwrap(); // TODO needed?
+                println!("S accept {}", addr);
+                let client = RemoteClient::new(stream, addr);
+                self.clients.push(client);
+            }
+            Err(err) => match err.kind() {
+                ErrorKind::WouldBlock => {}
+                _ => panic!("network error (accept): {}", err),
+            },
+        }
+    }
+
     fn network_receive(&mut self) {
         for client in &mut self.clients {
             // TODO Read from network properly.
@@ -77,22 +93,6 @@ impl Server {
                     },
                 }
             }
-        }
-    }
-
-    fn accept_new_connections(&mut self) {
-        match self.listener.accept() {
-            Ok((stream, addr)) => {
-                // TODO set_nodelay to disable Nagle'a algo? (also on Client)
-                stream.set_nonblocking(true).unwrap(); // TODO needed?
-                println!("S accept {}", addr);
-                let client = RemoteClient::new(stream, addr);
-                self.clients.push(client);
-            }
-            Err(err) => match err.kind() {
-                ErrorKind::WouldBlock => {}
-                _ => panic!("network error (accept): {}", err),
-            },
         }
     }
 

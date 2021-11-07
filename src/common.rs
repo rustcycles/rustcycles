@@ -14,7 +14,7 @@ pub(crate) struct GameState {
     /// This gamelogic frame's time in seconds.
     ///
     /// This does *not* have to run at the same speed as real world time.
-    /// TODO d_speed, pause
+    /// TODO d_speed, pause (don't forget integration_parameters.dt)
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,

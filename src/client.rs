@@ -1,6 +1,6 @@
 use std::{
+    collections::VecDeque,
     io::{ErrorKind, Read, Write},
-    mem,
     net::TcpStream,
 };
 
@@ -27,6 +27,7 @@ pub(crate) struct Client {
     pub(crate) ps: PlayerState,
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
+    buf: VecDeque<u8>,
     server_packet: ServerPacket,
 }
 
@@ -62,6 +63,7 @@ impl Client {
             ps: PlayerState::new(),
             camera,
             stream,
+            buf: VecDeque::default(),
             server_packet: ServerPacket::default(),
         }
     }
@@ -159,8 +161,11 @@ impl Client {
         debug_cross(pos1, Color::RED);
         debug_cross(pos2, Color::RED);
         for &cycle in &self.gs.cycles {
-            // TODO actually use
+            // TODO actually use gs.cycles
             debug_cross(cycle, Color::GREEN);
+        }
+        for &pos in &self.server_packet.positions {
+            debug_cross(pos, Color::BLUE);
         }
 
         scene.physics.draw(&mut scene.drawing_context);
@@ -196,12 +201,19 @@ impl Client {
     }
 
     fn network_receive(&mut self) {
-        let mut buf = [0; mem::size_of::<ServerPacket>()];
         loop {
-            let res = self.stream.read_exact(&mut buf);
+            // Read all available bytes until the stream would block.
+            // LATER Test networking thoroughly
+            //      - large amounts of data
+            //      - lossy and slow connections
+            //      - fragmented and merged packets
+
+            // No particular reason for the buffer size, except BufReader uses the same.
+            let mut buf = [0; 8192];
+            let res = self.stream.read(&mut buf);
             match res {
-                Ok(_) => {
-                    self.server_packet = bincode::deserialize(&buf).unwrap();
+                Ok(n) => {
+                    self.buf.extend(&buf[0..n]);
                 }
                 Err(err) => match err.kind() {
                     ErrorKind::WouldBlock => {
@@ -210,6 +222,22 @@ impl Client {
                     _ => panic!("network error (read): {}", err),
                 },
             }
+        }
+
+        loop {
+            if self.buf.len() < 2 {
+                break;
+            }
+            let len_bytes = [self.buf[0], self.buf[1]];
+            let len = usize::from(u16::from_le_bytes(len_bytes));
+            if self.buf.len() < len + 2 {
+                // Not enough bytes in buffer for a full frame.
+                break;
+            }
+            self.buf.pop_front();
+            self.buf.pop_front();
+            let bytes: Vec<_> = self.buf.drain(0..len).collect();
+            self.server_packet = bincode::deserialize(&bytes).unwrap();
         }
     }
 

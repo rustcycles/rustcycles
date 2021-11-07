@@ -1,10 +1,11 @@
 use std::{
-    io::{ErrorKind, Read},
+    io::{ErrorKind, Read, Write},
+    mem,
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
 use crate::{
-    common::{GameState, Input},
+    common::{GameState, Input, ServerPacket},
     GameEngine,
 };
 
@@ -74,7 +75,10 @@ impl Server {
         }
 
         for client in &mut self.clients {
-            let mut buf = [0; 6];
+            // TODO Read from network properly.
+            // Using size of Input is also probably wrong,
+            // bincode doesn't guarantee same size.
+            let mut buf = [0; mem::size_of::<Input>()];
             loop {
                 // We're reading in a loop in case more packets arrive in one frame.
                 let res = client.stream.read_exact(&mut buf);
@@ -95,6 +99,22 @@ impl Server {
     }
 
     fn network_send(&mut self) {
-        
+        // LATER Measure network usage.
+        // LATER Try to minimize network usage.
+        //       General purpose compression could help a bit,
+        //       but using what we know about the data should give much better results.
+        let scene = &self.engine.scenes[self.gs.scene];
+        let pos1 = scene.graph[self.gs.cycle1.node_handle].global_position();
+        let pos2 = scene.graph[self.gs.cycle2.node_handle].global_position();
+        let packet = ServerPacket {
+            positions: vec![pos1, pos2],
+        };
+        let buf = bincode::serialize(&packet).unwrap();
+        let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+        for client in &mut self.clients {
+            // Prefix data by length so it's easy to parse on the other side.
+            client.stream.write_all(&len).unwrap();
+            client.stream.write_all(&buf).unwrap();
+        }
     }
 }

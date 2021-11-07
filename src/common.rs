@@ -168,5 +168,5 @@ impl Debug for Input {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub(crate) struct ServerPacket {
-    positions: Vec<Vector3<f32>>,
+    pub(crate) positions: Vec<Vector3<f32>>,
 }

@@ -4,6 +4,7 @@ use rg3d::{
     core::{algebra::Vector3, pool::Handle},
     engine::{resource_manager::MaterialSearchOptions, RigidBodyHandle},
     physics::prelude::{ColliderBuilder, RigidBodyBuilder},
+    resource::model::Model,
     scene::{node::Node, Scene},
 };
 use serde::{Deserialize, Serialize};
@@ -18,6 +19,7 @@ pub(crate) struct GameState {
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,
+    cycle_model: Model,
     pub(crate) cycles: Vec<Vector3<f32>>,
     pub(crate) cycle1: Cycle,
     pub(crate) cycle2: Cycle,
@@ -46,14 +48,36 @@ impl GameState {
             .unwrap()
             .instantiate_geometry(&mut scene);
 
-        let cycle1 = Cycle::construct(engine, &mut scene, Vector3::new(-1.0, 5.0, 0.0), true).await;
-        let cycle2 = Cycle::construct(engine, &mut scene, Vector3::new(1.0, 5.0, 0.0), false).await;
+        let cycle_model = engine
+            .resource_manager
+            .request_model(
+                "data/rustcycle/rustcycle.fbx",
+                MaterialSearchOptions::RecursiveUp,
+            )
+            .await
+            .unwrap();
+
+        let cycle1 = Cycle::construct(
+            engine,
+            &mut scene,
+            &cycle_model,
+            Vector3::new(-1.0, 5.0, 0.0),
+            true,
+        );
+        let cycle2 = Cycle::construct(
+            engine,
+            &mut scene,
+            &cycle_model,
+            Vector3::new(1.0, 5.0, 0.0),
+            false,
+        );
 
         let scene = engine.scenes.add(scene);
 
         Self {
             game_time: 0.0,
             scene,
+            cycle_model,
             cycles: Vec::new(),
             cycle1,
             cycle2,
@@ -90,21 +114,14 @@ pub(crate) struct Cycle {
 }
 
 impl Cycle {
-    pub(crate) async fn construct(
+    pub(crate) fn construct(
         engine: &mut GameEngine,
         scene: &mut Scene,
+        model: &Model,
         pos: Vector3<f32>,
         ccd: bool,
     ) -> Self {
-        let node_handle = engine
-            .resource_manager
-            .request_model(
-                "data/rustcycle/rustcycle.fbx",
-                MaterialSearchOptions::RecursiveUp,
-            )
-            .await
-            .unwrap()
-            .instantiate_geometry(scene);
+        let node_handle = model.instantiate_geometry(scene);
         let body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
                 .ccd_enabled(ccd)

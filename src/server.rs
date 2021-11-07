@@ -17,11 +17,6 @@ pub(crate) struct Server {
     clients: Vec<RemoteClient>,
 }
 
-struct RemoteClient {
-    stream: TcpStream,
-    addr: SocketAddr,
-}
-
 impl Server {
     pub(crate) async fn new(mut engine: GameEngine) -> Self {
         let gs = GameState::new(&mut engine).await;
@@ -65,7 +60,7 @@ impl Server {
                 // TODO set_nodelay to disable Nagle'a algo? (also on Client)
                 stream.set_nonblocking(true).unwrap(); // TODO needed?
                 println!("S accept {}", addr);
-                let client = RemoteClient { stream, addr };
+                let client = RemoteClient::new(stream, addr);
                 self.clients.push(client);
             }
             Err(err) => match err.kind() {
@@ -116,5 +111,16 @@ impl Server {
             client.stream.write_all(&len).unwrap();
             client.stream.write_all(&buf).unwrap();
         }
+    }
+}
+
+struct RemoteClient {
+    stream: TcpStream,
+    addr: SocketAddr,
+}
+
+impl RemoteClient {
+    fn new(stream: TcpStream, addr: SocketAddr) -> Self {
+        Self { stream, addr }
     }
 }

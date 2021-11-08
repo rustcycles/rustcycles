@@ -202,6 +202,7 @@ impl Client {
             //      - large amounts of data
             //      - lossy and slow connections
             //      - fragmented and merged packets
+            // TODO Err(ref e) if e.kind() == ErrorKind::Interrupted => {} ???
 
             // No particular reason for the buffer size, except BufReader uses the same.
             let mut buf = [0; 8192];

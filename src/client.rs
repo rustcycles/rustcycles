@@ -125,9 +125,6 @@ impl Client {
         // Debug
         scene.drawing_context.clear_lines();
 
-        let pos1 = scene.graph[self.gs.cycle1.node_handle].global_position();
-        let pos2 = scene.graph[self.gs.cycle2.node_handle].global_position();
-
         let mut debug_cross = |pos, color| {
             let dir = Vector3::new(1.0, 1.0, 1.0) * 0.25;
             scene.drawing_context.add_line(Line {
@@ -158,11 +155,9 @@ impl Client {
             });
         };
 
-        debug_cross(pos1, Color::RED);
-        debug_cross(pos2, Color::RED);
-        for &cycle in &self.gs.cycles {
-            // TODO actually use gs.cycles
-            debug_cross(cycle, Color::GREEN);
+        for cycle in &self.gs.cycles {
+            scene.graph[cycle.node_handle].global_position();
+            debug_cross(pos, Color::GREEN);
         }
         for &pos in &self.server_packet.positions {
             debug_cross(pos, Color::BLUE);
@@ -170,7 +165,7 @@ impl Client {
 
         scene.physics.draw(&mut scene.drawing_context);
 
-        let pos1 = scene
+        /*let pos1 = scene
             .physics
             .bodies
             .get(&self.gs.cycle1.body_handle)
@@ -197,7 +192,7 @@ impl Client {
             begin: my_center,
             end: my_center + diff,
             color: Color::GREEN,
-        });
+        });*/
     }
 
     fn network_receive(&mut self) {

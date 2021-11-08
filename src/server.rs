@@ -63,6 +63,7 @@ impl Server {
                 println!("S accept {}", addr);
                 let client = RemoteClient::new(stream, addr);
                 self.clients.push(client);
+                self.gs.spawn(&mut self.engine);
             }
             Err(err) => match err.kind() {
                 ErrorKind::WouldBlock => {}
@@ -102,11 +103,12 @@ impl Server {
         //       General purpose compression could help a bit,
         //       but using what we know about the data should give much better results.
         let scene = &self.engine.scenes[self.gs.scene];
-        let pos1 = scene.graph[self.gs.cycle1.node_handle].global_position();
-        let pos2 = scene.graph[self.gs.cycle2.node_handle].global_position();
-        let packet = ServerPacket {
-            positions: vec![pos1, pos2],
-        };
+        let mut positions = Vec::new();
+        for cycle in &self.gs.cycles {
+            let pos = scene.graph[cycle.node_handle].global_position();
+            positions.push(pos);
+        }
+        let packet = ServerPacket { positions };
         let buf = bincode::serialize(&packet).unwrap();
         let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
         for client in &mut self.clients {

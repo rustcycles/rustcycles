@@ -20,9 +20,7 @@ pub(crate) struct GameState {
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
-    pub(crate) cycles: Vec<Vector3<f32>>,
-    pub(crate) cycle1: Cycle,
-    pub(crate) cycle2: Cycle,
+    pub(crate) cycles: Vec<Cycle>,
 }
 
 impl GameState {
@@ -57,9 +55,6 @@ impl GameState {
             .await
             .unwrap();
 
-        let cycle1 = Cycle::construct(&mut scene, &cycle_model, Vector3::new(-1.0, 5.0, 0.0), true);
-        let cycle2 = Cycle::construct(&mut scene, &cycle_model, Vector3::new(1.0, 5.0, 0.0), false);
-
         let scene = engine.scenes.add(scene);
 
         Self {
@@ -67,8 +62,6 @@ impl GameState {
             scene,
             cycle_model,
             cycles: Vec::new(),
-            cycle1,
-            cycle2,
         }
     }
 
@@ -84,15 +77,19 @@ impl GameState {
             } else {
                 -dir * dt * 50.0
             };
-            let mut accel = |handle| {
-                let body = scene.physics.bodies.get_mut(&handle).unwrap();
+            for cycle in &self.cycles {
+                let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
                 let mut linvel = *body.linvel();
                 linvel += wheel_accel;
                 body.set_linvel(linvel, true);
-            };
-            accel(self.cycle1.body_handle);
-            accel(self.cycle2.body_handle);
+            }
         }
+    }
+
+    pub(crate) fn spawn(&mut self, engine: &mut GameEngine) {
+        let scene = &mut engine.scenes[self.scene];
+        let cycle = Cycle::construct(scene, &self.cycle_model, Vector3::new(-1.0, 5.0, 0.0), true);
+        self.cycles.push(cycle);
     }
 }
 
@@ -102,6 +99,7 @@ pub(crate) struct Cycle {
 }
 
 impl Cycle {
+    #[must_use]
     pub(crate) fn construct(
         scene: &mut Scene,
         model: &Model,

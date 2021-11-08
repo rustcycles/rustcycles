@@ -10,7 +10,6 @@ use rg3d::{
     engine::Engine,
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    gui::node::StubNode,
     utils::log::{Log, MessageKind},
     window::{Fullscreen, WindowBuilder},
 };
@@ -44,7 +43,7 @@ use server::Server;
 
 // TODO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
 
-type GameEngine = Engine<(), StubNode>;
+type GameEngine = Engine;
 
 #[derive(StructOpt, Debug)]
 struct Opts {
@@ -139,7 +138,7 @@ fn client_main(opts: Opts) {
             Event::WindowEvent { event, .. } => {
                 match event {
                     WindowEvent::Resized(size) => {
-                        client.engine.renderer.set_frame_size(size.into()).unwrap();
+                        client.engine.set_frame_size(size.into()).unwrap();
                     }
                     WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit;

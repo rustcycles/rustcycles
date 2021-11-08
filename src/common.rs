@@ -2,8 +2,8 @@ use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
     core::{algebra::Vector3, pool::Handle},
-    engine::{resource_manager::MaterialSearchOptions, RigidBodyHandle},
-    physics::prelude::{ColliderBuilder, RigidBodyBuilder},
+    engine::resource_manager::MaterialSearchOptions,
+    physics3d::{rapier::prelude::*, RigidBodyHandle},
     resource::model::Model,
     scene::{node::Node, Scene},
 };

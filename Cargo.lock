@@ -22,9 +22,14 @@ checksum = "aae1277d39aeec15cb388266ecc24b11c80469deae6067e17a1a7aa9e5c1f234"
 
 [[package]]
 name = "ahash"
-version = "0.4.7"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "739f4a8db6605981345c5654f3a85b056ce52f37a39d34da03f25bf2151ea16e"
+checksum = "fcb51a0695d8f838b1ee009b3fbf66bda078cd64590202a864a8f3e8c4315c47"
+dependencies = [
+ "getrandom",
+ "once_cell",
+ "version_check",
+]
 
 [[package]]
 name = "alsa-sys"
@@ -660,9 +665,9 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "fontdue"
-version = "0.5.2"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c75712fff1702bac51b7eaa5a5ca9f9853b8055ef5906088a32f4fe196595a1d"
+checksum = "8669141fd879e023ac6fcfe1d90dfe3f83ca7e322781ddf3f5be59147e4b8113"
 dependencies = [
  "hashbrown",
  "ttf-parser 0.12.3",
@@ -814,6 +819,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fxhash"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -939,9 +953,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.9.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
+checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
 dependencies = [
  "ahash",
 ]
@@ -1119,79 +1133,6 @@ dependencies = [
  "byteorder",
  "ogg",
  "tinyvec",
-]
-
-[[package]]
-name = "lexical"
-version = "6.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c34e981f88d060a67815388470172638f1af16b3a12e581cb75142f190161bf9"
-dependencies = [
- "lexical-core",
-]
-
-[[package]]
-name = "lexical-core"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a3926d8f156019890be4abe5fd3785e0cff1001e06f59c597641fd513a5a284"
-dependencies = [
- "lexical-parse-float",
- "lexical-parse-integer",
- "lexical-util",
- "lexical-write-float",
- "lexical-write-integer",
-]
-
-[[package]]
-name = "lexical-parse-float"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4d066d004fa762d9da995ed21aa8845bb9f6e4265f540d716fb4b315197bf0e"
-dependencies = [
- "lexical-parse-integer",
- "lexical-util",
- "static_assertions",
-]
-
-[[package]]
-name = "lexical-parse-integer"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2c92badda8cc0fc4f3d3cc1c30aaefafb830510c8781ce4e8669881f3ed53ac"
-dependencies = [
- "lexical-util",
- "static_assertions",
-]
-
-[[package]]
-name = "lexical-util"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ff669ccaae16ee33af90dc51125755efed17f1309626ba5c12052512b11e291"
-dependencies = [
- "static_assertions",
-]
-
-[[package]]
-name = "lexical-write-float"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b5186948c7b297abaaa51560f2581dae625e5ce7dfc2d8fdc56345adb6dc576"
-dependencies = [
- "lexical-util",
- "lexical-write-integer",
- "static_assertions",
-]
-
-[[package]]
-name = "lexical-write-integer"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ece956492e0e40fd95ef8658a34d53a3b8c2015762fdcaaff2167b28de1f56ef"
-dependencies = [
- "lexical-util",
- "static_assertions",
 ]
 
 [[package]]
@@ -2100,22 +2041,19 @@ checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 [[package]]
 name = "rg3d"
 version = "0.23.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8f5c208756dd2735df56351f3af9ed88ba746f528e7405340f32034575e11af"
 dependencies = [
  "bitflags",
  "ddsfile",
+ "fxhash",
  "glow",
  "glutin",
  "image",
  "inflate",
  "lazy_static",
- "lexical",
- "lexical-parse-float",
- "rapier2d",
- "rapier3d",
  "rayon",
  "rg3d-core",
+ "rg3d-physics2d",
+ "rg3d-physics3d",
  "rg3d-resource",
  "rg3d-sound",
  "rg3d-ui",
@@ -2130,8 +2068,6 @@ dependencies = [
 [[package]]
 name = "rg3d-core"
 version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d1fa625cf8ceb2bc143dcc66c919b3ea14cdffc4723c82e551189f7d3a89ec9"
 dependencies = [
  "arrayvec",
  "base64",
@@ -2142,6 +2078,8 @@ dependencies = [
  "lazy_static",
  "memoffset",
  "nalgebra",
+ "num-traits 0.2.14",
+ "parking_lot",
  "rand",
  "rg3d-core-derive",
  "uuid",
@@ -2153,8 +2091,6 @@ dependencies = [
 [[package]]
 name = "rg3d-core-derive"
 version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2adf928c2c66f5ab36dd9152b1a5f36919bac6032d20abe2dfa387301242d2aa"
 dependencies = [
  "convert_case",
  "darling 0.13.0",
@@ -2164,10 +2100,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "rg3d-physics2d"
+version = "0.1.0"
+dependencies = [
+ "rapier2d",
+ "rg3d-core",
+]
+
+[[package]]
+name = "rg3d-physics3d"
+version = "0.1.0"
+dependencies = [
+ "rapier3d",
+ "rg3d-core",
+]
+
+[[package]]
 name = "rg3d-resource"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3aaae04c80e9bda26a55d0f325ccc9e6fda66bc6a4b34210aa4aeddd1c2bb637"
 dependencies = [
  "rg3d-core",
 ]
@@ -2175,8 +2125,6 @@ dependencies = [
 [[package]]
 name = "rg3d-sound"
 version = "0.25.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "003f209bd0a2bc9048c9418f0a746770af0e726c89a0b085518d12cf972c6fe8"
 dependencies = [
  "alsa-sys",
  "core-foundation-sys 0.8.3",
@@ -2192,8 +2140,6 @@ dependencies = [
 [[package]]
 name = "rg3d-ui"
 version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8d14e87b0190508a237c95fe78e1c85bfae85e8ef2ba2434b5d2107454cd1d6"
 dependencies = [
  "copypasta",
  "fontdue",
@@ -2205,9 +2151,9 @@ dependencies = [
 
 [[package]]
 name = "ron"
-version = "0.6.6"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86018df177b1beef6c7c8ef949969c4f7cb9a9344181b92486b23c79995bdaa4"
+checksum = "1b861ecaade43ac97886a512b360d01d66be9f41f3c61088b42cedf92e03d678"
 dependencies = [
  "base64",
  "bitflags",
@@ -2414,12 +2360,6 @@ dependencies = [
  "smithay-client-toolkit 0.14.0",
  "wayland-client",
 ]
-
-[[package]]
-name = "static_assertions"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strength_reduce"

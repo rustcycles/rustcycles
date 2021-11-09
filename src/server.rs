@@ -14,7 +14,6 @@ use crate::{
 pub(crate) struct Server {
     pub(crate) engine: GameEngine,
     pub(crate) gs: GameState,
-    pub(crate) input: Input,
     listener: TcpListener,
     clients: Pool<RemoteClient>,
 }
@@ -29,7 +28,6 @@ impl Server {
         Self {
             engine,
             gs,
-            input: Input::default(),
             listener,
             clients: Pool::new(),
         }
@@ -49,7 +47,7 @@ impl Server {
             self.network_receive();
 
             // TODO input
-            self.gs.tick(&mut self.engine, dt, self.input);
+            self.gs.tick(&mut self.engine, dt);
 
             self.engine.update(dt);
 
@@ -90,7 +88,8 @@ impl Server {
                 match res {
                     Ok(_) => {
                         let input: Input = bincode::deserialize(&buf).unwrap();
-                        println!("S received from {}: {:?}", client.addr, input);
+                        //println!("S received from {}: {:?}", client.addr, input);
+                        self.gs.players[client.player_handle].input = input;
                     }
                     Err(err) => match err.kind() {
                         ErrorKind::WouldBlock => {

@@ -70,19 +70,19 @@ impl GameState {
         }
     }
 
-    pub(crate) fn tick(&mut self, engine: &mut GameEngine, dt: f32, input: Input) {
+    pub(crate) fn tick(&mut self, engine: &mut GameEngine, dt: f32) {
         let scene = &mut engine.scenes[self.scene];
 
         let dir = Vector3::new(0.0, 0.0, 1.0); // TODO camera direction
 
-        // Testing physics
-        if input.fire1 || input.fire2 {
-            let wheel_accel = if input.fire1 {
-                dir * dt * 50.0
-            } else {
-                -dir * dt * 50.0
-            };
-            for cycle in &self.cycles {
+        for cycle in &self.cycles {
+            let input = &self.players[cycle.player_handle].input;
+            if input.fire1 || input.fire2 {
+                let wheel_accel = if input.fire1 {
+                    dir * dt * 50.0
+                } else {
+                    -dir * dt * 50.0
+                };
                 let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
                 let mut linvel = *body.linvel();
                 linvel += wheel_accel;
@@ -125,12 +125,16 @@ impl GameState {
 }
 
 pub(crate) struct Player {
+    pub(crate) input: Input,
     pub(crate) cycle_handle: Handle<Cycle>,
 }
 
 impl Player {
     pub(crate) fn new(cycle_handle: Handle<Cycle>) -> Self {
-        Self { cycle_handle }
+        Self {
+            input: Input::default(),
+            cycle_handle,
+        }
     }
 }
 

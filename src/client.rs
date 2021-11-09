@@ -80,7 +80,7 @@ impl Client {
 
             self.network_receive();
 
-            self.gs.tick(&mut self.engine, dt, self.ps.input);
+            self.gs.tick(&mut self.engine, dt);
 
             self.tick(dt);
 

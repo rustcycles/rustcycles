@@ -23,7 +23,7 @@ panic = "abort"
 [dependencies]
 bincode = "1.3.3"
 #rg3d = "0.23.0"
-rg3d = { path = "../rg3d", commit = "27a5e971c41c10a10d553645adcc1c905d71fd20" }
+rg3d = { path = "../rg3d", commit = "c366931aefcbf8d663ba29e5ec2ef3a658735c49" }
 serde = "1.0.130"
 structopt = "0.3.25"
 strum = "0.22"

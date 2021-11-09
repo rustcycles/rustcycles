@@ -4,8 +4,10 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
+use rg3d::core::pool::{Handle, Pool};
+
 use crate::{
-    common::{GameState, Input, ServerPacket},
+    common::{Cycle, GameState, Input, ServerPacket},
     GameEngine,
 };
 
@@ -14,7 +16,7 @@ pub(crate) struct Server {
     pub(crate) gs: GameState,
     pub(crate) input: Input,
     listener: TcpListener,
-    clients: Vec<RemoteClient>,
+    clients: Pool<RemoteClient>,
 }
 
 impl Server {
@@ -29,7 +31,7 @@ impl Server {
             gs,
             input: Input::default(),
             listener,
-            clients: Vec::new(),
+            clients: Pool::new(),
         }
     }
 
@@ -61,9 +63,10 @@ impl Server {
                 // TODO set_nodelay to disable Nagle'a algo? (also on Client)
                 stream.set_nonblocking(true).unwrap(); // TODO needed?
                 println!("S accept {}", addr);
-                let client = RemoteClient::new(stream, addr);
-                self.clients.push(client);
-                self.gs.spawn(&mut self.engine);
+                let _ = self.clients.spawn_with(|client_handle| {
+                    let cycle_handle = self.gs.spawn_cycle(&mut self.engine, client_handle.into());
+                    RemoteClient::new(stream, addr, cycle_handle)
+                });
             }
             Err(err) => match err.kind() {
                 ErrorKind::WouldBlock => {}
@@ -122,10 +125,15 @@ impl Server {
 struct RemoteClient {
     stream: TcpStream,
     addr: SocketAddr,
+    cycle_handle: Handle<Cycle>,
 }
 
 impl RemoteClient {
-    fn new(stream: TcpStream, addr: SocketAddr) -> Self {
-        Self { stream, addr }
+    fn new(stream: TcpStream, addr: SocketAddr, cycle_handle: Handle<Cycle>) -> Self {
+        Self {
+            stream,
+            addr,
+            cycle_handle,
+        }
     }
 }

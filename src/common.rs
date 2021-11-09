@@ -1,7 +1,10 @@
 use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
-    core::{algebra::Vector3, pool::Handle},
+    core::{
+        algebra::Vector3,
+        pool::{ErasedHandle, Handle, Pool},
+    },
     engine::resource_manager::MaterialSearchOptions,
     physics3d::{rapier::prelude::*, RigidBodyHandle},
     resource::model::Model,
@@ -20,7 +23,7 @@ pub(crate) struct GameState {
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
-    pub(crate) cycles: Vec<Cycle>,
+    pub(crate) cycles: Pool<Cycle>,
 }
 
 impl GameState {
@@ -61,7 +64,7 @@ impl GameState {
             game_time: 0.0,
             scene,
             cycle_model,
-            cycles: Vec::new(),
+            cycles: Pool::new(),
         }
     }
 
@@ -86,10 +89,15 @@ impl GameState {
         }
     }
 
-    pub(crate) fn spawn(&mut self, engine: &mut GameEngine) {
+    pub(crate) fn spawn_cycle(
+        &mut self,
+        engine: &mut GameEngine,
+        _client_handle: ErasedHandle,
+    ) -> Handle<Cycle> {
+        // LATER Use _client_handle, not ErasedHandle
         let scene = &mut engine.scenes[self.scene];
         let cycle = Cycle::construct(scene, &self.cycle_model, Vector3::new(-1.0, 5.0, 0.0), true);
-        self.cycles.push(cycle);
+        self.cycles.spawn(cycle)
     }
 }
 

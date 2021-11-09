@@ -182,13 +182,6 @@ fn client_main(opts: Opts) {
                         );
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
-                        println!(
-                            "{} mouse input {:?} {:?}",
-                            clock.elapsed().as_secs_f32(),
-                            state,
-                            button
-                        );
-
                         let pressed = state == ElementState::Pressed;
                         match button {
                             rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,

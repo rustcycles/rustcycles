@@ -23,6 +23,7 @@ pub(crate) struct GameState {
     pub(crate) game_time: f32,
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
+    pub(crate) players: Pool<Player>,
     pub(crate) cycles: Pool<Cycle>,
 }
 
@@ -64,6 +65,7 @@ impl GameState {
             game_time: 0.0,
             scene,
             cycle_model,
+            players: Pool::new(),
             cycles: Pool::new(),
         }
     }
@@ -89,37 +91,20 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub(crate) fn spawn_cycle(
         &mut self,
         engine: &mut GameEngine,
-        _client_handle: ErasedHandle,
+        player_handle: Handle<Player>,
     ) -> Handle<Cycle> {
-        // LATER Use _client_handle, not ErasedHandle
         let scene = &mut engine.scenes[self.scene];
-        let cycle = Cycle::construct(scene, &self.cycle_model, Vector3::new(-1.0, 5.0, 0.0), true);
-        self.cycles.spawn(cycle)
-    }
-}
 
-pub(crate) struct Cycle {
-    pub(crate) node_handle: Handle<Node>,
-    pub(crate) body_handle: RigidBodyHandle,
-}
-
-impl Cycle {
-    #[must_use]
-    pub(crate) fn construct(
-        scene: &mut Scene,
-        model: &Model,
-        pos: Vector3<f32>,
-        ccd: bool,
-    ) -> Self {
-        let node_handle = model.instantiate_geometry(scene);
+        let node_handle = self.cycle_model.instantiate_geometry(scene);
         let body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
-                .ccd_enabled(ccd)
+                .ccd_enabled(true)
                 .lock_rotations()
-                .translation(pos)
+                .translation(Vector3::new(-1.0, 5.0, 0.0))
                 .build(),
         );
         scene.physics.add_collider(
@@ -130,11 +115,29 @@ impl Cycle {
         );
         scene.physics_binder.bind(node_handle, body_handle);
 
-        Cycle {
+        let cycle = Cycle {
             node_handle,
             body_handle,
-        }
+            player_handle,
+        };
+        self.cycles.spawn(cycle)
     }
+}
+
+pub(crate) struct Player {
+    pub(crate) cycle_handle: Handle<Cycle>,
+}
+
+impl Player {
+    pub(crate) fn new(cycle_handle: Handle<Cycle>) -> Self {
+        Self { cycle_handle }
+    }
+}
+
+pub(crate) struct Cycle {
+    pub(crate) node_handle: Handle<Node>,
+    pub(crate) body_handle: RigidBodyHandle,
+    pub(crate) player_handle: Handle<Player>,
 }
 
 // LATER Bitfield?

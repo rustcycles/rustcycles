@@ -3,7 +3,7 @@ use std::fmt::{self, Debug, Formatter};
 use rg3d::{
     core::{
         algebra::Vector3,
-        pool::{ErasedHandle, Handle, Pool},
+        pool::{Handle, Pool},
     },
     engine::resource_manager::MaterialSearchOptions,
     physics3d::{rapier::prelude::*, RigidBodyHandle},

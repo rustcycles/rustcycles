@@ -7,7 +7,7 @@ use std::{
 use rg3d::core::pool::{Handle, Pool};
 
 use crate::{
-    common::{Cycle, GameState, Input, Player, ServerPacket},
+    common::{GameState, Input, Player, ServerPacket},
     GameEngine,
 };
 
@@ -126,6 +126,7 @@ impl Server {
 
 struct RemoteClient {
     stream: TcpStream,
+    #[allow(dead_code)]
     addr: SocketAddr,
     player_handle: Handle<Player>,
 }

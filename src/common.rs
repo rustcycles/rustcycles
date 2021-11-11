@@ -94,11 +94,10 @@ impl GameState {
     #[must_use]
     pub(crate) fn spawn_cycle(
         &mut self,
-        engine: &mut GameEngine,
+        scene: &mut Scene,
         player_handle: Handle<Player>,
+        cycle_index: Option<usize>,
     ) -> Handle<Cycle> {
-        let scene = &mut engine.scenes[self.scene];
-
         let node_handle = self.cycle_model.instantiate_geometry(scene);
         let body_handle = scene.physics.add_body(
             RigidBodyBuilder::new_dynamic()
@@ -120,10 +119,15 @@ impl GameState {
             body_handle,
             player_handle,
         };
-        self.cycles.spawn(cycle)
+        if let Some(index) = cycle_index {
+            self.cycles.spawn_at(index, cycle).unwrap()
+        } else {
+            self.cycles.spawn(cycle)
+        }
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct Player {
     pub(crate) input: Input,
     pub(crate) cycle_handle: Handle<Cycle>,
@@ -138,6 +142,7 @@ impl Player {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct Cycle {
     pub(crate) node_handle: Handle<Node>,
     pub(crate) body_handle: RigidBodyHandle,
@@ -183,7 +188,30 @@ impl Debug for Input {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
-pub(crate) struct ServerPacket {
+#[derive(Deserialize, Serialize)]
+pub(crate) enum ServerMessage {
+    Init(ServerInit),
+    Update(ServerUpdate),
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct ServerInit {
+    pub(crate) players: Vec<InitPlayer>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct InitPlayer {
+    pub(crate) player_index: u32,
+    pub(crate) cycle_index: u32,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct ServerUpdate {
     pub(crate) positions: Vec<Vector3<f32>>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub(crate) struct UpdateCycle {
+    position: Vector3<f32>,
+    velocity: Vector3<f32>,
 }

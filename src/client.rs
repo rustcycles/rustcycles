@@ -17,7 +17,7 @@ use rg3d::{
 };
 
 use crate::{
-    common::{GameState, Input, ServerPacket},
+    common::{GameState, Input, Player, ServerMessage, ServerUpdate},
     GameEngine,
 };
 
@@ -28,7 +28,7 @@ pub(crate) struct Client {
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
     buf: VecDeque<u8>,
-    server_packet: ServerPacket,
+    server_packets: Vec<ServerMessage>,
 }
 
 impl Client {
@@ -63,8 +63,8 @@ impl Client {
             ps: PlayerState::new(),
             camera,
             stream,
-            buf: VecDeque::default(),
-            server_packet: ServerPacket::default(),
+            buf: VecDeque::new(),
+            server_packets: Vec::new(),
         }
     }
 
@@ -95,6 +95,27 @@ impl Client {
 
     fn tick(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
+
+        for packet in self.server_packets.drain(..) {
+            match packet {
+                ServerMessage::Init(init) => {
+                    for init_player in init.players {
+                        let player = Player::new(Handle::NONE);
+                        let player_index = usize::try_from(init_player.player_index).unwrap();
+                        let player_handle = self.gs.players.spawn_at(player_index, player).unwrap();
+                        let cycle_handle = self.gs.spawn_cycle(
+                            scene,
+                            player_handle,
+                            Some(usize::try_from(init_player.cycle_index).unwrap()),
+                        );
+                        self.gs.players[player_handle].cycle_handle = cycle_handle;
+                    }
+                }
+                ServerMessage::Update(_) => {
+                    // FIXME
+                }
+            }
+        }
 
         let camera = &mut scene.graph[self.camera];
 
@@ -159,9 +180,9 @@ impl Client {
             scene.graph[cycle.node_handle].global_position();
             debug_cross(pos, Color::GREEN);
         }
-        for &pos in &self.server_packet.positions {
-            debug_cross(pos, Color::BLUE);
-        }
+        //for &pos in &self.server_packet.positions {
+        //    debug_cross(pos, Color::BLUE);
+        //}
 
         scene.physics.draw(&mut scene.drawing_context);
 
@@ -196,14 +217,13 @@ impl Client {
     }
 
     fn network_receive(&mut self) {
+        // Read all available bytes until the stream would block.
+        // LATER Test networking thoroughly
+        //      - large amounts of data
+        //      - lossy and slow connections
+        //      - fragmented and merged packets
+        // TODO Err(ref e) if e.kind() == ErrorKind::Interrupted => {} ???
         loop {
-            // Read all available bytes until the stream would block.
-            // LATER Test networking thoroughly
-            //      - large amounts of data
-            //      - lossy and slow connections
-            //      - fragmented and merged packets
-            // TODO Err(ref e) if e.kind() == ErrorKind::Interrupted => {} ???
-
             // No particular reason for the buffer size, except BufReader uses the same.
             let mut buf = [0; 8192];
             let res = self.stream.read(&mut buf);
@@ -220,6 +240,7 @@ impl Client {
             }
         }
 
+        // Parse the received bytes
         loop {
             if self.buf.len() < 2 {
                 break;
@@ -233,7 +254,8 @@ impl Client {
             self.buf.pop_front();
             self.buf.pop_front();
             let bytes: Vec<_> = self.buf.drain(0..len).collect();
-            self.server_packet = bincode::deserialize(&bytes).unwrap();
+            let message = bincode::deserialize(&bytes).unwrap();
+            self.server_packets.push(message);
         }
     }
 

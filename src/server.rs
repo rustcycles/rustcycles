@@ -7,7 +7,7 @@ use std::{
 use rg3d::core::pool::{Handle, Pool};
 
 use crate::{
-    common::{GameState, Input, Player, ServerPacket},
+    common::{GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate},
     GameEngine,
 };
 
@@ -51,7 +51,7 @@ impl Server {
 
             self.engine.update(dt);
 
-            self.network_send();
+            self.send_update();
         }
     }
 
@@ -66,8 +66,10 @@ impl Server {
                 let player_handle = self.gs.players.spawn(player);
                 let client = RemoteClient::new(stream, addr, player_handle);
                 let _ = self.clients.spawn(client);
-                let cycle_handle = self.gs.spawn_cycle(&mut self.engine, player_handle);
+                let scene = &mut self.engine.scenes[self.gs.scene];
+                let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
                 self.gs.players[player_handle].cycle_handle = cycle_handle;
+                self.send_init();
             }
             Err(err) => match err.kind() {
                 ErrorKind::WouldBlock => {}
@@ -102,18 +104,37 @@ impl Server {
         }
     }
 
-    fn network_send(&mut self) {
-        // LATER Measure network usage.
-        // LATER Try to minimize network usage.
-        //       General purpose compression could help a bit,
-        //       but using what we know about the data should give much better results.
+    fn send_init(&mut self) {
+        let mut players = Vec::new();
+        for (player_handle, player) in self.gs.players.pair_iter() {
+            let init_player = InitPlayer {
+                player_index: player_handle.index(),
+                cycle_index: player.cycle_handle.index(),
+            };
+            players.push(init_player);
+        }
+
+        let packet = ServerMessage::Init(ServerInit { players });
+        self.network_send(packet); // FIXME don't send to everyone
+    }
+
+    fn send_update(&mut self) {
         let scene = &self.engine.scenes[self.gs.scene];
         let mut positions = Vec::new();
         for cycle in &self.gs.cycles {
             let pos = scene.graph[cycle.node_handle].global_position();
             positions.push(pos);
         }
-        let packet = ServerPacket { positions };
+        let packet = ServerMessage::Update(ServerUpdate { positions });
+        self.network_send(packet);
+    }
+
+    fn network_send(&mut self, packet: ServerMessage) {
+        // LATER Measure network usage.
+        // LATER Try to minimize network usage.
+        //       General purpose compression could help a bit,
+        //       but using what we know about the data should give much better results.
+
         let buf = bincode::serialize(&packet).unwrap();
         let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
         for client in &mut self.clients {

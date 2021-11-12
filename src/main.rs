@@ -8,7 +8,6 @@ use rg3d::{
     core::instant::Instant,
     dpi::LogicalSize,
     engine::Engine,
-    error::ExternalError,
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::log::{Log, MessageKind},
@@ -189,12 +188,11 @@ fn client_main(opts: Opts) {
                         );
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
+                        client.set_mouse_grab(true);
+
                         let pressed = state == ElementState::Pressed;
                         match button {
-                            rg3d::event::MouseButton::Left => {
-                                client.set_mouse_grab(true);
-                                client.ps.input.fire1 = pressed;
-                            }
+                            rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,
                             rg3d::event::MouseButton::Right => client.ps.input.fire2 = pressed,
                             rg3d::event::MouseButton::Middle => {}
                             rg3d::event::MouseButton::Other(_) => {}

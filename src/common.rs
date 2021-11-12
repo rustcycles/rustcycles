@@ -5,14 +5,12 @@ use rg3d::{
         algebra::Vector3,
         pool::{Handle, Pool},
     },
-    engine::resource_manager::MaterialSearchOptions,
+    engine::{resource_manager::MaterialSearchOptions, Engine},
     physics3d::{rapier::prelude::*, RigidBodyHandle},
     resource::model::Model,
     scene::{node::Node, Scene},
 };
 use serde::{Deserialize, Serialize};
-
-use crate::GameEngine;
 
 pub(crate) struct GameState {
     /// This gamelogic frame's time in seconds.
@@ -28,7 +26,7 @@ pub(crate) struct GameState {
 }
 
 impl GameState {
-    pub(crate) async fn new(engine: &mut GameEngine) -> Self {
+    pub(crate) async fn new(engine: &mut Engine) -> Self {
         let mut scene = Scene::new();
         // This is needed because the default 1 causes the wheel to randomly stutter/stop
         // when just sliding on completely smooth floor. The higher the value, the less it slows down.
@@ -70,7 +68,7 @@ impl GameState {
         }
     }
 
-    pub(crate) fn tick(&mut self, engine: &mut GameEngine, dt: f32) {
+    pub(crate) fn tick(&mut self, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.scene];
 
         let dir = Vector3::new(0.0, 0.0, 1.0); // TODO camera direction

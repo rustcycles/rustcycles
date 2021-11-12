@@ -10,6 +10,7 @@ use rg3d::{
         color::Color,
         pool::Handle,
     },
+    engine::Engine,
     error::ExternalError,
     scene::{
         base::BaseBuilder, camera::CameraBuilder, debug::Line, node::Node,
@@ -17,14 +18,11 @@ use rg3d::{
     },
 };
 
-use crate::{
-    common::{GameState, Input, Player, ServerMessage},
-    GameEngine,
-};
+use crate::common::{GameState, Input, Player, ServerMessage};
 
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
-    pub(crate) engine: GameEngine,
+    pub(crate) engine: Engine,
     pub(crate) gs: GameState,
     pub(crate) ps: PlayerState,
     pub(crate) camera: Handle<Node>,
@@ -34,7 +32,7 @@ pub(crate) struct Client {
 }
 
 impl Client {
-    pub(crate) async fn new(mut engine: GameEngine) -> Self {
+    pub(crate) async fn new(mut engine: Engine) -> Self {
         let mut connect_attempts = 0;
         let stream = loop {
             connect_attempts += 1;

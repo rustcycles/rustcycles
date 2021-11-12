@@ -43,8 +43,6 @@ use server::Server;
 
 // TODO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
 
-type GameEngine = Engine;
-
 #[derive(StructOpt, Debug)]
 struct Opts {
     /// Use a window instead of fullscreen (doesn't apply to server)
@@ -119,7 +117,7 @@ fn client_main(opts: Opts) {
     }
     let event_loop = EventLoop::new();
     // LATER no vsync
-    let engine = GameEngine::new(window_builder, &event_loop, true).unwrap();
+    let engine = Engine::new(window_builder, &event_loop, true).unwrap();
     let mut client = rg3d::core::futures::executor::block_on(Client::new(engine));
 
     let clock = Instant::now();
@@ -254,7 +252,7 @@ fn server_main() {
         .with_inner_size(LogicalSize::new(400, 100));
     let event_loop = EventLoop::new();
     // LATER Does vsync have any effect here?
-    let engine = GameEngine::new(window_builder, &event_loop, false).unwrap();
+    let engine = Engine::new(window_builder, &event_loop, false).unwrap();
     let mut server = rg3d::core::futures::executor::block_on(Server::new(engine));
 
     // Render pure black just once so the window doesn't look broken.

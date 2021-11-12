@@ -4,24 +4,24 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
-use rg3d::core::pool::{Handle, Pool};
+use rg3d::{
+    core::pool::{Handle, Pool},
+    engine::Engine,
+};
 
-use crate::{
-    common::{
-        GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate, UpdateCycle,
-    },
-    GameEngine,
+use crate::common::{
+    GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate, UpdateCycle,
 };
 
 pub(crate) struct Server {
-    pub(crate) engine: GameEngine,
+    pub(crate) engine: Engine,
     pub(crate) gs: GameState,
     listener: TcpListener,
     clients: Pool<RemoteClient>,
 }
 
 impl Server {
-    pub(crate) async fn new(mut engine: GameEngine) -> Self {
+    pub(crate) async fn new(mut engine: Engine) -> Self {
         let gs = GameState::new(&mut engine).await;
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();

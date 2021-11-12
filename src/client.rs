@@ -36,6 +36,7 @@ impl Client {
         let mut connect_attempts = 0;
         let stream = loop {
             connect_attempts += 1;
+            // LATER Don't block the main thread.
             // LATER Limit the number of attempts.
             if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
                 println!("C connect attempts: {}", connect_attempts);

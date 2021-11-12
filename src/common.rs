@@ -213,6 +213,6 @@ pub(crate) struct ServerUpdate {
 #[derive(Deserialize, Serialize)]
 pub(crate) struct UpdateCycle {
     pub(crate) cycle_index: u32,
-    pub(crate) position: Vector3<f32>,
+    pub(crate) translation: Vector3<f32>,
     pub(crate) velocity: Vector3<f32>,
 }

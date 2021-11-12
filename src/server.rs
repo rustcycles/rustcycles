@@ -128,12 +128,10 @@ impl Server {
         let mut cycle_updates = Vec::new();
         for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
             let body = scene.physics.bodies.get(&cycle.body_handle).unwrap();
-            let position = *body.translation();
-            let velocity = *body.linvel();
             let update = UpdateCycle {
                 cycle_index: cycle_handle.index(),
-                position,
-                velocity,
+                translation: *body.translation(),
+                velocity: *body.linvel(),
             };
             cycle_updates.push(update);
         }

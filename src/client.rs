@@ -112,7 +112,7 @@ impl Client {
                     }
                 }
                 ServerMessage::Update(update) => {
-                    for update_cycle in update.cycles{
+                    for update_cycle in update.cycles {
                         let index = usize::try_from(update_cycle.cycle_index).unwrap();
                         let cycle = self.gs.cycles.at_mut(index).unwrap();
                         let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
@@ -132,7 +132,7 @@ impl Client {
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
         // Camera movement
-        let mut pos = *camera.local_transform().position().get();
+        let mut pos = **camera.local_transform().position();
         let camera_speed = 10.0;
         if self.ps.input.forward {
             // TODO normalize?

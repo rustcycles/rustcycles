@@ -10,7 +10,7 @@ use rg3d::{
 };
 
 use crate::common::{
-    GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate, UpdateCycle,
+    GameState, InitPlayer, Input, Player, SpawnPlayers, ServerMessage, UpdatePositions, UpdateCycle,
 };
 
 pub(crate) struct Server {
@@ -116,7 +116,7 @@ impl Server {
             players.push(init_player);
         }
 
-        let packet = ServerMessage::Init(ServerInit { players });
+        let packet = ServerMessage::Spawn(SpawnPlayers { players });
         self.network_send(packet, SendDest::One(client_handle));
     }
 
@@ -132,7 +132,7 @@ impl Server {
             };
             cycle_updates.push(update);
         }
-        let packet = ServerMessage::Update(ServerUpdate {
+        let packet = ServerMessage::Update(UpdatePositions {
             cycles: cycle_updates,
         });
         self.network_send(packet, SendDest::All);

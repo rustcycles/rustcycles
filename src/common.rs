@@ -188,12 +188,12 @@ impl Debug for Input {
 
 #[derive(Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
-    Init(ServerInit),
-    Update(ServerUpdate),
+    Spawn(SpawnPlayers),
+    Update(UpdatePositions),
 }
 
 #[derive(Deserialize, Serialize)]
-pub(crate) struct ServerInit {
+pub(crate) struct SpawnPlayers {
     pub(crate) players: Vec<InitPlayer>,
 }
 
@@ -204,7 +204,7 @@ pub(crate) struct InitPlayer {
 }
 
 #[derive(Deserialize, Serialize)]
-pub(crate) struct ServerUpdate {
+pub(crate) struct UpdatePositions {
     pub(crate) cycles: Vec<UpdateCycle>,
 }
 

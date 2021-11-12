@@ -116,7 +116,7 @@ impl Client {
 
         for packet in self.server_packets.drain(..) {
             match packet {
-                ServerMessage::Init(init) => {
+                ServerMessage::Spawn(init) => {
                     for init_player in init.players {
                         let player = Player::new(Handle::NONE);
                         let player_index = usize::try_from(init_player.player_index).unwrap();

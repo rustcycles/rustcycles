@@ -61,7 +61,7 @@ impl Server {
         loop {
             match self.listener.accept() {
                 Ok((stream, addr)) => {
-                    // TODO set_nodelay to disable Nagle'a algo? (also on Client)
+                    // LATER set_nodelay to disable Nagle'a algo? (also on Client)
                     stream.set_nonblocking(true).unwrap();
                     println!("S accept {}", addr);
 

@@ -70,11 +70,11 @@ impl Server {
                 let player = Player::new(Handle::NONE);
                 let player_handle = self.gs.players.spawn(player);
                 let client = RemoteClient::new(stream, addr, player_handle);
-                let _ = self.clients.spawn(client);
+                let client_handle = self.clients.spawn(client);
                 let scene = &mut self.engine.scenes[self.gs.scene];
                 let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
                 self.gs.players[player_handle].cycle_handle = cycle_handle;
-                self.send_init();
+                self.send_init(client_handle);
             }
             Err(err) => match err.kind() {
                 ErrorKind::WouldBlock => {}
@@ -109,7 +109,7 @@ impl Server {
         }
     }
 
-    fn send_init(&mut self) {
+    fn send_init(&mut self, client_handle: Handle<RemoteClient>) {
         let mut players = Vec::new();
         for (player_handle, player) in self.gs.players.pair_iter() {
             let init_player = InitPlayer {
@@ -120,7 +120,7 @@ impl Server {
         }
 
         let packet = ServerMessage::Init(ServerInit { players });
-        self.network_send(packet); // FIXME don't send to everyone
+        self.network_send(packet, SendDest::One(client_handle));
     }
 
     fn send_update(&mut self) {
@@ -138,10 +138,10 @@ impl Server {
         let packet = ServerMessage::Update(ServerUpdate {
             cycles: cycle_updates,
         });
-        self.network_send(packet);
+        self.network_send(packet, SendDest::All);
     }
 
-    fn network_send(&mut self, packet: ServerMessage) {
+    fn network_send(&mut self, packet: ServerMessage, dest: SendDest) {
         // LATER Measure network usage.
         // LATER Try to minimize network usage.
         //       General purpose compression could help a bit,
@@ -149,12 +149,29 @@ impl Server {
 
         let buf = bincode::serialize(&packet).unwrap();
         let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
-        for client in &mut self.clients {
-            // Prefix data by length so it's easy to parse on the other side.
-            client.stream.write_all(&len).unwrap();
-            client.stream.write_all(&buf).unwrap();
+        match dest {
+            SendDest::One(handle) => {
+                let client = &mut self.clients[handle];
+                Self::send_bytes(&buf, len, client);
+            }
+            SendDest::All => {
+                for client in &mut self.clients {
+                    Self::send_bytes(&buf, len, client);
+                }
+            }
         }
     }
+
+    fn send_bytes(buf: &[u8], len: [u8; 2], client: &mut RemoteClient) {
+        // Prefix data by length so it's easy to parse on the other side.
+        client.stream.write_all(&len).unwrap();
+        client.stream.write_all(buf).unwrap();
+    }
+}
+
+enum SendDest {
+    One(Handle<RemoteClient>),
+    All,
 }
 
 struct RemoteClient {

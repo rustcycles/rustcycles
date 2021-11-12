@@ -10,7 +10,7 @@ use rg3d::{
 };
 
 use crate::common::{
-    GameState, InitPlayer, Input, Player, SpawnPlayers, ServerMessage, UpdatePositions, UpdateCycle,
+    GameState, InitPlayer, Input, Player, ServerMessage, SpawnPlayers, UpdateCycle, UpdatePositions,
 };
 
 pub(crate) struct Server {
@@ -58,25 +58,29 @@ impl Server {
     }
 
     fn accept_new_connections(&mut self) {
-        match self.listener.accept() {
-            Ok((stream, addr)) => {
-                // TODO set_nodelay to disable Nagle'a algo? (also on Client)
-                stream.set_nonblocking(true).unwrap(); // TODO needed?
-                println!("S accept {}", addr);
+        loop {
+            match self.listener.accept() {
+                Ok((stream, addr)) => {
+                    // TODO set_nodelay to disable Nagle'a algo? (also on Client)
+                    stream.set_nonblocking(true).unwrap(); // TODO needed?
+                    println!("S accept {}", addr);
 
-                let player = Player::new(Handle::NONE);
-                let player_handle = self.gs.players.spawn(player);
-                let client = RemoteClient::new(stream, addr, player_handle);
-                let client_handle = self.clients.spawn(client);
-                let scene = &mut self.engine.scenes[self.gs.scene];
-                let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
-                self.gs.players[player_handle].cycle_handle = cycle_handle;
-                self.send_init(client_handle);
+                    let player = Player::new(Handle::NONE);
+                    let player_handle = self.gs.players.spawn(player);
+                    let client = RemoteClient::new(stream, addr, player_handle);
+                    let client_handle = self.clients.spawn(client);
+                    let scene = &mut self.engine.scenes[self.gs.scene];
+                    let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
+                    self.gs.players[player_handle].cycle_handle = cycle_handle;
+                    self.send_init(client_handle);
+                }
+                Err(err) => match err.kind() {
+                    ErrorKind::WouldBlock => {
+                        break;
+                    }
+                    _ => panic!("network error (accept): {}", err),
+                },
             }
-            Err(err) => match err.kind() {
-                ErrorKind::WouldBlock => {}
-                _ => panic!("network error (accept): {}", err),
-            },
         }
     }
 

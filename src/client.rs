@@ -10,6 +10,7 @@ use rg3d::{
         color::Color,
         pool::Handle,
     },
+    error::ExternalError,
     scene::{
         base::BaseBuilder, camera::CameraBuilder, debug::Line, node::Node,
         transform::TransformBuilder,
@@ -22,6 +23,7 @@ use crate::{
 };
 
 pub(crate) struct Client {
+    pub(crate) mouse_grabbed: bool,
     pub(crate) engine: GameEngine,
     pub(crate) gs: GameState,
     pub(crate) ps: PlayerState,
@@ -59,6 +61,7 @@ impl Client {
         .build(&mut scene.graph);
 
         Self {
+            mouse_grabbed: false,
             engine,
             gs,
             ps: PlayerState::new(),
@@ -66,6 +69,22 @@ impl Client {
             stream,
             buf: VecDeque::new(),
             server_packets: Vec::new(),
+        }
+    }
+
+    /// Either grab mouse and hide cursor
+    /// or ungrab mouse and show cursor.
+    pub(crate) fn set_mouse_grab(&mut self, grab: bool) {
+        // LATER Don't hide cursor in menu.
+        if grab != self.mouse_grabbed {
+            let window = self.engine.get_window();
+            let res = window.set_cursor_grab(grab);
+            match res {
+                Ok(_) | Err(ExternalError::NotSupported(_)) => {}
+                Err(_) => res.unwrap(),
+            }
+            window.set_cursor_visible(!grab);
+            self.mouse_grabbed = grab;
         }
     }
 

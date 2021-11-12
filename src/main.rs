@@ -8,6 +8,7 @@ use rg3d::{
     core::instant::Instant,
     dpi::LogicalSize,
     engine::Engine,
+    error::ExternalError,
     event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::log::{Log, MessageKind},
@@ -160,17 +161,23 @@ fn client_main(opts: Opts) {
                         // );
 
                         // Use scancodes, not virtual keys, because they don't depend on layout.
+                        const ESC: ScanCode = 1;
                         const W: ScanCode = 17;
                         const A: ScanCode = 30;
                         const S: ScanCode = 31;
                         const D: ScanCode = 32;
                         let pressed = input.state == ElementState::Pressed;
                         match input.scancode {
+                            ESC => client.set_mouse_grab(false),
                             W => client.ps.input.forward = pressed,
                             A => client.ps.input.left = pressed,
                             S => client.ps.input.backward = pressed,
                             D => client.ps.input.right = pressed,
-                            _ => {}
+                            c => {
+                                if pressed {
+                                    println!("C pressed scancode: {}", c)
+                                }
+                            }
                         }
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
@@ -184,7 +191,10 @@ fn client_main(opts: Opts) {
                     WindowEvent::MouseInput { state, button, .. } => {
                         let pressed = state == ElementState::Pressed;
                         match button {
-                            rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,
+                            rg3d::event::MouseButton::Left => {
+                                client.set_mouse_grab(true);
+                                client.ps.input.fire1 = pressed;
+                            }
                             rg3d::event::MouseButton::Right => client.ps.input.fire2 = pressed,
                             rg3d::event::MouseButton::Middle => {}
                             rg3d::event::MouseButton::Other(_) => {}

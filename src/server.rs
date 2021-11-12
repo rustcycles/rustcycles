@@ -62,7 +62,7 @@ impl Server {
             match self.listener.accept() {
                 Ok((stream, addr)) => {
                     // TODO set_nodelay to disable Nagle'a algo? (also on Client)
-                    stream.set_nonblocking(true).unwrap(); // TODO needed?
+                    stream.set_nonblocking(true).unwrap();
                     println!("S accept {}", addr);
 
                     let player = Player::new(Handle::NONE);

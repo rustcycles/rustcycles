@@ -4,10 +4,15 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
-use rg3d::core::pool::{Handle, Pool};
+use rg3d::core::{
+    algebra::Vector3,
+    pool::{Handle, Pool},
+};
 
 use crate::{
-    common::{GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate},
+    common::{
+        GameState, InitPlayer, Input, Player, ServerInit, ServerMessage, ServerUpdate, UpdateCycle,
+    },
     GameEngine,
 };
 
@@ -120,12 +125,21 @@ impl Server {
 
     fn send_update(&mut self) {
         let scene = &self.engine.scenes[self.gs.scene];
-        let mut positions = Vec::new();
-        for cycle in &self.gs.cycles {
-            let pos = scene.graph[cycle.node_handle].global_position();
-            positions.push(pos);
+        let mut cycle_updates = Vec::new();
+        for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
+            let body = scene.physics.bodies.get(&cycle.body_handle).unwrap();
+            let position = *body.translation();
+            let velocity = *body.linvel();
+            let update = UpdateCycle {
+                cycle_index: cycle_handle.index(),
+                position,
+                velocity,
+            };
+            cycle_updates.push(update);
         }
-        let packet = ServerMessage::Update(ServerUpdate { positions });
+        let packet = ServerMessage::Update(ServerUpdate {
+            cycles: cycle_updates,
+        });
         self.network_send(packet);
     }
 

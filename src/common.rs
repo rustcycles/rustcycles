@@ -207,11 +207,12 @@ pub(crate) struct InitPlayer {
 
 #[derive(Deserialize, Serialize)]
 pub(crate) struct ServerUpdate {
-    pub(crate) positions: Vec<Vector3<f32>>,
+    pub(crate) cycles: Vec<UpdateCycle>,
 }
 
 #[derive(Deserialize, Serialize)]
 pub(crate) struct UpdateCycle {
-    position: Vector3<f32>,
-    velocity: Vector3<f32>,
+    pub(crate) cycle_index: u32,
+    pub(crate) position: Vector3<f32>,
+    pub(crate) velocity: Vector3<f32>,
 }

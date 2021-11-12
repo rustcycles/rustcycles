@@ -111,8 +111,14 @@ impl Client {
                         self.gs.players[player_handle].cycle_handle = cycle_handle;
                     }
                 }
-                ServerMessage::Update(_) => {
-                    // FIXME
+                ServerMessage::Update(update) => {
+                    for update_cycle in update.cycles{
+                        let index = usize::try_from(update_cycle.cycle_index).unwrap();
+                        let cycle = self.gs.cycles.at_mut(index).unwrap();
+                        let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
+                        body.set_translation(update_cycle.position, true);
+                        body.set_linvel(update_cycle.velocity, true);
+                    }
                 }
             }
         }

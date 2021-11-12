@@ -186,9 +186,6 @@ impl Client {
             scene.graph[cycle.node_handle].global_position();
             debug_cross(pos, Color::GREEN);
         }
-        //for &pos in &self.server_packet.positions {
-        //    debug_cross(pos, Color::BLUE);
-        //}
 
         scene.physics.draw(&mut scene.drawing_context);
 

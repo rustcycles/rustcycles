@@ -17,7 +17,7 @@ use rg3d::{
 };
 
 use crate::{
-    common::{GameState, Input, Player, ServerMessage, ServerUpdate},
+    common::{GameState, Input, Player, ServerMessage},
     GameEngine,
 };
 

@@ -4,10 +4,7 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
-use rg3d::core::{
-    algebra::Vector3,
-    pool::{Handle, Pool},
-};
+use rg3d::core::pool::{Handle, Pool};
 
 use crate::{
     common::{

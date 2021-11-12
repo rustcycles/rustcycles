@@ -146,7 +146,7 @@ fn client_main(opts: Opts) {
                     WindowEvent::ReceivedCharacter(_) => {
                         // LATER might be useful for console/chat?
                     }
-                    WindowEvent::Focused(focus) => {
+                    WindowEvent::Focused(_focus) => {
                         //println!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
                         // LATER pause/unpause
                     }

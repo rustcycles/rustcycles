@@ -249,6 +249,13 @@ impl Client {
             let mut buf = [0; 8192];
             let res = self.stream.read(&mut buf);
             match res {
+                Ok(0) => {
+                    // The connection has been closed, don't get stuck in this loop.
+                    // This can happen for example when the server crashes.
+                    // LATER Some kind of clean client shutdown.
+                    //  Currently the client crashes later when attempting to send.
+                    break;
+                }
                 Ok(n) => {
                     self.buf.extend(&buf[0..n]);
                 }

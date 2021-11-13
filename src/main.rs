@@ -146,7 +146,11 @@ fn client_main(opts: Opts) {
                     }
                     WindowEvent::Focused(focus) => {
                         //println!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
+
+                        // This is needed in addition to mouse/ESC,
+                        // otherwise the mouse stays grabbed when alt+tabbing to other windows.
                         client.set_mouse_grab(focus);
+
                         // LATER pause/unpause
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
@@ -173,7 +177,7 @@ fn client_main(opts: Opts) {
                             D => client.ps.input.right = pressed,
                             c => {
                                 if pressed {
-                                    println!("C pressed scancode: {}", c)
+                                    println!("C pressed scancode: {}", c);
                                 }
                             }
                         }

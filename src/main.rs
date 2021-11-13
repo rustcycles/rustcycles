@@ -147,9 +147,14 @@ fn client_main(opts: Opts) {
                     WindowEvent::Focused(focus) => {
                         //println!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
 
-                        // This is needed in addition to mouse/ESC,
+                        // Ungrab here is needed in addition to ESC,
                         // otherwise the mouse stays grabbed when alt+tabbing to other windows.
-                        client.set_mouse_grab(focus);
+                        // However, don't automatically grab it when gaining focus,
+                        // the game can get stuck in a loop (bugs like this are most common on startup)
+                        // and it would never ungrab.
+                        if !focus {
+                            client.set_mouse_grab(false);
+                        }
 
                         // LATER pause/unpause
                     }

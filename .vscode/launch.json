@@ -7,7 +7,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'rustcycles'",
+            "name": "Debug client",
             "cargo": {
                 "args": [
                     "build",
@@ -19,7 +19,30 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": [
+                "--windowed",
+                "client"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug server",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=rustcycles",
+                    "--package=rustcycles"
+                ],
+                "filter": {
+                    "name": "rustcycles",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "server"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

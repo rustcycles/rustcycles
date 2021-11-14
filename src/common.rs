@@ -128,11 +128,11 @@ impl GameState {
 #[derive(Debug)]
 pub(crate) struct Player {
     pub(crate) input: Input,
-    pub(crate) cycle_handle: Handle<Cycle>,
+    pub(crate) cycle_handle: Option<Handle<Cycle>>,
 }
 
 impl Player {
-    pub(crate) fn new(cycle_handle: Handle<Cycle>) -> Self {
+    pub(crate) fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
         Self {
             input: Input::default(),
             cycle_handle,
@@ -186,30 +186,42 @@ impl Debug for Input {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
-    Spawn(SpawnPlayers),
-    Update(UpdatePositions),
+    InitData(InitData),
+    AddPlayer(AddPlayer),
+    SpawnCycle(SpawnCycle),
+    UpdatePhysics(UpdatePhysics),
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct SpawnPlayers {
-    pub(crate) players: Vec<InitPlayer>,
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct InitData {
+    pub(crate) player_cycles: Vec<PlayerCycle>,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct InitPlayer {
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct AddPlayer {
     pub(crate) player_index: u32,
-    pub(crate) cycle_index: u32,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct UpdatePositions {
-    pub(crate) cycles: Vec<UpdateCycle>,
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct SpawnCycle {
+    pub(crate) player_cycle: PlayerCycle,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct UpdateCycle {
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct PlayerCycle {
+    pub(crate) player_index: u32,
+    pub(crate) cycle_index: Option<u32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct UpdatePhysics {
+    pub(crate) cycle_physics: Vec<CyclePhysics>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct CyclePhysics {
     pub(crate) cycle_index: u32,
     pub(crate) translation: Vector3<f32>,
     pub(crate) velocity: Vector3<f32>,

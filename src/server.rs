@@ -10,7 +10,8 @@ use rg3d::{
 };
 
 use crate::common::{
-    GameState, InitPlayer, Input, Player, ServerMessage, SpawnPlayers, UpdateCycle, UpdatePositions,
+    AddPlayer, CyclePhysics, GameState, InitData, Input, Player, PlayerCycle, ServerMessage,
+    SpawnCycle, UpdatePhysics,
 };
 
 pub(crate) struct Server {
@@ -65,14 +66,39 @@ impl Server {
                     stream.set_nonblocking(true).unwrap();
                     println!("S accept {}", addr);
 
-                    let player = Player::new(Handle::NONE);
-                    let player_handle = self.gs.players.spawn(player);
-                    let client = RemoteClient::new(stream, addr, player_handle);
+                    // Create client
+                    let client = RemoteClient::new(stream, addr, Handle::NONE);
                     let client_handle = self.clients.spawn(client);
+                    // This is intentionally before spawning entities
+                    // 1) we can differentiate between syncing existing entities to new clients
+                    //      and spawning new entities - there might be spawn effects/sounds.
+                    // 2) we can add support for players without cycles - observers/spectators.
+                    self.send_init(client_handle);
+
+                    // Add player
+                    let player = Player::new(None);
+                    let player_handle = self.gs.players.spawn(player);
+                    self.clients[client_handle].player_handle = player_handle;
+                    let add_player = AddPlayer {
+                        player_index: player_handle.index(),
+                    };
+                    let packet = ServerMessage::AddPlayer(add_player);
+                    self.network_send(packet, SendDest::All);
+
+                    // Spawn cycle
                     let scene = &mut self.engine.scenes[self.gs.scene];
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
-                    self.gs.players[player_handle].cycle_handle = cycle_handle;
-                    self.send_init(client_handle);
+                    self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
+                    dbg!(cycle_handle);
+
+                    // Tell all players
+                    let player_cycle = PlayerCycle {
+                        player_index: player_handle.index(),
+                        cycle_index: Some(cycle_handle.index()),
+                    };
+                    let spawn_cycle = SpawnCycle { player_cycle };
+                    let packet = ServerMessage::SpawnCycle(spawn_cycle);
+                    self.network_send(packet, SendDest::All);
                 }
                 Err(err) => match err.kind() {
                     ErrorKind::WouldBlock => {
@@ -111,34 +137,34 @@ impl Server {
     }
 
     fn send_init(&mut self, client_handle: Handle<RemoteClient>) {
-        let mut players = Vec::new();
+        let mut player_cycles = Vec::new();
         for (player_handle, player) in self.gs.players.pair_iter() {
-            let init_player = InitPlayer {
+            let init_player = PlayerCycle {
                 player_index: player_handle.index(),
-                cycle_index: player.cycle_handle.index(),
+                cycle_index: player.cycle_handle.map(|handle| handle.index()),
             };
-            players.push(init_player);
+            player_cycles.push(init_player);
         }
 
-        let packet = ServerMessage::Spawn(SpawnPlayers { players });
+        let init_data = InitData { player_cycles };
+        let packet = ServerMessage::InitData(init_data);
         self.network_send(packet, SendDest::One(client_handle));
     }
 
     fn send_update(&mut self) {
         let scene = &self.engine.scenes[self.gs.scene];
-        let mut cycle_updates = Vec::new();
+        let mut cycle_physics = Vec::new();
         for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
             let body = scene.physics.bodies.get(&cycle.body_handle).unwrap();
-            let update = UpdateCycle {
+            let update = CyclePhysics {
                 cycle_index: cycle_handle.index(),
                 translation: *body.translation(),
                 velocity: *body.linvel(),
             };
-            cycle_updates.push(update);
+            cycle_physics.push(update);
         }
-        let packet = ServerMessage::Update(UpdatePositions {
-            cycles: cycle_updates,
-        });
+        let update_physics = UpdatePhysics { cycle_physics };
+        let packet = ServerMessage::UpdatePhysics(update_physics);
         self.network_send(packet, SendDest::All);
     }
 

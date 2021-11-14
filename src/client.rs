@@ -117,7 +117,6 @@ impl Client {
         for packet in self.server_packets.drain(..) {
             match packet {
                 ServerMessage::InitData(init_data) => {
-                    dbg!(&init_data);
                     for player_cycle in init_data.player_cycles {
                         let player_index = usize::try_from(player_cycle.player_index).unwrap();
                         let player = Player::new(None);
@@ -132,19 +131,15 @@ impl Client {
                     }
                 }
                 ServerMessage::AddPlayer(add_player)=>{
-                    dbg!(&add_player);
                     let player_index = usize::try_from(add_player.player_index).unwrap();
                     let player = Player::new(None);
                     self.gs.players.spawn_at(player_index, player).unwrap();
                 }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
-                    dbg!(&spawn_cycle);
                     let player_cycle = spawn_cycle.player_cycle;
 
                     let player_index = usize::try_from(player_cycle.player_index).unwrap();
                     let player_handle = self.gs.players.handle_from_index(player_index);
-                    dbg!(&self.gs.players);
-                    dbg!(player_handle);
 
                     let cycle_index = usize::try_from(player_cycle.cycle_index.unwrap()).unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));

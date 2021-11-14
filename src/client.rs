@@ -221,7 +221,8 @@ impl Client {
             debug_cross(pos, Color::GREEN);
         }
 
-        scene.physics.draw(&mut scene.drawing_context);
+        // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
+        //scene.physics.draw(&mut scene.drawing_context);
 
         /*let pos1 = scene
             .physics

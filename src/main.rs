@@ -24,7 +24,7 @@ use server::Server;
 //  - [x] Rotate the camera
 //  - [x] Move the camera
 //  - [x] Render wheel at player pos
-//  - [ ] Primitive networking to force client/server split
+//  - [x] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
 // TODO 0.1:

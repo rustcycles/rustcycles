@@ -4,6 +4,7 @@
 /callgrind.out.*
 /flamegraph.svg
 /perf.data
+/perf.data.old
 
 # Profiling compile times - https://endler.dev/2020/rust-compile-times/#profile-compile-times
 /rustc.svg

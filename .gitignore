@@ -1,5 +1,10 @@
 *.blend1
 
+# Profiling
+/callgrind.out.*
+/flamegraph.svg
+/perf.data
+
 # Profiling compile times - https://endler.dev/2020/rust-compile-times/#profile-compile-times
 /rustc.svg
 /rustcycles-*.mm_profdata

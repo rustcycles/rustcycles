@@ -94,7 +94,7 @@ impl GameState {
         &mut self,
         scene: &mut Scene,
         player_handle: Handle<Player>,
-        cycle_index: Option<usize>,
+        cycle_index: Option<u32>,
     ) -> Handle<Cycle> {
         let node_handle = self.cycle_model.instantiate_geometry(scene);
         let body_handle = scene.physics.add_body(

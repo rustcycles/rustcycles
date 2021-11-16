@@ -118,32 +118,36 @@ impl Client {
             match packet {
                 ServerMessage::InitData(init_data) => {
                     for player_cycle in init_data.player_cycles {
-                        let player_index = usize::try_from(player_cycle.player_index).unwrap();
                         let player = Player::new(None);
-                        let player_handle = self.gs.players.spawn_at(player_index, player).unwrap();
+                        let player_handle = self
+                            .gs
+                            .players
+                            .spawn_at(player_cycle.player_index, player)
+                            .unwrap();
 
                         if let Some(cycle_index) = player_cycle.cycle_index {
-                            let cycle_index = usize::try_from(cycle_index).unwrap();
                             let cycle_handle =
                                 self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                             self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
                         }
                     }
                 }
-                ServerMessage::AddPlayer(add_player)=>{
-                    let player_index = usize::try_from(add_player.player_index).unwrap();
+                ServerMessage::AddPlayer(add_player) => {
                     let player = Player::new(None);
-                    self.gs.players.spawn_at(player_index, player).unwrap();
+                    self.gs
+                        .players
+                        .spawn_at(add_player.player_index, player)
+                        .unwrap();
                 }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
-                    let player_cycle = spawn_cycle.player_cycle;
-
-                    let player_index = usize::try_from(player_cycle.player_index).unwrap();
+                    let player_index =
+                        usize::try_from(spawn_cycle.player_cycle.player_index).unwrap();
                     let player_handle = self.gs.players.handle_from_index(player_index);
 
-                    let cycle_index = usize::try_from(player_cycle.cycle_index.unwrap()).unwrap();
+                    let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                    self.gs.players[player_handle].cycle_handle = Some(cycle_handle); // FIXME need to spawn player first
+                    self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
+                    // FIXME need to spawn player first
                 }
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {

@@ -24,7 +24,7 @@ panic = "abort"
 [dependencies]
 bincode = "1.3.3"
 #rg3d = "0.23.0"
-rg3d = { git = "https://github.com/rg3dengine/rg3d", rev = "d9ce6d788d61b6bcf72715a473ff6d7688c02b9e" }
+rg3d = { git = "https://github.com/rg3dengine/rg3d", rev = "bad4e541e4403c69bbd022fa21a8d5dcce016266" }
 #rg3d = { path = "../rg3d" }
 serde = "1.0.130"
 structopt = "0.3.25"

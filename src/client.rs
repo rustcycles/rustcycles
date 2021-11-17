@@ -140,9 +140,7 @@ impl Client {
                         .unwrap();
                 }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
-                    let player_index =
-                        usize::try_from(spawn_cycle.player_cycle.player_index).unwrap();
-                    let player_handle = self.gs.players.handle_from_index(player_index);
+                    let player_handle = self.gs.players.handle_from_index(spawn_cycle.player_cycle.player_index);
 
                     let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
@@ -151,8 +149,7 @@ impl Client {
                 }
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {
-                        let index = usize::try_from(cycle_physics.cycle_index).unwrap();
-                        let cycle = self.gs.cycles.at_mut(index).unwrap();
+                        let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
                         body.set_translation(cycle_physics.translation, true);
                         body.set_linvel(cycle_physics.velocity, true);

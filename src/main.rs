@@ -62,6 +62,20 @@ enum Endpoint {
 }
 
 fn main() {
+    use rg3d::core::pool::Pool;
+    let mut pool = Pool::new();
+    let handle = pool.spawn(0);
+    dbg!(pool.alive_count());
+    dbg!(pool.count());
+    let (ticket, object) = pool.take_reserve(handle);
+    dbg!(pool.alive_count());
+    dbg!(pool.count());
+    //let h2 = pool.spawn_at(1, 0);
+    pool.put_back(ticket, object);
+    dbg!(pool.alive_count());
+    dbg!(pool.count());
+
+
     let opts = Opts::from_args();
 
     match opts.endpoint {

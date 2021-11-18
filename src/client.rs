@@ -13,7 +13,10 @@ use rg3d::{
     engine::Engine,
     error::ExternalError,
     scene::{
-        base::BaseBuilder, camera::CameraBuilder, debug::Line, node::Node,
+        base::BaseBuilder,
+        camera::{CameraBuilder, SkyBoxBuilder},
+        debug::Line,
+        node::Node,
         transform::TransformBuilder,
     },
 };
@@ -47,6 +50,12 @@ impl Client {
         stream.set_nonblocking(true).unwrap();
 
         let gs = GameState::new(&mut engine).await;
+        let path = "/home/martin/Downloads/fractals/m1.9401573530_0.0000000000_600000_1000_20a.jpg";
+        let top = engine
+            .resource_manager
+            .request_texture(path, None)
+            .await
+            .unwrap(); // LATER in parallel with gs?
 
         let scene = &mut engine.scenes[gs.scene];
         let camera = CameraBuilder::new(
@@ -55,6 +64,18 @@ impl Client {
                     .with_local_position(Vector3::new(0.0, 1.0, -3.0))
                     .build(),
             ),
+        )
+        .with_skybox(
+            SkyBoxBuilder {
+                front: None,
+                back: None,
+                left: None,
+                right: None,
+                top: Some(top),
+                bottom: None,
+            }
+            .build()
+            .unwrap(),
         )
         .build(&mut scene.graph);
 

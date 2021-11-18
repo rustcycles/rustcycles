@@ -161,7 +161,10 @@ impl Client {
                         .unwrap();
                 }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
-                    let player_handle = self.gs.players.handle_from_index(spawn_cycle.player_cycle.player_index);
+                    let player_handle = self
+                        .gs
+                        .players
+                        .handle_from_index(spawn_cycle.player_cycle.player_index);
 
                     let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));

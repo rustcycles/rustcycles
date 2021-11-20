@@ -50,12 +50,14 @@ impl Client {
         stream.set_nonblocking(true).unwrap();
 
         let gs = GameState::new(&mut engine).await;
-        let path = "/home/martin/Downloads/fractals/m1.9401573530_0.0000000000_600000_1000_20a.jpg";
+
+        // LATER Load everything in parallel (i.e. with GameState)
+        // LATER Report error if loading fails
         let top = engine
             .resource_manager
-            .request_texture(path, None)
+            .request_texture("data/skybox/top.png", None)
             .await
-            .unwrap(); // LATER in parallel with gs?
+            .ok();
 
         let scene = &mut engine.scenes[gs.scene];
         let camera = CameraBuilder::new(
@@ -71,7 +73,7 @@ impl Client {
                 back: None,
                 left: None,
                 right: None,
-                top: Some(top),
+                top,
                 bottom: None,
             }
             .build()

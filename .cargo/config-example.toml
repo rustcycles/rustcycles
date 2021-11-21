@@ -8,7 +8,7 @@
 
 # panic = "abort" disables unwind tables so backtraces are almost completely useless,
 # if a panic happens inside library code, we don't even get names of our functions.
-# To fix that, we use -Cforce-unwind-tables=y.
+# To fix that, we use -Cforce-unwind-tables=y in .cargo/config.toml.
 # https://github.com/rust-lang/rust/issues/81902
 
 # NOTE: For maximum performance, you need a nightly compiler

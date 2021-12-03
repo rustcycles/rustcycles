@@ -49,7 +49,6 @@ impl Server {
             self.accept_new_connections();
             self.network_receive();
 
-            // TODO input
             self.gs.tick(&mut self.engine, dt);
 
             self.engine.update(dt);

@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, io::Write, net::TcpStream};
+use std::{collections::VecDeque, net::TcpStream};
 
 use rg3d::{
     core::{
@@ -115,7 +115,7 @@ impl Client {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
-            self.network_receive();
+            self.sys_receive();
 
             self.gs.tick(&mut self.engine, dt);
 
@@ -124,7 +124,7 @@ impl Client {
             self.engine.update(dt);
 
             // LATER sending (some) input should happen as soon as we receive it
-            self.network_send();
+            self.sys_send_frame_update();
         }
 
         self.engine.get_window().request_redraw();
@@ -277,13 +277,13 @@ impl Client {
         });*/
     }
 
-    fn network_receive(&mut self) {
+    fn sys_receive(&mut self) {
         net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets);
     }
 
-    fn network_send(&mut self) {
-        let data = bincode::serialize(&self.ps.input).unwrap();
-        self.stream.write_all(&data).unwrap();
+    /// Send all once-per-frame stuff to the server.
+    fn sys_send_frame_update(&mut self) {
+        net::send(&mut [&mut self.stream], &self.ps.input);
     }
 }
 

@@ -1,10 +1,29 @@
 use std::{
     collections::VecDeque,
-    io::{ErrorKind, Read},
+    io::{ErrorKind, Read, Write},
     net::TcpStream,
 };
 
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
+
+pub(crate) fn send<P>(streams: &mut [&mut TcpStream], packet: P)
+where
+    P: Serialize,
+{
+    // LATER Measure network usage.
+    // LATER Try to minimize network usage.
+    //       General purpose compression could help a bit,
+    //       but using what we know about the data should give much better results.
+
+    let buf = bincode::serialize(&packet).unwrap();
+    let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+    for stream in streams {
+        // Prefix data by length so it's easy to parse on the other side.
+        stream.write_all(&len).unwrap();
+        stream.write_all(&buf).unwrap();
+        // TODO flush?
+    }
+}
 
 pub(crate) fn receive<P>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>, packets: &mut Vec<P>)
 where

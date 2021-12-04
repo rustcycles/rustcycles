@@ -1,6 +1,6 @@
 use std::{
-    io::{ErrorKind, Read, Write},
-    mem,
+    collections::VecDeque,
+    io::ErrorKind,
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
@@ -10,7 +10,7 @@ use rg3d::{
 };
 
 use crate::common::{
-    AddPlayer, CyclePhysics, GameState, InitData, Input, Player, PlayerCycle, ServerMessage,
+    net, AddPlayer, CyclePhysics, GameState, InitData, Input, Player, PlayerCycle, ServerMessage,
     SpawnCycle, UpdatePhysics,
 };
 
@@ -47,13 +47,13 @@ impl Server {
             self.gs.game_time += dt;
 
             self.accept_new_connections();
-            self.network_receive();
+            self.sys_receive();
 
             self.gs.tick(&mut self.engine, dt);
 
             self.engine.update(dt);
 
-            self.send_update();
+            self.sys_send_update();
         }
     }
 
@@ -108,28 +108,13 @@ impl Server {
         }
     }
 
-    fn network_receive(&mut self) {
+    fn sys_receive(&mut self) {
         for client in &mut self.clients {
-            // TODO Read from network properly.
-            // Using size of Input is also probably wrong,
-            // bincode doesn't guarantee same size.
-            let mut buf = [0; mem::size_of::<Input>()];
-            loop {
-                // We're reading in a loop in case more packets arrive in one frame.
-                let res = client.stream.read_exact(&mut buf);
-                match res {
-                    Ok(_) => {
-                        let input: Input = bincode::deserialize(&buf).unwrap();
-                        //println!("S received from {}: {:?}", client.addr, input);
-                        self.gs.players[client.player_handle].input = input;
-                    }
-                    Err(err) => match err.kind() {
-                        ErrorKind::WouldBlock => {
-                            break;
-                        }
-                        _ => panic!("network error (read): {}", err),
-                    },
-                }
+            let mut inputs: Vec<Input> = Vec::new();
+            net::receive(&mut client.stream, &mut client.buffer, &mut inputs);
+            if let Some(&input) = inputs.last() {
+                // LATER (server reconcilliation) handle more inputs arriving in one frame
+                self.gs.players[client.player_handle].input = input;
             }
         }
     }
@@ -149,7 +134,7 @@ impl Server {
         self.network_send(packet, SendDest::One(client_handle));
     }
 
-    fn send_update(&mut self) {
+    fn sys_send_update(&mut self) {
         let scene = &self.engine.scenes[self.gs.scene];
         let mut cycle_physics = Vec::new();
         for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
@@ -167,30 +152,23 @@ impl Server {
     }
 
     fn network_send(&mut self, packet: ServerMessage, dest: SendDest) {
-        // LATER Measure network usage.
-        // LATER Try to minimize network usage.
-        //       General purpose compression could help a bit,
-        //       but using what we know about the data should give much better results.
-
-        let buf = bincode::serialize(&packet).unwrap();
-        let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+        // LATER This is incredibly ugly, plus creating the Vec is inafficient.
+        //          - Save all streams in a Vec?
+        //          - Inline this fn and remove SendDest?
         match dest {
             SendDest::One(handle) => {
-                let client = &mut self.clients[handle];
-                Self::send_bytes(&buf, len, client);
+                let mut streams = [&mut self.clients[handle].stream];
+                net::send(&mut streams, packet);
             }
             SendDest::All => {
-                for client in &mut self.clients {
-                    Self::send_bytes(&buf, len, client);
-                }
+                let mut streams: Vec<_> = self
+                    .clients
+                    .iter_mut()
+                    .map(|client| &mut client.stream)
+                    .collect();
+                net::send(&mut streams[..], packet);
             }
-        }
-    }
-
-    fn send_bytes(buf: &[u8], len: [u8; 2], client: &mut RemoteClient) {
-        // Prefix data by length so it's easy to parse on the other side.
-        client.stream.write_all(&len).unwrap();
-        client.stream.write_all(buf).unwrap();
+        };
     }
 }
 
@@ -201,6 +179,7 @@ enum SendDest {
 
 struct RemoteClient {
     stream: TcpStream,
+    buffer: VecDeque<u8>,
     #[allow(dead_code)]
     addr: SocketAddr,
     player_handle: Handle<Player>,
@@ -210,6 +189,7 @@ impl RemoteClient {
     fn new(stream: TcpStream, addr: SocketAddr, player_handle: Handle<Player>) -> Self {
         Self {
             stream,
+            buffer: VecDeque::new(),
             addr,
             player_handle,
         }

@@ -26,7 +26,7 @@ pub(crate) struct Client {
     pub(crate) ps: PlayerState,
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
-    buf: VecDeque<u8>,
+    buffer: VecDeque<u8>,
     server_packets: Vec<ServerMessage>,
 }
 
@@ -84,7 +84,7 @@ impl Client {
             ps: PlayerState::new(),
             camera,
             stream,
-            buf: VecDeque::new(),
+            buffer: VecDeque::new(),
             server_packets: Vec::new(),
         }
     }
@@ -278,7 +278,7 @@ impl Client {
     }
 
     fn network_receive(&mut self) {
-        net::receive(&mut self.stream, &mut self.buf, &mut self.server_packets);
+        net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets);
     }
 
     fn network_send(&mut self) {

@@ -33,7 +33,6 @@ where
     //      - large amounts of data
     //      - lossy and slow connections
     //      - fragmented and merged packets
-    // TODO Err(ref e) if e.kind() == ErrorKind::Interrupted => {} ???
     loop {
         // No particular reason for the buffer size, except BufReader uses the same.
         let mut buf = [0; 8192];
@@ -49,12 +48,11 @@ where
             Ok(n) => {
                 buffer.extend(&buf[0..n]);
             }
-            Err(err) => match err.kind() {
-                ErrorKind::WouldBlock => {
-                    break;
-                }
-                _ => panic!("network error (read): {}", err),
-            },
+            Err(e) if e.kind() == ErrorKind::Interrupted => {}
+            Err(e) if e.kind() == ErrorKind::WouldBlock => {
+                break;
+            }
+            Err(e) => panic!("network error (read): {}", e),
         }
     }
 

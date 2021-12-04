@@ -64,6 +64,7 @@ impl Server {
                     // LATER Measure if nodelay actually makes a difference,
                     // or better yet, replace TCP with something better.
                     // Same on the client.
+                    // Also how does it interact with flushing the stram after each write?
                     stream.set_nodelay(true).unwrap();
                     stream.set_nonblocking(true).unwrap();
                     println!("S accept {}", addr);

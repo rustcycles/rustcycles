@@ -21,6 +21,7 @@ where
         // Prefix data by length so it's easy to parse on the other side.
         stream.write_all(&len).unwrap();
         stream.write_all(&buf).unwrap();
+        stream.flush().unwrap(); // LATER No idea if necessary or how it interacts with set_nodelay
     }
 }
 

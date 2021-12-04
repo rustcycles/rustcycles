@@ -189,6 +189,11 @@ impl Debug for Input {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub(crate) enum ClientMessage {
+    Input(Input),
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
     InitData(InitData),
     AddPlayer(AddPlayer),

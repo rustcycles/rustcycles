@@ -17,7 +17,7 @@ use rg3d::{
     },
 };
 
-use crate::common::{net, GameState, Input, Player, ServerMessage};
+use crate::common::{net, ClientMessage, GameState, Input, Player, ServerMessage};
 
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
@@ -284,7 +284,8 @@ impl Client {
 
     /// Send all once-per-frame stuff to the server.
     fn sys_send_frame_update(&mut self) {
-        net::send(&mut [&mut self.stream], &self.ps.input);
+        let packet = ClientMessage::Input(self.ps.input);
+        net::send(&mut [&mut self.stream], packet);
     }
 }
 

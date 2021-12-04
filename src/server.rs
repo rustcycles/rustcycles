@@ -10,8 +10,8 @@ use rg3d::{
 };
 
 use crate::common::{
-    net, AddPlayer, CyclePhysics, GameState, InitData, Input, Player, PlayerCycle, ServerMessage,
-    SpawnCycle, UpdatePhysics,
+    net, AddPlayer, ClientMessage, CyclePhysics, GameState, InitData, Player, PlayerCycle,
+    ServerMessage, SpawnCycle, UpdatePhysics,
 };
 
 pub(crate) struct Server {
@@ -113,11 +113,15 @@ impl Server {
 
     fn sys_receive(&mut self) {
         for client in &mut self.clients {
-            let mut inputs: Vec<Input> = Vec::new();
-            net::receive(&mut client.stream, &mut client.buffer, &mut inputs);
-            if let Some(&input) = inputs.last() {
-                // LATER (server reconcilliation) handle more inputs arriving in one frame
-                self.gs.players[client.player_handle].input = input;
+            let mut packets: Vec<ClientMessage> = Vec::new();
+            net::receive(&mut client.stream, &mut client.buffer, &mut packets);
+            for packet in packets {
+                match packet {
+                    ClientMessage::Input(input) => {
+                        // LATER (server reconcilliation) handle more inputs arriving in one frame
+                        self.gs.players[client.player_handle].input = input;
+                    }
+                }
             }
         }
     }

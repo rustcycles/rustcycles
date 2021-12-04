@@ -1,8 +1,4 @@
-use std::{
-    collections::VecDeque,
-    io::{ErrorKind, Read, Write},
-    net::TcpStream,
-};
+use std::{collections::VecDeque, io::Write, net::TcpStream};
 
 use rg3d::{
     core::{
@@ -21,7 +17,7 @@ use rg3d::{
     },
 };
 
-use crate::common::{GameState, Input, Player, ServerMessage};
+use crate::common::{net, GameState, Input, Player, ServerMessage};
 
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
@@ -282,53 +278,7 @@ impl Client {
     }
 
     fn network_receive(&mut self) {
-        // Read all available bytes until the stream would block.
-        // LATER Test networking thoroughly
-        //      - large amounts of data
-        //      - lossy and slow connections
-        //      - fragmented and merged packets
-        // TODO Err(ref e) if e.kind() == ErrorKind::Interrupted => {} ???
-        loop {
-            // No particular reason for the buffer size, except BufReader uses the same.
-            let mut buf = [0; 8192];
-            let res = self.stream.read(&mut buf);
-            match res {
-                Ok(0) => {
-                    // The connection has been closed, don't get stuck in this loop.
-                    // This can happen for example when the server crashes.
-                    // LATER Some kind of clean client shutdown.
-                    //  Currently the client crashes later when attempting to send.
-                    break;
-                }
-                Ok(n) => {
-                    self.buf.extend(&buf[0..n]);
-                }
-                Err(err) => match err.kind() {
-                    ErrorKind::WouldBlock => {
-                        break;
-                    }
-                    _ => panic!("network error (read): {}", err),
-                },
-            }
-        }
-
-        // Parse the received bytes
-        loop {
-            if self.buf.len() < 2 {
-                break;
-            }
-            let len_bytes = [self.buf[0], self.buf[1]];
-            let len = usize::from(u16::from_le_bytes(len_bytes));
-            if self.buf.len() < len + 2 {
-                // Not enough bytes in buffer for a full frame.
-                break;
-            }
-            self.buf.pop_front();
-            self.buf.pop_front();
-            let bytes: Vec<_> = self.buf.drain(0..len).collect();
-            let message = bincode::deserialize(&bytes).unwrap();
-            self.server_packets.push(message);
-        }
+        net::receive(&mut self.stream, &mut self.buf, &mut self.server_packets);
     }
 
     fn network_send(&mut self) {

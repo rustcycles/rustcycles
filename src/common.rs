@@ -1,3 +1,5 @@
+pub(crate) mod net;
+
 use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{

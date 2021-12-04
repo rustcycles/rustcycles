@@ -43,6 +43,7 @@ impl Client {
             }
             // LATER Maybe add a short delay (test local vs remove server)?
         };
+        stream.set_nodelay(true).unwrap();
         stream.set_nonblocking(true).unwrap();
 
         let gs = GameState::new(&mut engine).await;

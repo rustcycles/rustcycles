@@ -4,9 +4,11 @@ use std::{
     net::TcpStream,
 };
 
+use serde::de::DeserializeOwned;
+
 pub(crate) fn receive<P>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>, packets: &mut Vec<P>)
 where
-    for<'de> P: serde::Deserialize<'de>,
+    P: DeserializeOwned,
 {
     // Read all available bytes until the stream would block.
     // LATER Test networking thoroughly

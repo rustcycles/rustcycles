@@ -143,6 +143,11 @@ impl Client {
     }
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
+        if !self.mouse_grabbed {
+            // LATER (privacy) Recheck we're not handling mouse movement when minimized (and especially not sending to server)
+            return;
+        }
+
         // Subtract, don't add the delta X - rotations follow the right hand rule
         self.ps.input.yaw.0 -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
         self.ps.input.pitch.0 = (self.ps.input.pitch.0 + delta.1 as f32).clamp(-90.0, 90.0);

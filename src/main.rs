@@ -132,6 +132,7 @@ fn client_main(opts: Opts) {
         // LATER Offload gamelogic and rendering to another thread so input can be received at any time and sent to server immediately.
         // LATER Is there a way to not waste CPU cycles so much?
 
+        // Exhaustively match all variants so we notice if the enum changes.
         #[allow(clippy::single_match)]
         match event {
             Event::NewEvents(_) => {}
@@ -235,6 +236,7 @@ fn server_main() {
         // Default control_flow is ControllFlow::Poll but let's be explicit in acse it changes.
         *control_flow = ControlFlow::Poll;
 
+        // Exhaustively match all variants so we notice if the enum changes.
         #[allow(clippy::single_match)]
         match event {
             Event::NewEvents(_) => {}

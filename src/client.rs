@@ -237,6 +237,13 @@ impl Client {
             }
         }
 
+        // Join / spec
+        if self.ps.participation == Participation::Observing && self.ps.input.fire1 {
+            self.ps.participation = Participation::Playing;
+        } else if self.ps.participation == Participation::Playing && self.ps.input.fire2 {
+            self.ps.participation = Participation::Observing;
+        }
+
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
@@ -350,14 +357,25 @@ impl Client {
 #[derive(Debug)]
 pub(crate) struct PlayerState {
     pub(crate) input: Input,
-    // LATER This strudct will probably gain additional fields eventually (name?).
-    // If not, it should be removed.
+    pub(crate) participation: Participation,
 }
 
 impl PlayerState {
     pub(crate) fn new() -> Self {
         Self {
             input: Input::default(),
+            participation: Participation::Observing,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Participation {
+    /// The player is a freely floating camera observing the game.
+    Observing,
+    /// The player is watching another player's POV - LATER
+    #[allow(dead_code)]
+    Spectating,
+    /// The player is playing
+    Playing,
 }

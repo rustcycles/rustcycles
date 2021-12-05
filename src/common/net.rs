@@ -6,6 +6,9 @@ use std::{
 
 use serde::{de::DeserializeOwned, Serialize};
 
+const HEADER_LEN: usize = 2;
+
+/// Send `packet` to all `streams`.
 pub(crate) fn send<P>(streams: &mut [&mut TcpStream], packet: P)
 where
     P: Serialize,
@@ -16,15 +19,17 @@ where
     //       but using what we know about the data should give much better results.
 
     let buf = bincode::serialize(&packet).unwrap();
-    let len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+    let content_len: [u8; HEADER_LEN] = u16::try_from(buf.len()).unwrap().to_le_bytes();
     for stream in streams {
         // Prefix data by length so it's easy to parse on the other side.
-        stream.write_all(&len).unwrap();
+        stream.write_all(&content_len).unwrap();
         stream.write_all(&buf).unwrap();
         stream.flush().unwrap(); // LATER No idea if necessary or how it interacts with set_nodelay
     }
 }
 
+/// Read bytes from `stream` into `buffer`,
+/// parse packets that are complete and add them to `packets`.
 pub(crate) fn receive<P>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>, packets: &mut Vec<P>)
 where
     P: DeserializeOwned,
@@ -59,18 +64,18 @@ where
 
     // Parse the received bytes
     loop {
-        if buffer.len() < 2 {
+        if buffer.len() < HEADER_LEN {
             break;
         }
         let len_bytes = [buffer[0], buffer[1]];
-        let len = usize::from(u16::from_le_bytes(len_bytes));
-        if buffer.len() < len + 2 {
+        let content_len = usize::from(u16::from_le_bytes(len_bytes));
+        if buffer.len() < HEADER_LEN + content_len {
             // Not enough bytes in buffer for a full frame.
             break;
         }
         buffer.pop_front();
         buffer.pop_front();
-        let bytes: Vec<_> = buffer.drain(0..len).collect();
+        let bytes: Vec<_> = buffer.drain(0..content_len).collect();
         let message = bincode::deserialize(&bytes).unwrap();
         packets.push(message);
     }

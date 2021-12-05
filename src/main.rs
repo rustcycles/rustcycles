@@ -129,7 +129,7 @@ fn client_main(opts: Opts) {
         // This is great because we get events almost immediately,
         // e.g. 70-80 times each *milli*second when doing nothing else beside printing their times.
         // The downside is we occupy a full CPU core just for input.
-        // TODO Send important input to server immediately (keyboard and mouse button changes, mouse movement up to those changes)
+        // LATER Offload gamelogic and rendering to another thread so input can be received at any time and sent to server immediately.
         // LATER Is there a way to not waste CPU cycles so much?
 
         #[allow(clippy::single_match)]

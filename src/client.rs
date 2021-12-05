@@ -124,6 +124,8 @@ impl Client {
                 }
             }
         }
+
+        self.sys_send_input();
     }
 
     pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
@@ -136,6 +138,8 @@ impl Client {
             rg3d::event::MouseButton::Middle => {}
             rg3d::event::MouseButton::Other(_) => {}
         }
+
+        self.sys_send_input();
     }
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
@@ -178,7 +182,7 @@ impl Client {
 
             self.engine.update(dt);
 
-            self.sys_send_frame_update();
+            self.sys_send_input();
         }
 
         self.engine.get_window().request_redraw();
@@ -336,7 +340,7 @@ impl Client {
     }
 
     /// Send all once-per-frame stuff to the server.
-    fn sys_send_frame_update(&mut self) {
+    fn sys_send_input(&mut self) {
         let packet = ClientMessage::Input(self.ps.input);
         net::send(&mut [&mut self.stream], packet);
     }

@@ -179,7 +179,7 @@ impl Client {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
 
-            self.sys_receive();
+            self.sys_receive_updates();
 
             self.gs.tick(&mut self.engine, dt);
 
@@ -193,7 +193,9 @@ impl Client {
         self.engine.get_window().request_redraw();
     }
 
-    fn tick(&mut self, dt: f32) {
+    fn sys_receive_updates(&mut self) {
+        net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets);
+
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         for packet in self.server_packets.drain(..) {
@@ -241,6 +243,10 @@ impl Client {
                 }
             }
         }
+    }
+
+    fn tick(&mut self, dt: f32) {
+        let scene = &mut self.engine.scenes[self.gs.scene];
 
         // Join / spec
         if self.ps.participation == Participation::Observing && self.ps.input.fire1 {
@@ -352,10 +358,6 @@ impl Client {
             end: my_center + diff,
             color: Color::GREEN,
         });*/
-    }
-
-    fn sys_receive(&mut self) {
-        net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets);
     }
 
     /// Send all once-per-frame stuff to the server.

@@ -37,7 +37,7 @@ impl GameState {
         // NOTE: It might not actually be the floor that's causing it,
         // it seems to happen when passing between poles.
         // LATER Maybe there is a way to solve this by filtering collisions with the floor?
-        scene.physics.integration_parameters.max_ccd_substeps = 1;
+        scene.physics.integration_parameters.max_ccd_substeps = 100;
         // LATER allow changing scene.physics.integration_parameters.dt ?
 
         engine

@@ -28,5 +28,5 @@ rg3d = { git = "https://github.com/rg3dengine/rg3d", rev = "8964b57f8f612ca4295b
 #rg3d = { path = "../rg3d" }
 serde = "1.0.130"
 structopt = "0.3.25"
-strum = "0.22"
-strum_macros = "0.22"
+strum = "0.23.0"
+strum_macros = "0.23.1"

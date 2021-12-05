@@ -151,7 +151,7 @@ pub(crate) struct Cycle {
 
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
-    // Some things like shooting might need the exact angle at the time
+    // Some things like shooting might need the angle at the exact time
     // so we send pitch and yaw with each input.
     pub(crate) pitch: Deg,
     pub(crate) yaw: Deg,

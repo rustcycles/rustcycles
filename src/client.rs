@@ -18,7 +18,7 @@ use rg3d::{
     },
 };
 
-use crate::common::{net, ClientMessage, GameState, Input, Player, ServerMessage, Participation};
+use crate::common::{net, ClientMessage, GameState, Input, Participation, Player, ServerMessage};
 
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
@@ -257,21 +257,29 @@ impl Client {
         let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.input.pitch.0.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
+        let forward = camera
+            .look_vector()
+            .try_normalize(f32::EPSILON)
+            .unwrap_or_else(Vector3::z);
+        let left = camera
+            .side_vector()
+            .try_normalize(f32::EPSILON)
+            .unwrap_or_else(Vector3::x);
+
         // Camera movement
         let mut pos = **camera.local_transform().position();
         let camera_speed = 10.0;
         if self.ps.input.forward {
-            // TODO normalize?
-            pos += camera.look_vector() * dt * camera_speed;
+            pos += forward * dt * camera_speed;
         }
         if self.ps.input.backward {
-            pos += -camera.look_vector() * dt * camera_speed;
+            pos += -forward * dt * camera_speed;
         }
         if self.ps.input.left {
-            pos += camera.side_vector() * dt * camera_speed;
+            pos += left * dt * camera_speed;
         }
         if self.ps.input.right {
-            pos += -camera.side_vector() * dt * camera_speed;
+            pos += -left * dt * camera_speed;
         }
         camera.local_transform_mut().set_position(pos);
 

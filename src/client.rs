@@ -168,7 +168,6 @@ impl Client {
                     let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                     self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
-                    // FIXME need to spawn player first
                 }
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {

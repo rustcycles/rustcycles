@@ -8,7 +8,7 @@ use rg3d::{
     core::instant::Instant,
     dpi::LogicalSize,
     engine::Engine,
-    event::{DeviceEvent, ElementState, Event, ScanCode, WindowEvent},
+    event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::log::{Log, MessageKind},
     window::{Fullscreen, WindowBuilder},
@@ -149,16 +149,7 @@ fn client_main(opts: Opts) {
                     WindowEvent::Focused(focus) => {
                         //println!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
 
-                        // Ungrab here is needed in addition to ESC,
-                        // otherwise the mouse stays grabbed when alt+tabbing to other windows.
-                        // However, don't automatically grab it when gaining focus,
-                        // the game can get stuck in a loop (bugs like this are most common on startup)
-                        // and it would never ungrab.
-                        if !focus {
-                            client.set_mouse_grab(false);
-                        }
-
-                        // LATER pause/unpause
+                        client.focused(focus);
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
                         // NOTE: This event is repeated if the key is held, that means
@@ -169,25 +160,7 @@ fn client_main(opts: Opts) {
                         //     input
                         // );
 
-                        // Use scancodes, not virtual keys, because they don't depend on layout.
-                        const ESC: ScanCode = 1;
-                        const W: ScanCode = 17;
-                        const A: ScanCode = 30;
-                        const S: ScanCode = 31;
-                        const D: ScanCode = 32;
-                        let pressed = input.state == ElementState::Pressed;
-                        match input.scancode {
-                            ESC => client.set_mouse_grab(false),
-                            W => client.ps.input.forward = pressed,
-                            A => client.ps.input.left = pressed,
-                            S => client.ps.input.backward = pressed,
-                            D => client.ps.input.right = pressed,
-                            c => {
-                                if pressed {
-                                    println!("C pressed scancode: {}", c);
-                                }
-                            }
-                        }
+                        client.keyboard_input(input);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         println!(
@@ -198,15 +171,7 @@ fn client_main(opts: Opts) {
                         );
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
-                        client.set_mouse_grab(true);
-
-                        let pressed = state == ElementState::Pressed;
-                        match button {
-                            rg3d::event::MouseButton::Left => client.ps.input.fire1 = pressed,
-                            rg3d::event::MouseButton::Right => client.ps.input.fire2 = pressed,
-                            rg3d::event::MouseButton::Middle => {}
-                            rg3d::event::MouseButton::Other(_) => {}
-                        }
+                        client.mouse_input(state, button);
                     }
                     _ => {}
                 }
@@ -228,12 +193,7 @@ fn client_main(opts: Opts) {
                         //     delta
                         // );
 
-                        // Subtract, don't add the delta - rotations follow the right hand rule
-                        client.ps.yaw -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
-
-                        // TODO We should use degrees (or degrees per second) for all user facing values but we must make sure to avoid conversion errors.
-                        // Maybe add struct Deg(f32);?
-                        client.ps.pitch = (client.ps.pitch + delta.1 as f32).clamp(-90.0, 90.0);
+                        client.mouse_motion(delta);
                     }
                     _ => {}
                 }

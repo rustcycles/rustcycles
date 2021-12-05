@@ -8,6 +8,7 @@ use rg3d::{
     },
     engine::Engine,
     error::ExternalError,
+    event::{ElementState, KeyboardInput, MouseButton, ScanCode},
     scene::{
         base::BaseBuilder,
         camera::{CameraBuilder, SkyBoxBuilder},
@@ -90,6 +91,59 @@ impl Client {
         }
     }
 
+    pub(crate) fn focused(&mut self, focus: bool) {
+        // Ungrab here is needed in addition to ESC,
+        // otherwise the mouse stays grabbed when alt+tabbing to other windows.
+        // However, don't automatically grab it when gaining focus,
+        // the game can get stuck in a loop (bugs like this are most common on startup)
+        // and it would never ungrab.
+        if !focus {
+            self.set_mouse_grab(false);
+        }
+
+        // LATER pause/unpause
+    }
+
+    pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
+        // Use scancodes, not virtual keys, because they don't depend on layout.
+        const ESC: ScanCode = 1;
+        const W: ScanCode = 17;
+        const A: ScanCode = 30;
+        const S: ScanCode = 31;
+        const D: ScanCode = 32;
+        let pressed = input.state == ElementState::Pressed;
+        match input.scancode {
+            ESC => self.set_mouse_grab(false),
+            W => self.ps.input.forward = pressed,
+            A => self.ps.input.left = pressed,
+            S => self.ps.input.backward = pressed,
+            D => self.ps.input.right = pressed,
+            c => {
+                if pressed {
+                    println!("C pressed scancode: {}", c);
+                }
+            }
+        }
+    }
+
+    pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
+        self.set_mouse_grab(true);
+
+        let pressed = state == ElementState::Pressed;
+        match button {
+            rg3d::event::MouseButton::Left => self.ps.input.fire1 = pressed,
+            rg3d::event::MouseButton::Right => self.ps.input.fire2 = pressed,
+            rg3d::event::MouseButton::Middle => {}
+            rg3d::event::MouseButton::Other(_) => {}
+        }
+    }
+
+    pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
+        // Subtract, don't add the delta X - rotations follow the right hand rule
+        self.ps.input.yaw.0 -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
+        self.ps.input.pitch.0 = (self.ps.input.pitch.0 + delta.1 as f32).clamp(-90.0, 90.0);
+    }
+
     /// Either grab mouse and hide cursor
     /// or ungrab mouse and show cursor.
     pub(crate) fn set_mouse_grab(&mut self, grab: bool) {
@@ -124,7 +178,6 @@ impl Client {
 
             self.engine.update(dt);
 
-            // LATER sending (some) input should happen as soon as we receive it
             self.sys_send_frame_update();
         }
 
@@ -183,14 +236,15 @@ impl Client {
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
-        let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.yaw.to_radians());
+        let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.input.yaw.0.to_radians());
         let x = yaw * Vector3::x_axis();
-        let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.pitch.to_radians());
+        let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.input.pitch.0.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
         // Camera movement
         let mut pos = **camera.local_transform().position();
         let camera_speed = 10.0;
+        dbg!(camera.look_vector());
         if self.ps.input.forward {
             // TODO normalize?
             pos += camera.look_vector() * dt * camera_speed;
@@ -288,20 +342,18 @@ impl Client {
     }
 }
 
-/// State of the local player
+/// State of the *local* player
 #[derive(Debug)]
 pub(crate) struct PlayerState {
     pub(crate) input: Input,
-    pub(crate) pitch: f32,
-    pub(crate) yaw: f32,
+    // LATER This strudct will probably gain additional fields eventually (name?).
+    // If not, it should be removed.
 }
 
 impl PlayerState {
     pub(crate) fn new() -> Self {
         Self {
             input: Input::default(),
-            pitch: 0.0,
-            yaw: 0.0,
         }
     }
 }

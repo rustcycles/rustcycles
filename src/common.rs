@@ -149,9 +149,12 @@ pub(crate) struct Cycle {
     pub(crate) player_handle: Handle<Player>,
 }
 
-// LATER Bitfield?
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
+    // Some things like shooting might need the exact angle at the time
+    // so we send pitch and yaw with each input.
+    pub(crate) pitch: Deg,
+    pub(crate) yaw: Deg,
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
     pub(crate) forward: bool,
@@ -164,7 +167,7 @@ pub(crate) struct Input {
 impl Debug for Input {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         // Only output the pressed buttons so it's more readable.
-        write!(f, "Input {{ ")?;
+        write!(f, "Input {{ pitch {}° yaw {}° ", self.pitch.0, self.yaw.0)?;
         if self.fire1 {
             write!(f, "fire1 ")?;
         }
@@ -187,6 +190,9 @@ impl Debug for Input {
         Ok(())
     }
 }
+
+#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize)]
+pub(crate) struct Deg(pub(crate) f32);
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {

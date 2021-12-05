@@ -255,7 +255,6 @@ impl Client {
         // Camera movement
         let mut pos = **camera.local_transform().position();
         let camera_speed = 10.0;
-        dbg!(camera.look_vector());
         if self.ps.input.forward {
             // TODO normalize?
             pos += camera.look_vector() * dt * camera_speed;

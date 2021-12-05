@@ -170,9 +170,9 @@ impl Client {
     }
 
     pub(crate) fn update(&mut self, game_time_target: f32) {
-        let dt = 1.0 / 60.0; // TODO configurable
+        let dt = 1.0 / 60.0;
 
-        // TODO read these (again), verify what works best in practise:
+        // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 

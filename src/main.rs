@@ -19,7 +19,8 @@ use strum_macros::EnumString;
 use client::Client;
 use server::Server;
 
-// TODO MVP:
+// Master TODO list:
+// MVP:
 //  - [x] Arena and wheel models
 //  - [x] Rotate the camera
 //  - [x] Move the camera
@@ -27,7 +28,7 @@ use server::Server;
 //  - [x] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
-// TODO 0.1:
+// v0.1:
 //  - [x] Readme
 //  - [x] GH social preview (screenshot)
 //  - [ ] CI, audit, badges
@@ -40,8 +41,9 @@ use server::Server;
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
-
-// TODO All the LATERs - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make the project perfect.
+// All the LATERs
+//  - They mean something can be done better but marking it as a todo would be just noise when grepping.
+//    They're things I'd do if I had infinite time and wanted to make the project perfect.
 
 #[derive(StructOpt, Debug)]
 struct Opts {

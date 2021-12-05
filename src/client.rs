@@ -18,7 +18,7 @@ use rg3d::{
     },
 };
 
-use crate::common::{net, ClientMessage, GameState, Input, Player, ServerMessage};
+use crate::common::{net, ClientMessage, GameState, Input, Player, ServerMessage, Participation};
 
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
@@ -371,15 +371,4 @@ impl PlayerState {
             participation: Participation::Observing,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Participation {
-    /// The player is a freely floating camera observing the game.
-    Observing,
-    /// The player is watching another player's POV - LATER
-    #[allow(dead_code)]
-    Spectating,
-    /// The player is playing
-    Playing,
 }

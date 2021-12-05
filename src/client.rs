@@ -2,7 +2,7 @@ use std::{collections::VecDeque, net::TcpStream};
 
 use rg3d::{
     core::{
-        algebra::{Rotation, UnitQuaternion, Vector3},
+        algebra::{Rotation3, UnitQuaternion, Vector3},
         color::Color,
         pool::Handle,
     },
@@ -252,7 +252,7 @@ impl Client {
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
-        let yaw = Rotation::from_axis_angle(&Vector3::y_axis(), self.ps.input.yaw.0.to_radians());
+        let yaw = Rotation3::from_axis_angle(&Vector3::y_axis(), self.ps.input.yaw.0.to_radians());
         let x = yaw * Vector3::x_axis();
         let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.input.pitch.0.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);

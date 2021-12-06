@@ -124,7 +124,7 @@ fn client_main(opts: Opts) {
 
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
-        // Default control_flow is ControllFlow::Poll but let's be explicit in acse it changes.
+        // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
         // This is great because we get events almost immediately,
         // e.g. 70-80 times each *milli*second when doing nothing else beside printing their times.
@@ -232,7 +232,7 @@ fn server_main() {
 
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
-        // Default control_flow is ControllFlow::Poll but let's be explicit in acse it changes.
+        // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
 
         // Exhaustively match all variants so we notice if the enum changes.

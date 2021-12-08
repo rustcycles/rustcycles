@@ -41,6 +41,7 @@ use server::Server;
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
+//  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
 // All the LATERs
 //  - They mean something can be done better but marking it as a todo would be just noise when grepping.
 //    They're things I'd do if I had infinite time and wanted to make the project perfect.

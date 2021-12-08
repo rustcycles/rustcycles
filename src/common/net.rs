@@ -1,5 +1,6 @@
 use std::{
     collections::VecDeque,
+    error::Error,
     io::{ErrorKind, Read, Write},
     net::TcpStream,
 };
@@ -8,29 +9,48 @@ use serde::{de::DeserializeOwned, Serialize};
 
 const HEADER_LEN: usize = 2;
 
-/// Send `packet` to all `streams`.
-pub(crate) fn send<P>(streams: &mut [&mut TcpStream], packet: P)
+#[derive(Debug)]
+pub(crate) struct NetworkMessage {
+    content_len: [u8; HEADER_LEN],
+    buf: Vec<u8>,
+}
+
+pub(crate) fn serialize<M>(message: M) -> NetworkMessage
 where
-    P: Serialize,
+    M: Serialize,
 {
+    let buf = bincode::serialize(&message).unwrap();
+    let content_len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+    NetworkMessage { content_len, buf }
+}
+
+pub(crate) fn send(
+    network_message: &NetworkMessage,
+    stream: &mut TcpStream,
+) -> Result<(), Box<dyn Error>> {
     // LATER Measure network usage.
     // LATER Try to minimize network usage.
     //       General purpose compression could help a bit,
     //       but using what we know about the data should give much better results.
 
-    let buf = bincode::serialize(&packet).unwrap();
-    let content_len: [u8; HEADER_LEN] = u16::try_from(buf.len()).unwrap().to_le_bytes();
-    for stream in streams {
-        // Prefix data by length so it's easy to parse on the other side.
-        stream.write_all(&content_len).unwrap();
-        stream.write_all(&buf).unwrap();
-        stream.flush().unwrap(); // LATER No idea if necessary or how it interacts with set_nodelay
-    }
+    // Prefix data by length so it's easy to parse on the other side.
+    stream.write_all(&network_message.content_len)?;
+    stream.write_all(&network_message.buf)?;
+    stream.flush()?; // LATER No idea if necessary or how it interacts with set_nodelay
+
+    Ok(())
 }
 
 /// Read bytes from `stream` into `buffer`,
 /// parse packets that are complete and add them to `packets`.
-pub(crate) fn receive<P>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>, packets: &mut Vec<P>)
+///
+/// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
+#[must_use]
+pub(crate) fn receive<P>(
+    stream: &mut TcpStream,
+    buffer: &mut VecDeque<u8>,
+    packets: &mut Vec<P>,
+) -> bool
 where
     P: DeserializeOwned,
 {
@@ -39,6 +59,7 @@ where
     //      - large amounts of data
     //      - lossy and slow connections
     //      - fragmented and merged packets
+    let mut closed = false;
     loop {
         // No particular reason for the buffer size, except BufReader uses the same.
         let mut buf = [0; 8192];
@@ -47,8 +68,7 @@ where
             Ok(0) => {
                 // The connection has been closed, don't get stuck in this loop.
                 // This can happen for example when the server crashes.
-                // LATER Some kind of clean client shutdown.
-                //  Currently the client crashes later when attempting to send.
+                closed = true;
                 break;
             }
             Ok(n) => {
@@ -58,7 +78,11 @@ where
             Err(e) if e.kind() == ErrorKind::WouldBlock => {
                 break;
             }
-            Err(e) => panic!("network error (read): {}", e),
+            Err(e) => {
+                println!("network error (read): {}", e);
+                closed = true;
+                break;
+            }
         }
     }
 
@@ -79,4 +103,6 @@ where
         let message = bincode::deserialize(&bytes).unwrap();
         packets.push(message);
     }
+
+    closed
 }

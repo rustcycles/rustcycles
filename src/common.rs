@@ -98,6 +98,14 @@ impl GameState {
         }
     }
 
+    pub(crate) fn free_player(&mut self, scene: &mut Scene, player_handle: Handle<Player>) {
+        let player = self.players.free(player_handle);
+        if let Some(handle) = player.cycle_handle {
+            let cycle = self.cycles.free(handle);
+            scene.remove_node(cycle.node_handle);
+        }
+    }
+
     #[must_use]
     pub(crate) fn spawn_cycle(
         &mut self,

@@ -204,7 +204,7 @@ impl Client {
     }
 
     fn sys_receive_updates(&mut self) {
-        net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets);
+        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets); // LATER Clean disconnect
 
         let scene = &mut self.engine.scenes[self.gs.scene];
 
@@ -234,8 +234,8 @@ impl Client {
                         .unwrap();
                 }
                 ServerMessage::RemovePlayer { player_index } => {
-                    dbg!(player_index);
-                    todo!();
+                    let player_handle = self.gs.players.handle_from_index(player_index);
+                    self.gs.free_player(scene, player_handle);
                 }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
                     let player_handle = self
@@ -381,7 +381,8 @@ impl Client {
     /// Send all once-per-frame stuff to the server.
     fn sys_send_input(&mut self) {
         let packet = ClientMessage::Input(self.ps.input);
-        net::send(&mut [&mut self.stream], packet);
+        let network_message = net::serialize(packet);
+        net::send(&network_message, &mut self.stream).unwrap();
     }
 }
 

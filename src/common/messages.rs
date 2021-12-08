@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {
     Input(Input),
+    Chat(String), // LATER Allow sending this
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -122,18 +122,42 @@ impl Server {
     }
 
     fn sys_receive(&mut self) {
-        for client in &mut self.clients {
+        // TODO Pool::handle_iter()?
+        let mut disconnected = Vec::new();
+        for (client_handle, client) in self.clients.pair_iter_mut() {
             let mut packets: Vec<ClientMessage> = Vec::new();
-            net::receive(&mut client.stream, &mut client.buffer, &mut packets);
+            let closed = net::receive(&mut client.stream, &mut client.buffer, &mut packets);
+            // We might have received valid packets before the stream was closed - handle them
+            // even though for some, such as player input, it doesn't affect anything.
             for packet in packets {
                 match packet {
                     ClientMessage::Input(input) => {
                         // LATER (server reconcilliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;
                     }
+                    ClientMessage::Chat(chat) => {
+                        dbg!(chat);
+                        todo!();
+                    }
                 }
             }
+            if closed {
+                disconnected.push(client_handle);
+            }
         }
+        for client_handle in disconnected {
+            self.disconnect(client_handle);
+        }
+    }
+
+    fn disconnect(&mut self, client_handle: Handle<RemoteClient>) {
+        let scene = &mut self.engine.scenes[self.gs.scene];
+        let client = self.clients.free(client_handle);
+        self.gs.free_player(scene, client.player_handle);
+        let packet = ServerMessage::RemovePlayer {
+            player_index: client.player_handle.index(),
+        };
+        self.network_send(packet, SendDest::All);
     }
 
     fn send_init(&mut self, client_handle: Handle<RemoteClient>) {
@@ -172,20 +196,35 @@ impl Server {
         // LATER This is incredibly ugly, plus creating the Vec is inafficient.
         //          - Save all streams in a Vec?
         //          - Inline this fn and remove SendDest?
+        let mut disconnected = Vec::new();
+        let network_message = net::serialize(packet);
         match dest {
             SendDest::One(handle) => {
-                let mut streams = [&mut self.clients[handle].stream];
-                net::send(&mut streams, packet);
+                if let Err(e) = net::send(&network_message, &mut self.clients[handle].stream) {
+                    println!(
+                        "S Error in network_send One - index {}: {:?}",
+                        handle.index(),
+                        e
+                    );
+                    disconnected.push(handle);
+                }
             }
             SendDest::All => {
-                let mut streams: Vec<_> = self
-                    .clients
-                    .iter_mut()
-                    .map(|client| &mut client.stream)
-                    .collect();
-                net::send(&mut streams[..], packet);
+                for (handle, client) in self.clients.pair_iter_mut() {
+                    if let Err(e) = net::send(&network_message, &mut client.stream) {
+                        println!(
+                            "S Error in network_send All - index {}: {:?}",
+                            handle.index(),
+                            e
+                        );
+                        disconnected.push(handle);
+                    }
+                }
             }
         };
+        for client_handle in disconnected {
+            self.disconnect(client_handle);
+        }
     }
 }
 

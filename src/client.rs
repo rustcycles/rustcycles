@@ -21,8 +21,9 @@ use rg3d::{
 };
 
 use crate::common::{
+    entities::{Participation, Player},
     messages::{ClientMessage, ServerMessage},
-    net, GameState, Input, Participation, Player,
+    net, GameState, Input,
 };
 
 /// Game client.

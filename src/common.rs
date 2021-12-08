@@ -1,5 +1,6 @@
 //! Data and code shared between the client and server. Most gamelogic goes here.
 
+pub(crate) mod entities;
 pub(crate) mod messages;
 pub(crate) mod net;
 
@@ -11,11 +12,13 @@ use rg3d::{
         pool::{Handle, Pool},
     },
     engine::{resource_manager::MaterialSearchOptions, Engine},
-    physics3d::{rapier::prelude::*, RigidBodyHandle},
+    physics3d::rapier::prelude::*,
     resource::model::Model,
-    scene::{node::Node, Scene},
+    scene::Scene,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::common::entities::{Cycle, Player};
 
 /// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
@@ -129,39 +132,6 @@ impl GameState {
             self.cycles.spawn(cycle)
         }
     }
-}
-
-#[derive(Debug)]
-pub(crate) struct Player {
-    pub(crate) input: Input,
-    pub(crate) cycle_handle: Option<Handle<Cycle>>,
-}
-
-impl Player {
-    pub(crate) fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
-        Self {
-            input: Input::default(),
-            cycle_handle,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Participation {
-    /// The player is a freely floating camera observing the game.
-    Observing,
-    /// The player is watching another player's POV - LATER
-    #[allow(dead_code)]
-    Spectating,
-    /// The player is playing
-    Playing,
-}
-
-#[derive(Debug)]
-pub(crate) struct Cycle {
-    pub(crate) node_handle: Handle<Node>,
-    pub(crate) body_handle: RigidBodyHandle,
-    pub(crate) player_handle: Handle<Player>,
 }
 
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]

@@ -12,11 +12,12 @@ use rg3d::{
 };
 
 use crate::common::{
+    entities::Player,
     messages::{
         AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage, SpawnCycle,
         UpdatePhysics,
     },
-    net, GameState, Player,
+    net, GameState,
 };
 
 /// Game server.

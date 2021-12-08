@@ -1,3 +1,5 @@
+//! The authoritative server in a client-server multiplayer game architecture.
+
 use std::{
     collections::VecDeque,
     io::ErrorKind,
@@ -14,6 +16,9 @@ use crate::common::{
     ServerMessage, SpawnCycle, UpdatePhysics,
 };
 
+/// Game server.
+///
+/// Lets Clients connect to play. Contains the authoritate copy of the game state.
 pub(crate) struct Server {
     pub(crate) engine: Engine,
     pub(crate) gs: GameState,

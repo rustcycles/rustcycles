@@ -1,3 +1,5 @@
+//! Data and code shared between the client and server. Most gamelogic goes here.
+
 pub(crate) mod net;
 
 use std::fmt::{self, Debug, Formatter};
@@ -14,6 +16,7 @@ use rg3d::{
 };
 use serde::{Deserialize, Serialize};
 
+/// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
     /// This gamelogic frame's time in seconds.
     ///

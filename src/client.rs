@@ -1,3 +1,5 @@
+//! The client in a client-server multiplayer game architecture.
+
 use std::{collections::VecDeque, net::TcpStream};
 
 use rg3d::{
@@ -20,6 +22,10 @@ use rg3d::{
 
 use crate::common::{net, ClientMessage, GameState, Input, Participation, Player, ServerMessage};
 
+/// Game client.
+///
+/// Needs to be connected to a game Server to play. Contains a local copy of the game state
+/// which might not be entirely accurate due to network lag and packet loss.
 pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,

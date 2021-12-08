@@ -14,11 +14,17 @@ pub(crate) enum ClientMessage {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
+    /// Add initial data that is sent to a new player upon connecting.
     InitData(InitData),
+    /// Add a new player to the game.
     AddPlayer(AddPlayer),
+    /// Remove the player and all data associated with him, for example when he disconnects.
     RemovePlayer { player_index: u32 },
+    /// Spawn a new cycle for an existing player.
     SpawnCycle(SpawnCycle),
+    /// Remove the cycle from game state, for example when the player switches to observer mode.
     DespawnCycle { cycle_index: u32 },
+    /// Update the translations, rotations, velocities, etc. of everything.
     UpdatePhysics(UpdatePhysics),
 }
 

@@ -16,7 +16,9 @@ pub(crate) enum ClientMessage {
 pub(crate) enum ServerMessage {
     InitData(InitData),
     AddPlayer(AddPlayer),
+    RemovePlayer { player_index: u32 },
     SpawnCycle(SpawnCycle),
+    DespawnCycle { cycle_index: u32 },
     UpdatePhysics(UpdatePhysics),
 }
 
@@ -28,11 +30,18 @@ pub(crate) struct InitData {
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct AddPlayer {
     pub(crate) player_index: u32,
+    // LATER Name and maybe other fields
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct SpawnCycle {
     pub(crate) player_cycle: PlayerCycle,
+    // LATER If no fields are added here, might as well remove this struct and use the u32 directly in the enum
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct DespawnCycle {
+    pub(crate) cycle_index: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

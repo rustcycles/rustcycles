@@ -233,6 +233,10 @@ impl Client {
                         .spawn_at(add_player.player_index, player)
                         .unwrap();
                 }
+                ServerMessage::RemovePlayer { player_index } => {
+                    dbg!(player_index);
+                    todo!();
+                }
                 ServerMessage::SpawnCycle(spawn_cycle) => {
                     let player_handle = self
                         .gs
@@ -242,6 +246,10 @@ impl Client {
                     let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                     self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
+                }
+                ServerMessage::DespawnCycle { cycle_index } => {
+                    dbg!(cycle_index);
+                    todo!();
                 }
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {

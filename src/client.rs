@@ -38,7 +38,7 @@ pub(crate) struct Client {
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
     buffer: VecDeque<u8>,
-    server_packets: Vec<ServerMessage>,
+    server_messages: Vec<ServerMessage>,
 }
 
 impl Client {
@@ -97,7 +97,7 @@ impl Client {
             camera,
             stream,
             buffer: VecDeque::new(),
-            server_packets: Vec::new(),
+            server_messages: Vec::new(),
         }
     }
 
@@ -204,12 +204,12 @@ impl Client {
     }
 
     fn sys_receive_updates(&mut self) {
-        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_packets); // LATER Clean disconnect
+        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_messages); // LATER Clean disconnect
 
         let scene = &mut self.engine.scenes[self.gs.scene];
 
-        for packet in self.server_packets.drain(..) {
-            match packet {
+        for message in self.server_messages.drain(..) {
+            match message {
                 ServerMessage::InitData(init_data) => {
                     for player_cycle in init_data.player_cycles {
                         let player = Player::new(None);
@@ -380,8 +380,8 @@ impl Client {
 
     /// Send all once-per-frame stuff to the server.
     fn sys_send_input(&mut self) {
-        let packet = ClientMessage::Input(self.ps.input);
-        let network_message = net::serialize(packet);
+        let messsage = ClientMessage::Input(self.ps.input);
+        let network_message = net::serialize(messsage);
         net::send(&network_message, &mut self.stream).unwrap();
     }
 }

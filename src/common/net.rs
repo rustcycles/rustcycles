@@ -42,17 +42,17 @@ pub(crate) fn send(
 }
 
 /// Read bytes from `stream` into `buffer`,
-/// parse packets that are complete and add them to `packets`.
+/// parse messages that are complete and add them to `messages`.
 ///
 /// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
 #[must_use]
-pub(crate) fn receive<P>(
+pub(crate) fn receive<M>(
     stream: &mut TcpStream,
     buffer: &mut VecDeque<u8>,
-    packets: &mut Vec<P>,
+    messages: &mut Vec<M>,
 ) -> bool
 where
-    P: DeserializeOwned,
+    M: DeserializeOwned,
 {
     // Read all available bytes until the stream would block.
     // LATER Test networking thoroughly
@@ -101,7 +101,7 @@ where
         buffer.pop_front();
         let bytes: Vec<_> = buffer.drain(0..content_len).collect();
         let message = bincode::deserialize(&bytes).unwrap();
-        packets.push(message);
+        messages.push(message);
     }
 
     closed

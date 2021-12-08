@@ -94,8 +94,8 @@ impl Server {
                     let add_player = AddPlayer {
                         player_index: player_handle.index(),
                     };
-                    let packet = ServerMessage::AddPlayer(add_player);
-                    self.network_send(packet, SendDest::All);
+                    let message = ServerMessage::AddPlayer(add_player);
+                    self.network_send(message, SendDest::All);
 
                     // Spawn cycle
                     let scene = &mut self.engine.scenes[self.gs.scene];
@@ -108,8 +108,8 @@ impl Server {
                         cycle_index: Some(cycle_handle.index()),
                     };
                     let spawn_cycle = SpawnCycle { player_cycle };
-                    let packet = ServerMessage::SpawnCycle(spawn_cycle);
-                    self.network_send(packet, SendDest::All);
+                    let message = ServerMessage::SpawnCycle(spawn_cycle);
+                    self.network_send(message, SendDest::All);
                 }
                 Err(err) => match err.kind() {
                     ErrorKind::WouldBlock => {
@@ -125,12 +125,12 @@ impl Server {
         // TODO Pool::handle_iter()?
         let mut disconnected = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
-            let mut packets: Vec<ClientMessage> = Vec::new();
-            let closed = net::receive(&mut client.stream, &mut client.buffer, &mut packets);
-            // We might have received valid packets before the stream was closed - handle them
+            let mut messages: Vec<ClientMessage> = Vec::new();
+            let closed = net::receive(&mut client.stream, &mut client.buffer, &mut messages);
+            // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
-            for packet in packets {
-                match packet {
+            for message in messages {
+                match message {
                     ClientMessage::Input(input) => {
                         // LATER (server reconcilliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;
@@ -154,10 +154,10 @@ impl Server {
         let scene = &mut self.engine.scenes[self.gs.scene];
         let client = self.clients.free(client_handle);
         self.gs.free_player(scene, client.player_handle);
-        let packet = ServerMessage::RemovePlayer {
+        let message = ServerMessage::RemovePlayer {
             player_index: client.player_handle.index(),
         };
-        self.network_send(packet, SendDest::All);
+        self.network_send(message, SendDest::All);
     }
 
     fn send_init(&mut self, client_handle: Handle<RemoteClient>) {
@@ -171,8 +171,8 @@ impl Server {
         }
 
         let init_data = InitData { player_cycles };
-        let packet = ServerMessage::InitData(init_data);
-        self.network_send(packet, SendDest::One(client_handle));
+        let message = ServerMessage::InitData(init_data);
+        self.network_send(message, SendDest::One(client_handle));
     }
 
     fn sys_send_update(&mut self) {
@@ -188,16 +188,16 @@ impl Server {
             cycle_physics.push(update);
         }
         let update_physics = UpdatePhysics { cycle_physics };
-        let packet = ServerMessage::UpdatePhysics(update_physics);
-        self.network_send(packet, SendDest::All);
+        let message = ServerMessage::UpdatePhysics(update_physics);
+        self.network_send(message, SendDest::All);
     }
 
-    fn network_send(&mut self, packet: ServerMessage, dest: SendDest) {
+    fn network_send(&mut self, message: ServerMessage, dest: SendDest) {
         // LATER This is incredibly ugly, plus creating the Vec is inafficient.
         //          - Save all streams in a Vec?
         //          - Inline this fn and remove SendDest?
         let mut disconnected = Vec::new();
-        let network_message = net::serialize(packet);
+        let network_message = net::serialize(message);
         match dest {
             SendDest::One(handle) => {
                 if let Err(e) = net::send(&network_message, &mut self.clients[handle].stream) {

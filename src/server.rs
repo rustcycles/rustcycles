@@ -127,6 +127,12 @@ impl Server {
                         // LATER (server reconcilliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;
                     }
+                    ClientMessage::Join => {
+                        todo!();
+                    }
+                    ClientMessage::Observe => {
+                        todo!();
+                    }
                 }
             }
         }

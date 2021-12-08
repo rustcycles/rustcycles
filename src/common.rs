@@ -211,6 +211,8 @@ pub(crate) struct Deg(pub(crate) f32);
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {
     Input(Input),
+    Join,
+    Observe,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

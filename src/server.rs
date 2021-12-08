@@ -100,7 +100,6 @@ impl Server {
                     // Spawn cycle
                     let scene = &mut self.engine.scenes[self.gs.scene];
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
-                    self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
 
                     // Tell all players
                     let player_cycle = PlayerCycle {

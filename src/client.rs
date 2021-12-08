@@ -204,7 +204,11 @@ impl Client {
     }
 
     fn sys_receive_updates(&mut self) {
-        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_messages); // LATER Clean disconnect
+        let _ = net::receive(
+            &mut self.stream,
+            &mut self.buffer,
+            &mut self.server_messages,
+        ); // LATER Clean disconnect
 
         let scene = &mut self.engine.scenes[self.gs.scene];
 
@@ -220,9 +224,7 @@ impl Client {
                             .unwrap();
 
                         if let Some(cycle_index) = player_cycle.cycle_index {
-                            let cycle_handle =
-                                self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                            self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
+                            self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                         }
                     }
                 }
@@ -244,8 +246,7 @@ impl Client {
                         .handle_from_index(spawn_cycle.player_cycle.player_index);
 
                     let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
-                    let cycle_handle = self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                    self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
+                    self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
                     dbg!(cycle_index);

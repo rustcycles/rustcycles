@@ -106,7 +106,6 @@ impl GameState {
         }
     }
 
-    #[must_use]
     pub(crate) fn spawn_cycle(
         &mut self,
         scene: &mut Scene,
@@ -134,11 +133,15 @@ impl GameState {
             body_handle,
             player_handle,
         };
-        if let Some(index) = cycle_index {
+        let cycle_handle = if let Some(index) = cycle_index {
             self.cycles.spawn_at(index, cycle).unwrap()
         } else {
             self.cycles.spawn(cycle)
-        }
+        };
+
+        self.players[player_handle].cycle_handle = Some(cycle_handle);
+
+        cycle_handle
     }
 }
 

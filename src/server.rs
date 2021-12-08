@@ -12,8 +12,11 @@ use rg3d::{
 };
 
 use crate::common::{
-    net, AddPlayer, ClientMessage, CyclePhysics, GameState, InitData, Player, PlayerCycle,
-    ServerMessage, SpawnCycle, UpdatePhysics,
+    messages::{
+        AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage, SpawnCycle,
+        UpdatePhysics,
+    },
+    net, GameState, Player,
 };
 
 /// Game server.

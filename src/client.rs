@@ -20,7 +20,10 @@ use rg3d::{
     },
 };
 
-use crate::common::{net, ClientMessage, GameState, Input, Participation, Player, ServerMessage};
+use crate::common::{
+    messages::{ClientMessage, ServerMessage},
+    net, GameState, Input, Participation, Player,
+};
 
 /// Game client.
 ///

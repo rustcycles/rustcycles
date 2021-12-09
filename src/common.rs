@@ -148,9 +148,9 @@ impl GameState {
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
     // Some things like shooting might need the angle at the exact time
-    // so we send pitch and yaw with each input.
-    pub(crate) pitch: Deg,
+    // so we send yaw and pitch with each input.
     pub(crate) yaw: Deg,
+    pub(crate) pitch: Deg,
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
     pub(crate) forward: bool,
@@ -163,7 +163,7 @@ pub(crate) struct Input {
 impl Debug for Input {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         // Only output the pressed buttons so it's more readable.
-        write!(f, "Input {{ pitch {}° yaw {}° ", self.pitch.0, self.yaw.0)?;
+        write!(f, "Input {{ yaw {}° pitch {}° ", self.yaw.0, self.pitch.0)?;
         if self.fire1 {
             write!(f, "fire1 ")?;
         }

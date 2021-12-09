@@ -13,6 +13,7 @@ pub(crate) enum ClientMessage {
     Chat(String), // LATER Allow sending this
 }
 
+/// Message sent from server to client
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
     /// Add initial data that is sent to a new player upon connecting.

@@ -34,7 +34,7 @@ pub(crate) struct Client {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
     pub(crate) gs: GameState,
-    pub(crate) ps: PlayerState,
+    pub(crate) lp: LocalPlayer,
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
     buffer: VecDeque<u8>,
@@ -93,7 +93,7 @@ impl Client {
             mouse_grabbed: false,
             engine,
             gs,
-            ps: PlayerState::new(),
+            lp: LocalPlayer::new(),
             camera,
             stream,
             buffer: VecDeque::new(),
@@ -124,10 +124,10 @@ impl Client {
         let pressed = input.state == ElementState::Pressed;
         match input.scancode {
             ESC => self.set_mouse_grab(false),
-            W => self.ps.input.forward = pressed,
-            A => self.ps.input.left = pressed,
-            S => self.ps.input.backward = pressed,
-            D => self.ps.input.right = pressed,
+            W => self.lp.input.forward = pressed,
+            A => self.lp.input.left = pressed,
+            S => self.lp.input.backward = pressed,
+            D => self.lp.input.right = pressed,
             c => {
                 if pressed {
                     println!("C pressed scancode: {}", c);
@@ -143,8 +143,8 @@ impl Client {
 
         let pressed = state == ElementState::Pressed;
         match button {
-            rg3d::event::MouseButton::Left => self.ps.input.fire1 = pressed,
-            rg3d::event::MouseButton::Right => self.ps.input.fire2 = pressed,
+            rg3d::event::MouseButton::Left => self.lp.input.fire1 = pressed,
+            rg3d::event::MouseButton::Right => self.lp.input.fire2 = pressed,
             rg3d::event::MouseButton::Middle => {}
             rg3d::event::MouseButton::Other(_) => {}
         }
@@ -159,8 +159,8 @@ impl Client {
         }
 
         // Subtract, don't add the delta X - rotations follow the right hand rule
-        self.ps.input.yaw.0 -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
-        self.ps.input.pitch.0 = (self.ps.input.pitch.0 + delta.1 as f32).clamp(-90.0, 90.0);
+        self.lp.input.yaw.0 -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
+        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + delta.1 as f32).clamp(-90.0, 90.0);
     }
 
     /// Either grab mouse and hide cursor
@@ -268,18 +268,18 @@ impl Client {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         // Join / spec
-        if self.ps.participation == Participation::Observing && self.ps.input.fire1 {
-            self.ps.participation = Participation::Playing;
-        } else if self.ps.participation == Participation::Playing && self.ps.input.fire2 {
-            self.ps.participation = Participation::Observing;
+        if self.lp.participation == Participation::Observing && self.lp.input.fire1 {
+            self.lp.participation = Participation::Playing;
+        } else if self.lp.participation == Participation::Playing && self.lp.input.fire2 {
+            self.lp.participation = Participation::Observing;
         }
 
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
-        let yaw = Rotation3::from_axis_angle(&Vector3::y_axis(), self.ps.input.yaw.0.to_radians());
+        let yaw = Rotation3::from_axis_angle(&Vector3::y_axis(), self.lp.input.yaw.0.to_radians());
         let x = yaw * Vector3::x_axis();
-        let pitch = UnitQuaternion::from_axis_angle(&x, self.ps.input.pitch.0.to_radians());
+        let pitch = UnitQuaternion::from_axis_angle(&x, self.lp.input.pitch.0.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
         let forward = camera
@@ -294,16 +294,16 @@ impl Client {
         // Camera movement
         let mut pos = **camera.local_transform().position();
         let camera_speed = 10.0;
-        if self.ps.input.forward {
+        if self.lp.input.forward {
             pos += forward * dt * camera_speed;
         }
-        if self.ps.input.backward {
+        if self.lp.input.backward {
             pos += -forward * dt * camera_speed;
         }
-        if self.ps.input.left {
+        if self.lp.input.left {
             pos += left * dt * camera_speed;
         }
-        if self.ps.input.right {
+        if self.lp.input.right {
             pos += -left * dt * camera_speed;
         }
         camera.local_transform_mut().set_position(pos);
@@ -381,20 +381,20 @@ impl Client {
 
     /// Send all once-per-frame stuff to the server.
     fn sys_send_input(&mut self) {
-        let messsage = ClientMessage::Input(self.ps.input);
+        let messsage = ClientMessage::Input(self.lp.input);
         let network_message = net::serialize(messsage);
         net::send(&network_message, &mut self.stream).unwrap();
     }
 }
 
-/// State of the *local* player
+/// State of the local player
 #[derive(Debug)]
-pub(crate) struct PlayerState {
+pub(crate) struct LocalPlayer {
     pub(crate) input: Input,
     pub(crate) participation: Participation,
 }
 
-impl PlayerState {
+impl LocalPlayer {
     pub(crate) fn new() -> Self {
         Self {
             input: Input::default(),

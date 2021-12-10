@@ -8,7 +8,7 @@ use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
     core::{
-        algebra::{Vector3, Rotation3},
+        algebra::{Rotation3, Vector3},
         pool::{Handle, Pool},
     },
     engine::{resource_manager::MaterialSearchOptions, Engine},
@@ -18,7 +18,7 @@ use rg3d::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::common::entities::{Cycle, Player};
+use crate::common::entities::{Cycle, Participation, Player};
 
 /// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
@@ -81,7 +81,11 @@ impl GameState {
         let scene = &mut engine.scenes[self.scene];
 
         for cycle in &self.cycles {
-            let input = &self.players[cycle.player_handle].input;
+            let player = &self.players[cycle.player_handle];
+            //if player.participation != Participation::Playing { TODO
+            //    continue;
+            //}
+            let input = player.input;
 
             let rot = Rotation3::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
             let dir = rot * Vector3::z();

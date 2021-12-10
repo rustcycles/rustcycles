@@ -15,6 +15,7 @@ use crate::common::Input;
 #[derive(Debug)]
 pub(crate) struct Player {
     pub(crate) input: Input,
+    pub(crate) participation: Participation,
     pub(crate) cycle_handle: Option<Handle<Cycle>>,
 }
 
@@ -22,6 +23,7 @@ impl Player {
     pub(crate) fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
         Self {
             input: Input::default(),
+            participation: Participation::Observing,
             cycle_handle,
         }
     }

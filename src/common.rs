@@ -8,7 +8,7 @@ use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
     core::{
-        algebra::Vector3,
+        algebra::{Vector3, Rotation3},
         pool::{Handle, Pool},
     },
     engine::{resource_manager::MaterialSearchOptions, Engine},
@@ -80,10 +80,12 @@ impl GameState {
     pub(crate) fn tick(&mut self, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.scene];
 
-        let dir = Vector3::new(0.0, 0.0, 1.0); // TODO camera direction
-
         for cycle in &self.cycles {
             let input = &self.players[cycle.player_handle].input;
+
+            let rot = Rotation3::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
+            let dir = rot * Vector3::z();
+
             if input.fire1 || input.fire2 {
                 let wheel_accel = if input.fire1 {
                     dir * dt * 50.0
@@ -189,3 +191,9 @@ impl Debug for Input {
 
 #[derive(Debug, Clone, Copy, Default, Deserialize, Serialize)]
 pub(crate) struct Deg(pub(crate) f32);
+
+impl Deg {
+    pub(crate) fn to_radians(self) -> f32 {
+        self.0.to_radians()
+    }
+}

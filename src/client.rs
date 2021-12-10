@@ -30,7 +30,7 @@ use crate::common::{
 ///
 /// Needs to be connected to a game Server to play. Contains a local copy of the game state
 /// which might not be entirely accurate due to network lag and packet loss.
-pub(crate) struct Client {
+pub(crate) struct GameClient {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
     pub(crate) gs: GameState,
@@ -41,7 +41,7 @@ pub(crate) struct Client {
     server_messages: Vec<ServerMessage>,
 }
 
-impl Client {
+impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
         let mut connect_attempts = 0;
         let stream = loop {

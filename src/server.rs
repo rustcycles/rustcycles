@@ -23,14 +23,14 @@ use crate::common::{
 /// Game server.
 ///
 /// Lets Clients connect to play. Contains the authoritate copy of the game state.
-pub(crate) struct Server {
+pub(crate) struct GameServer {
     pub(crate) engine: Engine,
     pub(crate) gs: GameState,
     listener: TcpListener,
     clients: Pool<RemoteClient>,
 }
 
-impl Server {
+impl GameServer {
     pub(crate) async fn new(mut engine: Engine) -> Self {
         let gs = GameState::new(&mut engine).await;
 

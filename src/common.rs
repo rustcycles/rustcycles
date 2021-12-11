@@ -103,7 +103,9 @@ impl GameState {
             }
             // FIXME WTF???
             if input.forward || input.backward {
-                // LATER does this allow clipping into geometry?
+                // LATER Does this allow clipping into geometry?
+                //  Use an impulse proportional to mouse movement instead?
+                //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
                 let mut pos = *body.position();
                 pos.rotation = rot;
                 body.set_position(pos, true);

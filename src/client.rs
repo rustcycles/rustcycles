@@ -146,6 +146,7 @@ impl GameClient {
             }
             thread::sleep(Duration::from_millis(10));
         };
+        println!("C local_player_index is {}", lp.player_handle.index());
 
         Self {
             mouse_grabbed: false,

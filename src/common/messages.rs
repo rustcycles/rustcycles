@@ -4,7 +4,7 @@
 
 use crate::common::Input;
 
-use rg3d::core::algebra::Vector3;
+use rg3d::{core::algebra::Vector3, physics3d::Isometry};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -84,6 +84,6 @@ pub(crate) struct UpdatePhysics {
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct CyclePhysics {
     pub(crate) cycle_index: u32,
-    pub(crate) translation: Vector3<f32>,
+    pub(crate) position: Isometry<f32>,
     pub(crate) velocity: Vector3<f32>,
 }

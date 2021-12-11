@@ -322,7 +322,7 @@ impl GameClient {
                     for cycle_physics in update_physics.cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
-                        body.set_translation(cycle_physics.translation, true);
+                        body.set_position(cycle_physics.position, true);
                         body.set_linvel(cycle_physics.velocity, true);
                     }
                 }

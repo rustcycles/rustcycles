@@ -205,7 +205,7 @@ impl GameServer {
             let body = scene.physics.bodies.get(&cycle.body_handle).unwrap();
             let update = CyclePhysics {
                 cycle_index: cycle_handle.index(),
-                translation: *body.translation(),
+                position: *body.position(),
                 velocity: *body.linvel(),
             };
             cycle_physics.push(update);

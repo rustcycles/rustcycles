@@ -8,7 +8,7 @@ use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
     core::{
-        algebra::{Rotation3, Vector3},
+        algebra::{UnitQuaternion, Vector3},
         pool::{Handle, Pool},
     },
     engine::{resource_manager::MaterialSearchOptions, Engine},
@@ -87,20 +87,27 @@ impl GameState {
             }
 
             let input = player.input;
-
-            let rot = Rotation3::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
-            let dir = rot * Vector3::z();
-
+            let rot = UnitQuaternion::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
+            let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
             if input.forward || input.backward {
+                let dir = rot * Vector3::z();
                 let wheel_accel = if input.forward {
                     dir * dt * 50.0
                 } else {
                     -dir * dt * 50.0
                 };
-                let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
+
                 let mut linvel = *body.linvel();
                 linvel += wheel_accel;
                 body.set_linvel(linvel, true);
+            }
+            if input.forward || input.backward {
+                // FIXME WTF???
+                let mut pos = *body.position();
+                pos.rotation = rot;
+                body.set_position(pos, true);
+                // LATER Figure out how to use set_rotation - how to get AngVector from Rotation/UnitQuaternion.
+                //body.set_rotation(rot, true);
             }
         }
     }

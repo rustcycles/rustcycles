@@ -101,8 +101,9 @@ impl GameState {
                 linvel += wheel_accel;
                 body.set_linvel(linvel, true);
             }
+            // FIXME WTF???
             if input.forward || input.backward {
-                // FIXME WTF???
+                // LATER does this allow clipping into geometry?
                 let mut pos = *body.position();
                 pos.rotation = rot;
                 body.set_position(pos, true);

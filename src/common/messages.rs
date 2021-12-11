@@ -28,6 +28,15 @@ pub(crate) enum ServerMessage {
     AddPlayer(AddPlayer),
     /// Remove the player and all data associated with him, for example when he disconnects.
     RemovePlayer { player_index: u32 },
+    /// This player is now observing.
+    Observe { player_index: u32 },
+    /// This player is now spectating.
+    Spectate {
+        player_index: u32,
+        spectatee_index: u32,
+    },
+    /// This player is now playing.
+    Join { player_index: u32 },
     /// Spawn a new cycle for an existing player.
     SpawnCycle(PlayerCycle),
     /// Remove the cycle from game state, for example when the player switches to observer mode.

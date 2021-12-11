@@ -287,6 +287,26 @@ impl GameClient {
                     let player_handle = self.gs.players.handle_from_index(player_index);
                     self.gs.free_player(scene, player_handle);
                 }
+                ServerMessage::Observe { player_index } => {
+                    self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Observing;
+                    println!("C player {} is now observing", player_index);
+                }
+                ServerMessage::Spectate {
+                    player_index,
+                    spectatee_index,
+                } => {
+                    let spectatee_handle = self.gs.players.handle_from_index(spectatee_index);
+                    self.gs.players.at_mut(player_index).unwrap().ps =
+                        PlayerState::Spectating { spectatee_handle };
+                    println!(
+                        "C player {} is now spectating player {}",
+                        player_index, spectatee_index
+                    );
+                }
+                ServerMessage::Join { player_index } => {
+                    self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Playing;
+                    println!("C player {} is now playing", player_index);
+                }
                 ServerMessage::SpawnCycle(PlayerCycle {
                     player_index,
                     cycle_index,
@@ -311,15 +331,15 @@ impl GameClient {
     }
 
     fn tick(&mut self, dt: f32) {
-        let scene = &mut self.engine.scenes[self.gs.scene];
-
         // Join / spec
-        //if self.lp.participation == Participation::Observing && self.lp.input.fire1 {
-        //    self.lp.participation = Participation::Playing;
-        //} else if self.lp.participation == Participation::Playing && self.lp.input.fire2 {
-        //    self.lp.participation = Participation::Observing;
-        //}
+        let ps = self.gs.players[self.lp.player_handle].ps;
+        if ps == PlayerState::Observing && self.lp.input.fire1 {
+            self.network_send(ClientMessage::Join);
+        } else if ps == PlayerState::Playing && self.lp.input.fire2 {
+            self.network_send(ClientMessage::Observe);
+        }
 
+        let scene = &mut self.engine.scenes[self.gs.scene];
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
@@ -427,8 +447,11 @@ impl GameClient {
 
     /// Send all once-per-frame stuff to the server.
     fn sys_send_input(&mut self) {
-        let messsage = ClientMessage::Input(self.lp.input);
-        let network_message = net::serialize(messsage);
+        self.network_send(ClientMessage::Input(self.lp.input));
+    }
+
+    fn network_send(&mut self, message: ClientMessage) {
+        let network_message = net::serialize(message);
         net::send(&network_message, &mut self.stream).unwrap();
     }
 }

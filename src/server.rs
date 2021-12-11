@@ -118,6 +118,7 @@ impl GameServer {
 
     fn sys_receive(&mut self) {
         let mut disconnected = Vec::new();
+        let mut messages_to_all = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
             let mut messages: Vec<ClientMessage> = Vec::new();
             let closed = net::receive(&mut client.stream, &mut client.buffer, &mut messages);
@@ -135,9 +136,17 @@ impl GameServer {
                     }
                     ClientMessage::Join => {
                         self.gs.players[client.player_handle].ps = PlayerState::Playing;
+                        let player_index = client.player_handle.index();
+                        println!("S player {} is now playing", player_index);
+                        let msg = ServerMessage::Join { player_index };
+                        messages_to_all.push(msg);
                     }
                     ClientMessage::Observe => {
                         self.gs.players[client.player_handle].ps = PlayerState::Observing;
+                        let player_index = client.player_handle.index();
+                        println!("S player {} is now observing", player_index);
+                        let msg = ServerMessage::Observe { player_index };
+                        messages_to_all.push(msg);
                     }
                 }
             }
@@ -147,6 +156,9 @@ impl GameServer {
         }
         for client_handle in disconnected {
             self.disconnect(client_handle);
+        }
+        for message in messages_to_all {
+            self.network_send(message, SendDest::All);
         }
     }
 

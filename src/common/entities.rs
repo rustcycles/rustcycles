@@ -37,9 +37,9 @@ pub(crate) enum PlayerState {
     Observing,
     /// The player is watching another player's POV - LATER
     #[allow(dead_code)]
-    Spectating, // (Handle<Player>),
+    Spectating { spectatee_handle: Handle<Player> },
     /// The player is playing
-    Playing, //(Handle<Player>),
+    Playing,
 }
 
 #[derive(Debug)]

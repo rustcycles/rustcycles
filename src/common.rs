@@ -82,17 +82,17 @@ impl GameState {
 
         for cycle in &self.cycles {
             let player = &self.players[cycle.player_handle];
-            // if player.ps != PlayerState::Playing {
-            //     continue;
-            // } FIXME
+            if player.ps != PlayerState::Playing {
+                continue;
+            }
 
             let input = player.input;
 
             let rot = Rotation3::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
             let dir = rot * Vector3::z();
 
-            if input.fire1 || input.fire2 {
-                let wheel_accel = if input.fire1 {
+            if input.forward || input.backward {
+                let wheel_accel = if input.forward {
                     dir * dt * 50.0
                 } else {
                     -dir * dt * 50.0

@@ -21,8 +21,8 @@ use rg3d::{
 };
 
 use crate::common::{
-    entities::{Participation, Player},
-    messages::{ClientMessage, ServerMessage},
+    entities::{Player, PlayerState},
+    messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
     net, GameState, Input,
 };
 
@@ -214,18 +214,33 @@ impl GameClient {
 
         for message in self.server_messages.drain(..) {
             match message {
-                ServerMessage::InitData(init_data) => {
-                    for player_cycle in init_data.player_cycles {
+                ServerMessage::InitData(InitData {
+                    player_indices,
+                    local_player_index,
+                    player_cycles,
+                    player_projectiles,
+                }) => {
+                    for player_index in player_indices {
                         let player = Player::new(None);
-                        let player_handle = self
-                            .gs
-                            .players
-                            .spawn_at(player_cycle.player_index, player)
-                            .unwrap();
+                        self.gs.players.spawn_at(player_index, player).unwrap();
+                    }
+                    self.lp.player_handle = self.gs.players.handle_from_index(local_player_index);
 
-                        if let Some(cycle_index) = player_cycle.cycle_index {
-                            self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                        }
+                    for PlayerCycle {
+                        player_index,
+                        cycle_index,
+                    } in player_cycles
+                    {
+                        let player_handle = self.gs.players.handle_from_index(player_index);
+                        self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
+                    }
+
+                    for PlayerProjectile {
+                        player_index: _,
+                        projectile_index: _,
+                    } in player_projectiles
+                    {
+                        todo!("init projectiles");
                     }
                 }
                 ServerMessage::AddPlayer(add_player) => {
@@ -239,13 +254,11 @@ impl GameClient {
                     let player_handle = self.gs.players.handle_from_index(player_index);
                     self.gs.free_player(scene, player_handle);
                 }
-                ServerMessage::SpawnCycle(spawn_cycle) => {
-                    let player_handle = self
-                        .gs
-                        .players
-                        .handle_from_index(spawn_cycle.player_cycle.player_index);
-
-                    let cycle_index = spawn_cycle.player_cycle.cycle_index.unwrap();
+                ServerMessage::SpawnCycle(PlayerCycle {
+                    player_index,
+                    cycle_index,
+                }) => {
+                    let player_handle = self.gs.players.handle_from_index(player_index);
                     self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
@@ -268,11 +281,11 @@ impl GameClient {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         // Join / spec
-        if self.lp.participation == Participation::Observing && self.lp.input.fire1 {
-            self.lp.participation = Participation::Playing;
-        } else if self.lp.participation == Participation::Playing && self.lp.input.fire2 {
-            self.lp.participation = Participation::Observing;
-        }
+        //if self.lp.participation == Participation::Observing && self.lp.input.fire1 {
+        //    self.lp.participation = Participation::Playing;
+        //} else if self.lp.participation == Participation::Playing && self.lp.input.fire2 {
+        //    self.lp.participation = Participation::Observing;
+        //}
 
         let camera = &mut scene.graph[self.camera];
 
@@ -390,15 +403,15 @@ impl GameClient {
 /// State of the local player
 #[derive(Debug)]
 pub(crate) struct LocalPlayer {
+    pub(crate) player_handle: Handle<Player>,
     pub(crate) input: Input,
-    pub(crate) participation: Participation,
 }
 
 impl LocalPlayer {
     pub(crate) fn new() -> Self {
         Self {
+            player_handle: Handle::NONE, // FIXME don't use NONE
             input: Input::default(),
-            participation: Participation::Observing,
         }
     }
 }

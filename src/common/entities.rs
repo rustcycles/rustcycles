@@ -12,10 +12,11 @@ use rg3d::{core::pool::Handle, physics3d::RigidBodyHandle, scene::node::Node};
 
 use crate::common::Input;
 
+/// A client connected to a server. Can be observing, spectating or playing.
 #[derive(Debug)]
 pub(crate) struct Player {
     pub(crate) input: Input,
-    pub(crate) participation: Participation,
+    pub(crate) ps: PlayerState,
     pub(crate) cycle_handle: Option<Handle<Cycle>>,
 }
 
@@ -23,21 +24,22 @@ impl Player {
     pub(crate) fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
         Self {
             input: Input::default(),
-            participation: Participation::Observing,
+            ps: PlayerState::Observing,
             cycle_handle,
         }
     }
 }
 
+/// How the player is participating in the game.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Participation {
+pub(crate) enum PlayerState {
     /// The player is a freely floating camera observing the game.
     Observing,
     /// The player is watching another player's POV - LATER
     #[allow(dead_code)]
-    Spectating,
+    Spectating, // (Handle<Player>),
     /// The player is playing
-    Playing,
+    Playing, //(Handle<Player>),
 }
 
 #[derive(Debug)]

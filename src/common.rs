@@ -18,7 +18,7 @@ use rg3d::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::common::entities::{Cycle, Participation, Player};
+use crate::common::entities::{Cycle, Player, PlayerState};
 
 /// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
@@ -82,9 +82,10 @@ impl GameState {
 
         for cycle in &self.cycles {
             let player = &self.players[cycle.player_handle];
-            //if player.participation != Participation::Playing { TODO
-            //    continue;
-            //}
+            // if player.ps != PlayerState::Playing {
+            //     continue;
+            // } FIXME
+
             let input = player.input;
 
             let rot = Rotation3::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());

@@ -12,10 +12,9 @@ use rg3d::{
 };
 
 use crate::common::{
-    entities::Player,
+    entities::{Player, PlayerState},
     messages::{
-        AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage, SpawnCycle,
-        UpdatePhysics,
+        AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage, UpdatePhysics,
     },
     net, GameState,
 };
@@ -78,24 +77,22 @@ impl GameServer {
                     stream.set_nonblocking(true).unwrap();
                     println!("S accept {}", addr);
 
-                    // Create client
-                    let client = RemoteClient::new(stream, addr, Handle::NONE);
-                    let client_handle = self.clients.spawn(client);
-                    // This is intentionally before spawning entities
-                    // 1) we can differentiate between syncing existing entities to new clients
-                    //      and spawning new entities - there might be spawn effects/sounds.
-                    // 2) we can add support for players without cycles - observers/spectators.
-                    self.send_init(client_handle);
-
                     // Add player
+                    // This is sent to all clients except the new one.
                     let player = Player::new(None);
                     let player_handle = self.gs.players.spawn(player);
-                    self.clients[client_handle].player_handle = player_handle;
                     let add_player = AddPlayer {
+                        name: "Player".to_owned(), // LATER from client
                         player_index: player_handle.index(),
                     };
                     let message = ServerMessage::AddPlayer(add_player);
                     self.network_send(message, SendDest::All);
+
+                    // Create client
+                    // This is after adding the player so that we can sent the new client its own player index.
+                    let client = RemoteClient::new(stream, addr, player_handle);
+                    let client_handle = self.clients.spawn(client);
+                    self.send_init(client_handle);
 
                     // Spawn cycle
                     let scene = &mut self.engine.scenes[self.gs.scene];
@@ -104,10 +101,9 @@ impl GameServer {
                     // Tell all players
                     let player_cycle = PlayerCycle {
                         player_index: player_handle.index(),
-                        cycle_index: Some(cycle_handle.index()),
+                        cycle_index: cycle_handle.index(),
                     };
-                    let spawn_cycle = SpawnCycle { player_cycle };
-                    let message = ServerMessage::SpawnCycle(spawn_cycle);
+                    let message = ServerMessage::SpawnCycle(player_cycle);
                     self.network_send(message, SendDest::All);
                 }
                 Err(err) => match err.kind() {
@@ -138,6 +134,12 @@ impl GameServer {
                         dbg!(chat);
                         todo!();
                     }
+                    ClientMessage::Join => {
+                        self.gs.players[client.player_handle].ps = PlayerState::Playing;
+                    }
+                    ClientMessage::Observe => {
+                        self.gs.players[client.player_handle].ps = PlayerState::Observing;
+                    }
                 }
             }
             if closed {
@@ -160,16 +162,27 @@ impl GameServer {
     }
 
     fn send_init(&mut self, client_handle: Handle<RemoteClient>) {
+        let mut player_indices = Vec::new();
+        for (player_handle, _) in self.gs.players.pair_iter() {
+            player_indices.push(player_handle.index());
+        }
+        let local_player_index = self.clients[client_handle].player_handle.index();
+
         let mut player_cycles = Vec::new();
-        for (player_handle, player) in self.gs.players.pair_iter() {
+        for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
             let init_player = PlayerCycle {
-                player_index: player_handle.index(),
-                cycle_index: player.cycle_handle.map(|handle| handle.index()),
+                player_index: cycle.player_handle.index(),
+                cycle_index: cycle_handle.index(),
             };
             player_cycles.push(init_player);
         }
 
-        let init_data = InitData { player_cycles };
+        let init_data = InitData {
+            player_indices,
+            local_player_index,
+            player_cycles,
+            player_projectiles: Vec::new(), // LATER
+        };
         let message = ServerMessage::InitData(init_data);
         self.network_send(message, SendDest::One(client_handle));
     }

@@ -11,19 +11,25 @@ use serde::{Deserialize, Serialize};
 pub(crate) enum ClientMessage {
     Input(Input),
     Chat(String), // LATER Allow sending this
+    Join,
+    Observe,
 }
 
 /// Message sent from server to client
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {
-    /// Add initial data that is sent to a new player upon connecting.
+    /// Initial game state that is sent to a new player upon connecting.
+    ///
+    /// This is intentionally separate from messages such as AddPlayer or SpawnCycle
+    /// because eventually those might trigger additional effects
+    /// such as info messages, sounds, particles, etc.
     InitData(InitData),
     /// Add a new player to the game.
     AddPlayer(AddPlayer),
     /// Remove the player and all data associated with him, for example when he disconnects.
     RemovePlayer { player_index: u32 },
     /// Spawn a new cycle for an existing player.
-    SpawnCycle(SpawnCycle),
+    SpawnCycle(PlayerCycle),
     /// Remove the cycle from game state, for example when the player switches to observer mode.
     DespawnCycle { cycle_index: u32 },
     /// Update the translations, rotations, velocities, etc. of everything.
@@ -32,19 +38,16 @@ pub(crate) enum ServerMessage {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct InitData {
+    pub(crate) player_indices: Vec<u32>,
+    pub(crate) local_player_index: u32,
     pub(crate) player_cycles: Vec<PlayerCycle>,
+    pub(crate) player_projectiles: Vec<PlayerProjectile>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct AddPlayer {
     pub(crate) player_index: u32,
-    // LATER Name and maybe other fields
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct SpawnCycle {
-    pub(crate) player_cycle: PlayerCycle,
-    // LATER If no fields are added here, might as well remove this struct and use the u32 directly in the enum
+    pub(crate) name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -55,7 +58,13 @@ pub(crate) struct DespawnCycle {
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct PlayerCycle {
     pub(crate) player_index: u32,
-    pub(crate) cycle_index: Option<u32>,
+    pub(crate) cycle_index: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct PlayerProjectile {
+    pub(crate) player_index: u32,
+    pub(crate) projectile_index: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

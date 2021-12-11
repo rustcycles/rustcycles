@@ -1,6 +1,6 @@
 //! The client in a client-server multiplayer game architecture.
 
-use std::{collections::VecDeque, net::TcpStream};
+use std::{collections::VecDeque, net::TcpStream, thread, time::Duration};
 
 use rg3d::{
     core::{
@@ -44,20 +44,23 @@ pub(crate) struct GameClient {
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
         let mut connect_attempts = 0;
-        let stream = loop {
+        let mut stream = loop {
             connect_attempts += 1;
-            // LATER Don't block the main thread.
+            // LATER Don't block the main thread - no sleep in async
             // LATER Limit the number of attempts.
             if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
                 println!("C connect attempts: {}", connect_attempts);
                 break stream;
             }
-            // LATER Maybe add a short delay (test local vs remove server)?
+            if connect_attempts % 100 == 0 {
+                println!("C connect attempts: {}", connect_attempts);
+            }
+            thread::sleep(Duration::from_millis(10));
         };
         stream.set_nodelay(true).unwrap();
         stream.set_nonblocking(true).unwrap();
 
-        let gs = GameState::new(&mut engine).await;
+        let mut gs = GameState::new(&mut engine).await;
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
@@ -89,15 +92,70 @@ impl GameClient {
         )
         .build(&mut scene.graph);
 
+        let mut buffer = VecDeque::new();
+        let mut server_messages = Vec::new();
+
+        let mut init_attempts = 0;
+        let lp = loop {
+            init_attempts += 1;
+            let closed = net::receive(&mut stream, &mut buffer, &mut server_messages);
+            if closed {
+                panic!("connection closed before init"); // LATER Don't crash
+            }
+            if !server_messages.is_empty() {
+                let message = server_messages.remove(0);
+                if let ServerMessage::InitData(InitData {
+                    player_indices,
+                    local_player_index,
+                    player_cycles,
+                    player_projectiles,
+                }) = message
+                {
+                    for player_index in player_indices {
+                        let player = Player::new(None);
+                        gs.players.spawn_at(player_index, player).unwrap();
+                    }
+                    let local_player_handle = gs.players.handle_from_index(local_player_index);
+                    let lp = LocalPlayer::new(local_player_handle);
+
+                    for PlayerCycle {
+                        player_index,
+                        cycle_index,
+                    } in player_cycles
+                    {
+                        let player_handle = gs.players.handle_from_index(player_index);
+                        gs.spawn_cycle(scene, player_handle, Some(cycle_index));
+                    }
+
+                    for PlayerProjectile {
+                        player_index: _,
+                        projectile_index: _,
+                    } in player_projectiles
+                    {
+                        todo!("init projectiles");
+                    }
+
+                    println!("C init attempts: {}", init_attempts);
+                    break lp;
+                } else {
+                    panic!("First message wasn't init"); // LATER Don't crash
+                }
+            }
+            if init_attempts % 100 == 0 {
+                println!("C init attempts: {}", init_attempts);
+            }
+            thread::sleep(Duration::from_millis(10));
+        };
+
         Self {
             mouse_grabbed: false,
             engine,
             gs,
-            lp: LocalPlayer::new(),
+            lp,
             camera,
             stream,
-            buffer: VecDeque::new(),
-            server_messages: Vec::new(),
+            buffer,
+            server_messages,
         }
     }
 
@@ -214,34 +272,8 @@ impl GameClient {
 
         for message in self.server_messages.drain(..) {
             match message {
-                ServerMessage::InitData(InitData {
-                    player_indices,
-                    local_player_index,
-                    player_cycles,
-                    player_projectiles,
-                }) => {
-                    for player_index in player_indices {
-                        let player = Player::new(None);
-                        self.gs.players.spawn_at(player_index, player).unwrap();
-                    }
-                    self.lp.player_handle = self.gs.players.handle_from_index(local_player_index);
-
-                    for PlayerCycle {
-                        player_index,
-                        cycle_index,
-                    } in player_cycles
-                    {
-                        let player_handle = self.gs.players.handle_from_index(player_index);
-                        self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                    }
-
-                    for PlayerProjectile {
-                        player_index: _,
-                        projectile_index: _,
-                    } in player_projectiles
-                    {
-                        todo!("init projectiles");
-                    }
+                ServerMessage::InitData(_) => {
+                    panic!("Received unexpected init")
                 }
                 ServerMessage::AddPlayer(add_player) => {
                     let player = Player::new(None);
@@ -408,9 +440,9 @@ pub(crate) struct LocalPlayer {
 }
 
 impl LocalPlayer {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(player_handle: Handle<Player>) -> Self {
         Self {
-            player_handle: Handle::NONE, // FIXME don't use NONE
+            player_handle,
             input: Input::default(),
         }
     }

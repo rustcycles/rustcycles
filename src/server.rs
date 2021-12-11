@@ -117,7 +117,6 @@ impl GameServer {
     }
 
     fn sys_receive(&mut self) {
-        // TODO Pool::handle_iter()?
         let mut disconnected = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
             let mut messages: Vec<ClientMessage> = Vec::new();

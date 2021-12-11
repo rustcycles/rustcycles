@@ -56,9 +56,9 @@ where
 {
     // Read all available bytes until the stream would block.
     // LATER Test networking thoroughly
-    //      - large amounts of data
     //      - lossy and slow connections
     //      - fragmented and merged packets
+    // LATER(security) Test large amounts of data
     let mut closed = false;
     loop {
         // No particular reason for the buffer size, except BufReader uses the same.

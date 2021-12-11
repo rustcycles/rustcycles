@@ -132,7 +132,7 @@ impl GameServer {
                     }
                     ClientMessage::Chat(chat) => {
                         dbg!(chat);
-                        todo!();
+                        todo!("ClientMessage::Chat");
                     }
                     ClientMessage::Join => {
                         self.gs.players[client.player_handle].ps = PlayerState::Playing;

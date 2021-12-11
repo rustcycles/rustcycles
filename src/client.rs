@@ -263,7 +263,7 @@ impl GameClient {
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
                     dbg!(cycle_index);
-                    todo!();
+                    todo!("despawn cycle");
                 }
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {

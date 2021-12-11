@@ -20,7 +20,7 @@ use client::GameClient;
 use server::GameServer;
 
 // Master TODO list:
-// MVP:
+// v0.1 - MVP:
 //  - [x] Arena and wheel models
 //  - [x] Rotate the camera
 //  - [x] Move the camera
@@ -28,7 +28,7 @@ use server::GameServer;
 //  - [x] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
-// v0.1:
+// v0.2:
 //  - [x] Readme
 //  - [x] GH social preview (screenshot)
 //  - [ ] CI, audit, badges
@@ -38,13 +38,19 @@ use server::GameServer;
 //      - [ ] Poles - there's many - check perf
 //      - [ ] Everything - is it possible to tunnel through at high speeds?
 //          - Yes - try CCD?
+//  - [ ] Use proper lights instead of just ambient light
 //  - [ ] Texture the whole arena
 //  - [ ] Finish RustCycle model
 //  - [ ] Skybox - fractal resembling stars?
-//  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
 // All the LATERs
 //  - They mean something can be done better but marking it as a todo would be just noise when grepping.
 //    They're things I'd do if I had infinite time and wanted to make the project perfect.
+//    As the game matures, some of them might be promoted to todos.
+
+// LATERs:
+//  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
+//  - [ ] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
+//  - [ ] If possible, lint against unwrap, print, println, dbg, ...
 
 #[derive(StructOpt, Debug)]
 struct Opts {

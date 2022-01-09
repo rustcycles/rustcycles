@@ -50,7 +50,6 @@ impl GameState {
             .resource_manager
             .request_model(
                 "data/arena/arena.rgs",
-                //MaterialSearchOptions::UsePathDirectly, FIXME
             )
             .await
             .unwrap()

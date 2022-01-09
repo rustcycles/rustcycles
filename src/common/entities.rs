@@ -8,7 +8,7 @@
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
 
-use rg3d::{core::pool::Handle, physics3d::RigidBodyHandle, scene::node::Node};
+use rg3d::{core::pool::Handle, scene::node::Node};
 
 use crate::common::Input;
 
@@ -44,7 +44,7 @@ pub(crate) enum PlayerState {
 
 #[derive(Debug)]
 pub(crate) struct Cycle {
-    pub(crate) node_handle: Handle<Node>,
-    pub(crate) body_handle: RigidBodyHandle,
+    pub(crate) node_handle: Handle<Node>, // TODO needed?
+    pub(crate) body_handle: Handle<Node>,
     pub(crate) player_handle: Handle<Player>,
 }

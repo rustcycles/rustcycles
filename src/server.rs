@@ -202,11 +202,12 @@ impl GameServer {
         let scene = &self.engine.scenes[self.gs.scene];
         let mut cycle_physics = Vec::new();
         for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
-            let body = scene.physics.bodies.get(&cycle.body_handle).unwrap();
+            let body = scene.graph[cycle.body_handle].as_rigid_body();
             let update = CyclePhysics {
                 cycle_index: cycle_handle.index(),
-                position: *body.position(),
-                velocity: *body.linvel(),
+                translation: **body.local_transform().position(),
+                rotation: **body.local_transform().rotation(),
+                velocity: body.lin_vel(),
             };
             cycle_physics.push(update);
         }

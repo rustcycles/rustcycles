@@ -66,7 +66,7 @@ impl GameClient {
         // LATER Report error if loading fails
         let top = engine
             .resource_manager
-            .request_texture("data/skybox/top.png", None)
+            .request_texture("data/skybox/top.png")
             .await
             .ok();
 
@@ -321,9 +321,10 @@ impl GameClient {
                 ServerMessage::UpdatePhysics(update_physics) => {
                     for cycle_physics in update_physics.cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
-                        let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
-                        body.set_position(cycle_physics.position, true);
-                        body.set_linvel(cycle_physics.velocity, true);
+                        let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
+                        body.local_transform_mut().set_position(cycle_physics.translation);
+                        body.local_transform_mut().set_rotation(cycle_physics.rotation);
+                        body.set_lin_vel(cycle_physics.velocity);
                     }
                 }
             }
@@ -413,7 +414,7 @@ impl GameClient {
         }
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
-        //scene.physics.draw(&mut scene.drawing_context);
+        scene.graph.physics.draw(&mut scene.drawing_context);
 
         /*let pos1 = scene
             .physics

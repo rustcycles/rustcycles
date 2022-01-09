@@ -11,10 +11,9 @@ use rg3d::{
         algebra::{UnitQuaternion, Vector3},
         pool::{Handle, Pool},
     },
-    engine::{resource_manager::MaterialSearchOptions, Engine},
-    physics3d::rapier::prelude::*,
+    engine::Engine,
     resource::model::Model,
-    scene::Scene,
+    scene::{base::BaseBuilder, rigidbody::RigidBodyBuilder, transform::TransformBuilder, Scene},
 };
 use serde::{Deserialize, Serialize};
 
@@ -44,14 +43,14 @@ impl GameState {
         // NOTE: It might not actually be the floor that's causing it,
         // it seems to happen when passing between poles.
         // LATER Maybe there is a way to solve this by filtering collisions with the floor?
-        scene.physics.integration_parameters.max_ccd_substeps = 100;
+        //scene.physics.integration_parameters.max_ccd_substeps = 100; FIXME rg3d 0.24
         // LATER allow changing scene.physics.integration_parameters.dt ?
 
         engine
             .resource_manager
             .request_model(
                 "data/arena/arena.rgs",
-                MaterialSearchOptions::UsePathDirectly,
+                //MaterialSearchOptions::UsePathDirectly, FIXME
             )
             .await
             .unwrap()
@@ -59,10 +58,7 @@ impl GameState {
 
         let cycle_model = engine
             .resource_manager
-            .request_model(
-                "data/rustcycle/rustcycle.fbx",
-                MaterialSearchOptions::RecursiveUp,
-            )
+            .request_model("data/rustcycle/rustcycle.fbx")
             .await
             .unwrap();
 
@@ -88,7 +84,7 @@ impl GameState {
 
             let input = player.input;
             let rot = UnitQuaternion::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
-            let body = scene.physics.bodies.get_mut(&cycle.body_handle).unwrap();
+            let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if input.forward || input.backward {
                 let dir = rot * Vector3::z();
                 let wheel_accel = if input.forward {
@@ -97,9 +93,9 @@ impl GameState {
                     -dir * dt * 50.0
                 };
 
-                let mut linvel = *body.linvel();
-                linvel += wheel_accel;
-                body.set_linvel(linvel, true);
+                let mut lin_vel = body.lin_vel();
+                lin_vel += wheel_accel;
+                body.set_lin_vel(lin_vel);
             }
 
             //scene.graph[cycle.node_handle].local_transform_mut().set_rotation(rot);
@@ -108,7 +104,7 @@ impl GameState {
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
             //body.set_rotation(rot.scaled_axis(), true); // FIXME
-            body.set_rotation(Vector3::y() * self.game_time, true);
+            //body.set_rotation(Vector3::y() * self.game_time, true); FIXME removed when moving to rg3d 0.24
         }
     }
 
@@ -127,20 +123,34 @@ impl GameState {
         cycle_index: Option<u32>,
     ) -> Handle<Cycle> {
         let node_handle = self.cycle_model.instantiate_geometry(scene);
-        let body_handle = scene.physics.add_body(
-            RigidBodyBuilder::new_dynamic()
-                .ccd_enabled(true)
-                .lock_rotations()
-                .translation(Vector3::new(-1.0, 5.0, 0.0))
-                .build(),
-        );
-        scene.physics.add_collider(
-            // Size manually copied from the result of rusty-editor's Fit Collider
-            // LATER Remove rustcycle.rgs?
-            ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
-            &body_handle,
-        );
-        scene.physics_binder.bind(node_handle, body_handle);
+        let body_handle = RigidBodyBuilder::new(
+            BaseBuilder::new()
+                .with_local_transform(
+                    TransformBuilder::new()
+                        .with_local_position(Vector3::new(-1.0, 5.0, 0.0))
+                        .build(),
+                )
+                .with_children(&[node_handle]),
+        )
+        .with_ccd_enabled(true)
+        .with_locked_rotations(true)
+        .build(&mut scene.graph);
+        // with_can_sleep(false)? FIXME
+
+        // let body_handle = scene.physics.add_body(
+        //     RigidBodyBuilder::new_dynamic()
+        //         .ccd_enabled(true)
+        //         .lock_rotations()
+        //         .translation(Vector3::new(-1.0, 5.0, 0.0))
+        //         .build(),
+        // );
+        // scene.physics.add_collider(
+        //     // Size manually copied from the result of rusty-editor's Fit Collider
+        //     // LATER Remove rustcycle.rgs?
+        //     ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
+        //     &body_handle,
+        // );
+        // scene.physics_binder.bind(node_handle, body_handle);
 
         let cycle = Cycle {
             node_handle,

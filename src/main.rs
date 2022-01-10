@@ -55,6 +55,7 @@ use server::GameServer;
 // TODO rg3d bugs:
 //  rendering nondeterm
 //  rbody attached differently in editor vs game
+//  Not being able to find .options files shouldn't be a warning
 
 #[derive(StructOpt, Debug)]
 struct Opts {

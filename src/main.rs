@@ -52,6 +52,10 @@ use server::GameServer;
 //  - [ ] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
 //  - [ ] If possible, lint against unwrap, print, println, dbg, ...
 
+// TODO rg3d bugs:
+//  rendering nondeterm
+//  rbody attached differently in editor vs game
+
 #[derive(StructOpt, Debug)]
 struct Opts {
     /// Use a window instead of fullscreen (doesn't apply to server)

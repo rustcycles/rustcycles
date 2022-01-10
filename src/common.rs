@@ -13,7 +13,13 @@ use rg3d::{
     },
     engine::Engine,
     resource::model::Model,
-    scene::{base::BaseBuilder, rigidbody::RigidBodyBuilder, transform::TransformBuilder, Scene},
+    scene::{
+        base::BaseBuilder,
+        collider::{ColliderBuilder, ColliderShape},
+        rigidbody::RigidBodyBuilder,
+        transform::TransformBuilder,
+        Scene,
+    },
 };
 use serde::{Deserialize, Serialize};
 
@@ -48,9 +54,7 @@ impl GameState {
 
         engine
             .resource_manager
-            .request_model(
-                "data/arena/arena.rgs",
-            )
+            .request_model("data/arena/arena.rgs")
             .await
             .unwrap()
             .instantiate_geometry(&mut scene);
@@ -122,6 +126,11 @@ impl GameState {
         cycle_index: Option<u32>,
     ) -> Handle<Cycle> {
         let node_handle = self.cycle_model.instantiate_geometry(scene);
+        let collider_handle = ColliderBuilder::new(BaseBuilder::new())
+            // Size manually copied from the result of rusty-editor's Fit Collider
+            // LATER Remove rustcycle.rgs?
+            .with_shape(ColliderShape::cuboid(0.125, 0.271, 0.271))
+            .build(&mut scene.graph);
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()
                 .with_local_transform(
@@ -129,27 +138,12 @@ impl GameState {
                         .with_local_position(Vector3::new(-1.0, 5.0, 0.0))
                         .build(),
                 )
-                .with_children(&[node_handle]),
+                .with_children(&[node_handle, collider_handle]),
         )
         .with_ccd_enabled(true)
         .with_locked_rotations(true)
         .build(&mut scene.graph);
         // with_can_sleep(false)? FIXME
-
-        // let body_handle = scene.physics.add_body(
-        //     RigidBodyBuilder::new_dynamic()
-        //         .ccd_enabled(true)
-        //         .lock_rotations()
-        //         .translation(Vector3::new(-1.0, 5.0, 0.0))
-        //         .build(),
-        // );
-        // scene.physics.add_collider(
-        //     // Size manually copied from the result of rusty-editor's Fit Collider
-        //     // LATER Remove rustcycle.rgs?
-        //     ColliderBuilder::cuboid(0.125, 0.271, 0.271).build(),
-        //     &body_handle,
-        // );
-        // scene.physics_binder.bind(node_handle, body_handle);
 
         let cycle = Cycle {
             node_handle,

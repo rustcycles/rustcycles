@@ -142,8 +142,8 @@ impl GameState {
         )
         .with_ccd_enabled(true)
         .with_locked_rotations(true)
+        .with_can_sleep(false)
         .build(&mut scene.graph);
-        // with_can_sleep(false)? FIXME
 
         let cycle = Cycle {
             node_handle,

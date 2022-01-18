@@ -361,26 +361,26 @@ impl GameClient {
             .unwrap_or_else(Vector3::x);
 
         // Camera movement
-        let mut pos = **camera.local_transform().position();
+        let mut camera_pos = **camera.local_transform().position();
         let camera_speed = 10.0;
         if self.lp.input.forward {
-            pos += forward * dt * camera_speed;
+            camera_pos += forward * dt * camera_speed;
         }
         if self.lp.input.backward {
-            pos += -forward * dt * camera_speed;
+            camera_pos += -forward * dt * camera_speed;
         }
         if self.lp.input.left {
-            pos += left * dt * camera_speed;
+            camera_pos += left * dt * camera_speed;
         }
         if self.lp.input.right {
-            pos += -left * dt * camera_speed;
+            camera_pos += -left * dt * camera_speed;
         }
-        camera.local_transform_mut().set_position(pos);
+        camera.local_transform_mut().set_position(camera_pos);
 
         // Debug
         scene.drawing_context.clear_lines();
 
-        let mut debug_cross = |pos, color| {
+        let mut debug_cross = |pos, color, from_origin| {
             let radius = 0.5;
             let dir = Vector3::new(1.0, 1.0, 1.0) * radius;
             scene.drawing_context.add_line(Line {
@@ -409,13 +409,21 @@ impl GameClient {
                 end: pos + dir,
                 color,
             });
+
+            if from_origin {
+                scene.drawing_context.add_line(Line {
+                    begin: Vector3::zeros(),
+                    end: pos,
+                    color,
+                });
+            }
         };
 
         for cycle in &self.gs.cycles {
-            scene.graph[cycle.node_handle].global_position();
-            debug_cross(pos, Color::GREEN);
+            let pos = scene.graph[cycle.node_handle].global_position();
+            debug_cross(pos, Color::GREEN, false);
         }
-        debug_cross(Vector3::new(5.0, 5.0, 5.0), Color::WHITE);
+        debug_cross(Vector3::new(5.0, 5.0, 5.0), Color::WHITE, false);
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);

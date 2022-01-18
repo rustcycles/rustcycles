@@ -322,8 +322,10 @@ impl GameClient {
                     for cycle_physics in update_physics.cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
-                        body.local_transform_mut().set_position(cycle_physics.translation);
-                        body.local_transform_mut().set_rotation(cycle_physics.rotation);
+                        body.local_transform_mut()
+                            .set_position(cycle_physics.translation);
+                        body.local_transform_mut()
+                            .set_rotation(cycle_physics.rotation);
                         body.set_lin_vel(cycle_physics.velocity);
                     }
                 }
@@ -379,28 +381,29 @@ impl GameClient {
         scene.drawing_context.clear_lines();
 
         let mut debug_cross = |pos, color| {
-            let dir = Vector3::new(1.0, 1.0, 1.0) * 0.25;
+            let radius = 0.5;
+            let dir = Vector3::new(1.0, 1.0, 1.0) * radius;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(-1.0, 1.0, 1.0) * 0.25;
+            let dir = Vector3::new(-1.0, 1.0, 1.0) * radius;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(1.0, 1.0, -1.0) * 0.25;
+            let dir = Vector3::new(1.0, 1.0, -1.0) * radius;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(-1.0, 1.0, -1.0) * 0.25;
+            let dir = Vector3::new(-1.0, 1.0, -1.0) * radius;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
@@ -412,6 +415,7 @@ impl GameClient {
             scene.graph[cycle.node_handle].global_position();
             debug_cross(pos, Color::GREEN);
         }
+        debug_cross(Vector3::new(5.0, 5.0, 5.0), Color::WHITE);
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);

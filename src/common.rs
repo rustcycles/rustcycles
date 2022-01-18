@@ -98,14 +98,10 @@ impl GameState {
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
             }
-
-            //scene.graph[cycle.node_handle].local_transform_mut().set_rotation(rot);
-
             // LATER Does this allow clipping into geometry?
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
-            //body.set_rotation(rot.scaled_axis(), true); // FIXME
-            //body.set_rotation(Vector3::y() * self.game_time, true); FIXME removed when moving to rg3d 0.24
+            body.local_transform_mut().set_rotation(rot);
         }
     }
 

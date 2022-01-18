@@ -43,13 +43,11 @@ impl GameState {
     pub(crate) async fn new(engine: &mut Engine) -> Self {
         let mut scene = Scene::new();
         // This is needed because the default 1 causes the wheel to randomly stutter/stop
-        // when just sliding on completely smooth floor. The higher the value, the less it slows down.
+        // when passing between poles - they use a single trimesh collider.
         // 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
         // It never completely goes away, even with 100.
-        // NOTE: It might not actually be the floor that's causing it,
-        // it seems to happen when passing between poles.
-        // LATER Maybe there is a way to solve this by filtering collisions with the floor?
-        //scene.physics.integration_parameters.max_ccd_substeps = 100; FIXME rg3d 0.24
+        // TODO rg3d 0.24 broke this
+        //scene.physics.integration_parameters.max_ccd_substeps = 100;
         // LATER allow changing scene.physics.integration_parameters.dt ?
 
         engine

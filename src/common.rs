@@ -1,5 +1,8 @@
 //! Data and code shared between the client and server. Most gamelogic goes here.
 
+#[macro_use]
+pub mod debug; // Keep first so the macros are available everywhere
+
 pub(crate) mod entities;
 pub(crate) mod messages;
 pub(crate) mod net;

@@ -387,29 +387,29 @@ impl GameClient {
         scene.drawing_context.clear_lines();
 
         let mut debug_cross = |pos, color, from_origin| {
-            let radius = 0.5;
-            let dir = Vector3::new(1.0, 1.0, 1.0) * radius;
+            let half_len = 0.5;
+            let dir = Vector3::new(1.0, 1.0, 1.0) * half_len;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(-1.0, 1.0, 1.0) * radius;
+            let dir = Vector3::new(-1.0, 1.0, 1.0) * half_len;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(1.0, 1.0, -1.0) * radius;
+            let dir = Vector3::new(1.0, 1.0, -1.0) * half_len;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,
                 color,
             });
 
-            let dir = Vector3::new(-1.0, 1.0, -1.0) * radius;
+            let dir = Vector3::new(-1.0, 1.0, -1.0) * half_len;
             scene.drawing_context.add_line(Line {
                 begin: pos - dir,
                 end: pos + dir,

@@ -4,7 +4,7 @@ use std::{collections::VecDeque, net::TcpStream, thread, time::Duration};
 
 use rg3d::{
     core::{
-        algebra::{Rotation3, UnitQuaternion, Vector3},
+        algebra::{Rotation3, UnitQuaternion},
         color::Color,
         pool::Handle,
     },
@@ -30,6 +30,7 @@ use crate::{
         self,
         details::{Shape, DEBUG_SHAPES},
     },
+    prelude::*,
 };
 
 /// Game client.
@@ -80,7 +81,7 @@ impl GameClient {
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
                 TransformBuilder::new()
-                    .with_local_position(Vector3::new(0.0, 1.0, -3.0))
+                    .with_local_position(v!(0 1 -3))
                     .build(),
             ),
         )
@@ -358,19 +359,13 @@ impl GameClient {
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
-        let yaw = Rotation3::from_axis_angle(&Vector3::y_axis(), self.lp.input.yaw.0.to_radians());
-        let x = yaw * Vector3::x_axis();
+        let yaw = Rotation3::from_axis_angle(&Vec3::up_axis(), self.lp.input.yaw.0.to_radians());
+        let x = yaw * Vec3::left_axis();
         let pitch = UnitQuaternion::from_axis_angle(&x, self.lp.input.pitch.0.to_radians());
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
-        let forward = camera
-            .look_vector()
-            .try_normalize(f32::EPSILON)
-            .unwrap_or_else(Vector3::z);
-        let left = camera
-            .side_vector()
-            .try_normalize(f32::EPSILON)
-            .unwrap_or_else(Vector3::x);
+        let forward = camera.forward_vec_normed();
+        let left = camera.left_vec_normed();
 
         // Camera movement
         let mut camera_pos = **camera.local_transform().position();
@@ -396,7 +391,7 @@ impl GameClient {
             let pos = scene.graph[cycle.node_handle].global_position();
             dbg_cross!(pos, 3.0, Color::GREEN);
         }
-        dbg_cross!(Vector3::new(5.0, 5.0, 5.0), 0.0, Color::WHITE);
+        dbg_cross!(v!(5 5 5), 0.0, Color::WHITE);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
@@ -404,28 +399,28 @@ impl GameClient {
                 let Shape::Cross { point } = shape.shape;
                 // LATER if cvars.d_draw && cvars.d_draw_crosses {
                 let half_len = 0.5; // LATER cvar
-                let dir = Vector3::new(1.0, 1.0, 1.0) * half_len;
+                let dir = v!(1 1 1) * half_len;
                 scene.drawing_context.add_line(Line {
                     begin: point - dir,
                     end: point + dir,
                     color: shape.color,
                 });
 
-                let dir = Vector3::new(-1.0, 1.0, 1.0) * half_len;
+                let dir = v!(-1 1 1) * half_len;
                 scene.drawing_context.add_line(Line {
                     begin: point - dir,
                     end: point + dir,
                     color: shape.color,
                 });
 
-                let dir = Vector3::new(1.0, 1.0, -1.0) * half_len;
+                let dir = v!(1 1 -1) * half_len;
                 scene.drawing_context.add_line(Line {
                     begin: point - dir,
                     end: point + dir,
                     color: shape.color,
                 });
 
-                let dir = Vector3::new(-1.0, 1.0, -1.0) * half_len;
+                let dir = v!(-1 1 -1) * half_len;
                 scene.drawing_context.add_line(Line {
                     begin: point - dir,
                     end: point + dir,
@@ -435,7 +430,7 @@ impl GameClient {
                 let from_origin = false; // LATER cvar
                 if from_origin {
                     scene.drawing_context.add_line(Line {
-                        begin: Vector3::zeros(),
+                        begin: Vec3::zeros(),
                         end: point,
                         color: shape.color,
                     });
@@ -448,35 +443,6 @@ impl GameClient {
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);
-
-        /*let pos1 = scene
-            .physics
-            .bodies
-            .get(&self.gs.cycle1.body_handle)
-            .unwrap()
-            .position()
-            .translation
-            .vector;
-        let pos2 = scene
-            .physics
-            .bodies
-            .get(&self.gs.cycle2.body_handle)
-            .unwrap()
-            .position()
-            .translation
-            .vector;
-        scene.drawing_context.add_line(Line {
-            begin: pos1,
-            end: pos2,
-            color: Color::GREEN,
-        });
-        let diff = pos1 - pos2;
-        let my_center = Vector3::new(0.0, 3.0, 0.0);
-        scene.drawing_context.add_line(Line {
-            begin: my_center,
-            end: my_center + diff,
-            color: Color::GREEN,
-        });*/
     }
 
     /// Send all once-per-frame stuff to the server.

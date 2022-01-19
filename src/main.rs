@@ -1,9 +1,11 @@
+// Keep this first so the macros are available everywhere without having to import them.
 #[macro_use]
-pub mod debug; // Keep first so the macros are available everywhere
+pub(crate) mod debug;
 
 mod client;
 mod common;
 mod server;
+mod prelude;
 
 use std::{env, process::Command};
 

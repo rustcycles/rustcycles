@@ -20,7 +20,7 @@ macro_rules! soft_assert {
     };
 }
 
-/// Draw a small cross at the given world coordinates.
+/// Draw a cross at the given world coordinates.
 /// Optionally specify
 /// - how long it lasts in seconds (default is 0.0 which means 1 frame)
 /// - color
@@ -43,9 +43,13 @@ macro_rules! dbg_cross {
 // but it's usually more ergonomic to use the macros and functions above above.
 // LATER submod?
 
-/// Helper struct, use `dbg_cross!()`.
-pub(crate) struct Cross {
-    pub(crate) point: Vector3<f32>,
+pub(crate) enum Shape {
+    Cross { point: Vector3<f32> },
+}
+
+/// Helper struct, use one of the `dbg_*!()` macros.
+pub(crate) struct DebugShape {
+    pub(crate) shape: Shape,
     /// Time left (decreases every frame)
     pub(crate) time: f32,
     pub(crate) color: Color,
@@ -53,18 +57,19 @@ pub(crate) struct Cross {
 
 /// Helper function, prefer `dbg_cross!()` instead.
 pub fn debug_cross(point: Vector3<f32>, time: f32, color: Color) {
-    DEBUG_CROSSES.with(|crosses| {
-        let cross = Cross { point, time, color };
-        crosses.borrow_mut().push(cross);
+    DEBUG_SHAPES.with(|shapes| {
+        let shape = Shape::Cross { point };
+        let shape = DebugShape { shape, time, color };
+        shapes.borrow_mut().push(shape);
     });
 }
 
 thread_local! {
-    pub(crate) static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 
 pub(crate) fn cleanup() {
-    DEBUG_CROSSES.with(|crosses| crosses.borrow_mut().retain(|cross| cross.time > 0.0));
+    DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
 }
 
 // ^ When adding to this file, keep in mind the public/private split.

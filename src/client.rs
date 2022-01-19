@@ -26,7 +26,7 @@ use crate::{
         messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
         net, GameState, Input,
     },
-    debug::{self, DEBUG_CROSSES},
+    debug::{self, Shape, DEBUG_SHAPES},
 };
 
 /// Game client.
@@ -395,49 +395,50 @@ impl GameClient {
         }
         dbg_cross!(Vector3::new(5.0, 5.0, 5.0), 0.0, Color::WHITE);
 
-        DEBUG_CROSSES.with(|crosses| {
-            let mut crosses = crosses.borrow_mut();
-            for cross in crosses.iter_mut() {
+        DEBUG_SHAPES.with(|shapes| {
+            let mut shapes = shapes.borrow_mut();
+            for shape in shapes.iter_mut() {
+                let Shape::Cross { point } = shape.shape;
                 // LATER if cvars.d_draw && cvars.d_draw_crosses {
                 let half_len = 0.5; // LATER cvar
                 let dir = Vector3::new(1.0, 1.0, 1.0) * half_len;
                 scene.drawing_context.add_line(Line {
-                    begin: cross.point - dir,
-                    end: cross.point + dir,
-                    color: cross.color,
+                    begin: point - dir,
+                    end: point + dir,
+                    color: shape.color,
                 });
 
                 let dir = Vector3::new(-1.0, 1.0, 1.0) * half_len;
                 scene.drawing_context.add_line(Line {
-                    begin: cross.point - dir,
-                    end: cross.point + dir,
-                    color: cross.color,
+                    begin: point - dir,
+                    end: point + dir,
+                    color: shape.color,
                 });
 
                 let dir = Vector3::new(1.0, 1.0, -1.0) * half_len;
                 scene.drawing_context.add_line(Line {
-                    begin: cross.point - dir,
-                    end: cross.point + dir,
-                    color: cross.color,
+                    begin: point - dir,
+                    end: point + dir,
+                    color: shape.color,
                 });
 
                 let dir = Vector3::new(-1.0, 1.0, -1.0) * half_len;
                 scene.drawing_context.add_line(Line {
-                    begin: cross.point - dir,
-                    end: cross.point + dir,
-                    color: cross.color,
+                    begin: point - dir,
+                    end: point + dir,
+                    color: shape.color,
                 });
 
                 let from_origin = false; // LATER cvar
                 if from_origin {
                     scene.drawing_context.add_line(Line {
                         begin: Vector3::zeros(),
-                        end: cross.point,
-                        color: cross.color,
+                        end: point,
+                        color: shape.color,
                     });
                 }
                 // LATER }
-                cross.time -= dt;
+                shape.time -= dt;
             }
         });
         debug::cleanup();

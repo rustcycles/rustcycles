@@ -13,8 +13,10 @@ use rg3d::{
     utils::log::{Log, MessageKind},
     window::{Fullscreen, WindowBuilder},
 };
-use structopt::StructOpt;
 use strum_macros::EnumString;
+
+#[cfg(feature = "cli")]
+use structopt::StructOpt;
 
 use client::GameClient;
 use server::GameServer;
@@ -58,17 +60,20 @@ use server::GameServer;
 //  Not being able to find .options files shouldn't be a warning
 //  [ERROR]: Unable to load texture "data/skybox/top.png"! Reason FileLoadError(Io(Os { code: 2, kind: NotFound, message: "No such file or directory" }))
 
-#[derive(StructOpt, Debug)]
+#[derive(Debug, Default)]
+#[cfg_attr(feature = "cli", derive(StructOpt))]
 struct Opts {
     /// Use a window instead of fullscreen (doesn't apply to server)
-    #[structopt(long)]
+    #[cfg_attr(feature = "cli", structopt(long))]
     windowed: bool,
 
-    #[structopt(subcommand)]
+    /// Whether to run the client, server or both.
+    #[cfg_attr(feature = "cli", structopt(subcommand))]
     endpoint: Option<Endpoint>,
 }
 
-#[derive(StructOpt, Debug, EnumString)]
+#[derive(Debug, EnumString)]
+#[cfg_attr(feature = "cli", derive(StructOpt))]
 enum Endpoint {
     /// Run only the game client
     Client,
@@ -76,9 +81,35 @@ enum Endpoint {
     Server,
 }
 
+#[cfg(feature = "cli")]
 fn main() {
     let opts = Opts::from_args();
+    run(opts);
+}
 
+#[cfg(not(feature = "cli"))]
+fn main() {
+    let mut opts = Opts::default();
+
+    // We kinda wanna use structopt because it has nice QoL features
+    // but it adds a couple hundred ms to incremental debug builds.
+    // So for dev builds we use this crude way of parsing input instead
+    // to build and therefore iterate a tiny bit faster.
+    let args = env::args().skip(1); // Skip path to self
+    for arg in args {
+        match arg.as_str() {
+            "client" => opts.endpoint = Some(Endpoint::Client),
+            "server" => opts.endpoint = Some(Endpoint::Server),
+            "--windowed" => opts.windowed = true,
+            other => panic!("unexpected argument: {other}"),
+        }
+    }
+
+    run(opts);
+}
+
+
+fn run(opts: Opts) {
     match opts.endpoint {
         None => client_server_main(opts),
         Some(Endpoint::Client) => client_main(opts),

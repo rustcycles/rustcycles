@@ -20,10 +20,13 @@ use rg3d::{
     },
 };
 
-use crate::common::{
-    entities::{Player, PlayerState},
-    messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
-    net, GameState, Input,
+use crate::{
+    common::{
+        entities::{Player, PlayerState},
+        messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
+        net, GameState, Input,
+    },
+    debug::{self, DEBUG_CROSSES},
 };
 
 /// Game client.
@@ -384,52 +387,60 @@ impl GameClient {
         camera.local_transform_mut().set_position(camera_pos);
 
         // Debug
+        debug::cleanup();
         scene.drawing_context.clear_lines();
-
-        let mut debug_cross = |pos, color, from_origin| {
-            let half_len = 0.5;
-            let dir = Vector3::new(1.0, 1.0, 1.0) * half_len;
-            scene.drawing_context.add_line(Line {
-                begin: pos - dir,
-                end: pos + dir,
-                color,
-            });
-
-            let dir = Vector3::new(-1.0, 1.0, 1.0) * half_len;
-            scene.drawing_context.add_line(Line {
-                begin: pos - dir,
-                end: pos + dir,
-                color,
-            });
-
-            let dir = Vector3::new(1.0, 1.0, -1.0) * half_len;
-            scene.drawing_context.add_line(Line {
-                begin: pos - dir,
-                end: pos + dir,
-                color,
-            });
-
-            let dir = Vector3::new(-1.0, 1.0, -1.0) * half_len;
-            scene.drawing_context.add_line(Line {
-                begin: pos - dir,
-                end: pos + dir,
-                color,
-            });
-
-            if from_origin {
-                scene.drawing_context.add_line(Line {
-                    begin: Vector3::zeros(),
-                    end: pos,
-                    color,
-                });
-            }
-        };
 
         for cycle in &self.gs.cycles {
             let pos = scene.graph[cycle.node_handle].global_position();
-            debug_cross(pos, Color::GREEN, false);
+            dbg_cross!(pos, 3.0, Color::GREEN);
         }
-        debug_cross(Vector3::new(5.0, 5.0, 5.0), Color::WHITE, false);
+        dbg_cross!(Vector3::new(5.0, 5.0, 5.0), 0.0, Color::WHITE);
+
+        DEBUG_CROSSES.with(|crosses| {
+            let mut crosses = crosses.borrow_mut();
+            for cross in crosses.iter_mut() {
+                // LATER if cvars.d_draw && cvars.d_draw_crosses {
+                let half_len = 0.5; // LATER cvar
+                let dir = Vector3::new(1.0, 1.0, 1.0) * half_len;
+                scene.drawing_context.add_line(Line {
+                    begin: cross.point - dir,
+                    end: cross.point + dir,
+                    color: cross.color,
+                });
+
+                let dir = Vector3::new(-1.0, 1.0, 1.0) * half_len;
+                scene.drawing_context.add_line(Line {
+                    begin: cross.point - dir,
+                    end: cross.point + dir,
+                    color: cross.color,
+                });
+
+                let dir = Vector3::new(1.0, 1.0, -1.0) * half_len;
+                scene.drawing_context.add_line(Line {
+                    begin: cross.point - dir,
+                    end: cross.point + dir,
+                    color: cross.color,
+                });
+
+                let dir = Vector3::new(-1.0, 1.0, -1.0) * half_len;
+                scene.drawing_context.add_line(Line {
+                    begin: cross.point - dir,
+                    end: cross.point + dir,
+                    color: cross.color,
+                });
+
+                let from_origin = false; // LATER cvar
+                if from_origin {
+                    scene.drawing_context.add_line(Line {
+                        begin: Vector3::zeros(),
+                        end: cross.point,
+                        color: cross.color,
+                    });
+                }
+                // LATER }
+                cross.time -= dt;
+            }
+        });
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);

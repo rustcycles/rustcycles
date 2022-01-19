@@ -1,3 +1,6 @@
+#[macro_use]
+pub mod debug; // Keep first so the macros are available everywhere
+
 mod client;
 mod common;
 mod server;
@@ -107,7 +110,6 @@ fn main() {
 
     run(opts);
 }
-
 
 fn run(opts: Opts) {
     match opts.endpoint {

@@ -2,10 +2,10 @@
 //!
 //! LATER These will form the basis of demo recording and replay.
 
-use crate::common::Input;
-
-use rg3d::core::algebra::{UnitQuaternion, Vector3};
+use rg3d::core::algebra::UnitQuaternion;
 use serde::{Deserialize, Serialize};
+
+use crate::{common::Input, prelude::*};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {
@@ -84,7 +84,7 @@ pub(crate) struct UpdatePhysics {
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct CyclePhysics {
     pub(crate) cycle_index: u32,
-    pub(crate) translation: Vector3<f32>,
+    pub(crate) translation: Vec3,
     pub(crate) rotation: UnitQuaternion<f32>,
-    pub(crate) velocity: Vector3<f32>,
+    pub(crate) velocity: Vec3,
 }

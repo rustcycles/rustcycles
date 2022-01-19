@@ -6,10 +6,12 @@
 
 use std::cell::RefCell;
 
-use rg3d::core::{algebra::Vector3, color::Color};
+use rg3d::core::color::Color;
+
+use crate::prelude::*;
 
 pub(crate) enum Shape {
-    Cross { point: Vector3<f32> },
+    Cross { point: Vec3 },
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
@@ -21,7 +23,7 @@ pub(crate) struct DebugShape {
 }
 
 /// Helper function, prefer `dbg_cross!()` instead.
-pub(crate) fn debug_cross(point: Vector3<f32>, time: f32, color: Color) {
+pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
     DEBUG_SHAPES.with(|shapes| {
         let shape = Shape::Cross { point };
         let shape = DebugShape { shape, time, color };

@@ -217,9 +217,15 @@ impl GameClient {
             return;
         }
 
+        // LATER cvars
+        let mouse_sensitivity_horizontal = 0.5;
+        let mouse_sensitivity_vertical = 0.5;
+        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal;
+        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical;
+
         // Subtract, don't add the delta X - rotations follow the right hand rule
-        self.lp.input.yaw.0 -= delta.0 as f32; // LATER Normalize to [0, 360°) or something
-        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + delta.1 as f32).clamp(-90.0, 90.0);
+        self.lp.input.yaw.0 -= delta_yaw; // LATER Normalize to [0, 360°) or something
+        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + delta_pitch).clamp(-90.0, 90.0);
     }
 
     /// Either grab mouse and hide cursor

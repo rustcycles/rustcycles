@@ -14,7 +14,7 @@ use rg3d::{
     scene::{
         base::BaseBuilder,
         camera::{CameraBuilder, SkyBoxBuilder},
-        debug::Line,
+        debug::{Line, SceneDrawingContext},
         node::Node,
         transform::TransformBuilder,
     },
@@ -28,7 +28,7 @@ use crate::{
     },
     debug::{
         self,
-        details::{Shape, DEBUG_SHAPES},
+        details::{DebugShape, Shape, DEBUG_SHAPES},
     },
     prelude::*,
 };
@@ -396,45 +396,8 @@ impl GameClient {
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
             for shape in shapes.iter_mut() {
-                let Shape::Cross { point } = shape.shape;
                 // LATER if cvars.d_draw && cvars.d_draw_crosses {
-                let half_len = 0.5; // LATER cvar
-                let dir = v!(1 1 1) * half_len;
-                scene.drawing_context.add_line(Line {
-                    begin: point - dir,
-                    end: point + dir,
-                    color: shape.color,
-                });
-
-                let dir = v!(-1 1 1) * half_len;
-                scene.drawing_context.add_line(Line {
-                    begin: point - dir,
-                    end: point + dir,
-                    color: shape.color,
-                });
-
-                let dir = v!(1 1 -1) * half_len;
-                scene.drawing_context.add_line(Line {
-                    begin: point - dir,
-                    end: point + dir,
-                    color: shape.color,
-                });
-
-                let dir = v!(-1 1 -1) * half_len;
-                scene.drawing_context.add_line(Line {
-                    begin: point - dir,
-                    end: point + dir,
-                    color: shape.color,
-                });
-
-                let from_origin = false; // LATER cvar
-                if from_origin {
-                    scene.drawing_context.add_line(Line {
-                        begin: Vec3::zeros(),
-                        end: point,
-                        color: shape.color,
-                    });
-                }
+                draw_shape(&mut scene.drawing_context, shape);
                 // LATER }
                 shape.time -= dt;
             }
@@ -453,6 +416,51 @@ impl GameClient {
     fn network_send(&mut self, message: ClientMessage) {
         let network_message = net::serialize(message);
         net::send(&network_message, &mut self.stream).unwrap();
+    }
+}
+
+fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
+    match shape.shape {
+        Shape::Line { begin, end } => todo!(),
+        Shape::Cross { point } => {
+            let half_len = 0.5; // LATER cvar
+            let dir = v!(1 1 1) * half_len;
+            drawing_context.add_line(Line {
+                begin: point - dir,
+                end: point + dir,
+                color: shape.color,
+            });
+
+            let dir = v!(-1 1 1) * half_len;
+            drawing_context.add_line(Line {
+                begin: point - dir,
+                end: point + dir,
+                color: shape.color,
+            });
+
+            let dir = v!(1 1 -1) * half_len;
+            drawing_context.add_line(Line {
+                begin: point - dir,
+                end: point + dir,
+                color: shape.color,
+            });
+
+            let dir = v!(-1 1 -1) * half_len;
+            drawing_context.add_line(Line {
+                begin: point - dir,
+                end: point + dir,
+                color: shape.color,
+            });
+
+            let from_origin = false; // LATER cvar
+            if from_origin {
+                drawing_context.add_line(Line {
+                    begin: Vec3::zeros(),
+                    end: point,
+                    color: shape.color,
+                });
+            }
+        }
     }
 }
 

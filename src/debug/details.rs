@@ -11,6 +11,7 @@ use rg3d::core::color::Color;
 use crate::prelude::*;
 
 pub(crate) enum Shape {
+    Line { begin: Vec3, end: Vec3 },
     Cross { point: Vec3 },
 }
 

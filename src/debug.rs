@@ -14,6 +14,7 @@ macro_rules! soft_assert {
     ($cond:expr, $($arg:tt)+) => {
         if !$cond {
             // LATER Proper logging
+            // LATER client vs server
             println!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
         }
     };

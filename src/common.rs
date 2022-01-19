@@ -8,7 +8,7 @@ use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
     core::{
-        algebra::{UnitQuaternion, Vector3},
+        algebra::UnitQuaternion,
         pool::{Handle, Pool},
     },
     engine::Engine,
@@ -23,7 +23,10 @@ use rg3d::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::common::entities::{Cycle, Player, PlayerState};
+use crate::{
+    common::entities::{Cycle, Player, PlayerState},
+    prelude::*,
+};
 
 /// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
@@ -84,10 +87,10 @@ impl GameState {
             }
 
             let input = player.input;
-            let rot = UnitQuaternion::from_axis_angle(&Vector3::y_axis(), input.yaw.to_radians());
+            let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if input.forward || input.backward {
-                let dir = rot * Vector3::z();
+                let dir = rot * Vec3::forward();
                 let wheel_accel = if input.forward {
                     dir * dt * 50.0
                 } else {
@@ -104,7 +107,10 @@ impl GameState {
             // FIXME this is broken
             //body.local_transform_mut().set_rotation(rot);
             body.local_transform_mut()
-                .set_rotation(UnitQuaternion::from_axis_angle(&Vector3::y_axis(), self.game_time));
+                .set_rotation(UnitQuaternion::from_axis_angle(
+                    &Vec3::up_axis(),
+                    self.game_time,
+                ));
         }
     }
 
@@ -132,7 +138,7 @@ impl GameState {
             BaseBuilder::new()
                 .with_local_transform(
                     TransformBuilder::new()
-                        .with_local_position(Vector3::new(-1.0, 5.0, 0.0))
+                        .with_local_position(v!(-1 5 0))
                         .build(),
                 )
                 .with_children(&[node_handle, collider_handle]),

@@ -1,3 +1,9 @@
+//! A bunch of QoL macros, traits and functions
+//! to make gamedev in Rust faster and saner.
+//!
+//! Most files in this game should import it via
+//! `use crate::prelude::*`.
+
 use rg3d::{
     core::algebra::{Unit, Vector3},
     scene::node::Node,
@@ -26,6 +32,7 @@ macro_rules! v {
 
 pub(crate) type Vec3 = Vector3<f32>;
 
+/// Nalgebra's coordinate system is right-handed, I think.
 pub(crate) trait Vec3Ext
 where
     Self: Sized,

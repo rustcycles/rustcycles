@@ -387,7 +387,6 @@ impl GameClient {
         camera.local_transform_mut().set_position(camera_pos);
 
         // Debug
-        debug::cleanup();
         scene.drawing_context.clear_lines();
 
         for cycle in &self.gs.cycles {
@@ -441,6 +440,7 @@ impl GameClient {
                 cross.time -= dt;
             }
         });
+        debug::cleanup();
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);

@@ -26,7 +26,10 @@ use crate::{
         messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
         net, GameState, Input,
     },
-    debug::{self, Shape, DEBUG_SHAPES},
+    debug::{
+        self,
+        details::{Shape, DEBUG_SHAPES},
+    },
 };
 
 /// Game client.
@@ -441,7 +444,7 @@ impl GameClient {
                 shape.time -= dt;
             }
         });
-        debug::cleanup();
+        debug::details::cleanup();
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);

@@ -15,6 +15,8 @@ use crate::prelude::*;
 #[macro_export]
 macro_rules! __format_pairs {
     ( $e:expr ) => {
+        // We use {:?} instead of {} here because it's more likely to stay on one line.
+        // E.g. nalgebra vectors get printed as columns when using {}.
         format!("{}: {:.6?}", stringify!($e), $e)
     };
     ( $e:expr, $( $rest:expr ),+ ) => {

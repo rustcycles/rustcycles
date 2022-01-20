@@ -4,8 +4,8 @@ pub(crate) mod debug;
 
 mod client;
 mod common;
-mod server;
 mod prelude;
+mod server;
 
 use std::{env, process::Command};
 
@@ -255,6 +255,7 @@ fn client_main(opts: Opts) {
             Event::Resumed => {}
             Event::MainEventsCleared => {
                 client.update(clock.elapsed().as_secs_f32());
+                while let Some(_ui_message) = client.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
@@ -302,6 +303,7 @@ fn server_main() {
             Event::Resumed => {}
             Event::MainEventsCleared => {
                 server.update(clock.elapsed().as_secs_f32());
+                while let Some(_ui_message) = server.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {}
             Event::RedrawEventsCleared => {}

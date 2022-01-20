@@ -389,8 +389,7 @@ impl GameClient {
 
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
-            dbg_cross!(body_pos, 3.0, Color::GREEN);
-            dbg_cross!(body_pos + Vec3::up() * 0.01, 3.0, Color::RED);
+            dbg_cross!(body_pos, 5.0, Color::GREEN);
         }
 
         dbg_line!(v!(10 5 5), v!(10 5 7));

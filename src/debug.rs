@@ -91,3 +91,48 @@ macro_rules! dbg_cross {
         $crate::dbg_cross!($point, 0.0);
     };
 }
+
+#[cfg(test)]
+mod tests {
+    // Don't import anything else here to test the macros properly use full paths.
+    use crate::prelude::*;
+
+    // LATER Test these do what they should, not just that they compile.
+
+    #[test]
+    fn test_soft_assert() {
+        // Neither should crash
+        soft_assert!(2 + 2 == 4);
+        soft_assert!(2 + 2 == 5);
+    }
+
+    #[test]
+    fn test_logging_compiles() {
+        let x = 5;
+        let y = 6;
+
+        dbg_logf!();
+        dbg_logf!("abcd");
+        dbg_logf!("x: {}, y: {y}, 7: {}", x, 7);
+
+        dbg_logd!();
+        dbg_logd!(x);
+        dbg_logd!(x, y, 7);
+    }
+
+    #[test]
+    fn test_drawing_compiles_no_import() {
+        // Intentionally don't import Color to test the macro still works.
+        dbg_line!(v!(1 2 3), v!(4 5 6));
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0);
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, rg3d::core::color::Color::BLUE);
+
+        dbg_arrow!(v!(1 2 3), v!(4 5 6));
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0);
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, rg3d::core::color::Color::BLUE);
+
+        dbg_cross!(v!(1 2 3));
+        dbg_cross!(v!(1 2 3), 5.0);
+        dbg_cross!(v!(1 2 3), 5.0, rg3d::core::color::Color::BLUE);
+    }
+}

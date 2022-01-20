@@ -14,6 +14,9 @@ use crate::prelude::*;
 /// Not meant to be used directly.
 #[macro_export]
 macro_rules! __format_pairs {
+    ( ) => {
+        format!("")
+    };
     ( $e:expr ) => {
         // We use {:?} instead of {} here because it's more likely to stay on one line.
         // E.g. nalgebra vectors get printed as columns when using {}.

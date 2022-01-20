@@ -99,8 +99,8 @@ impl GameState {
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
                 dbg_arrow!(v!(0 3 0), 1000.0 * dir.normalize());
-                dbg_logd!(dir); // FIXME
-                dbg_logf!("dir {}", dir);
+                //dbg_logd!(dir); // FIXME
+                //dbg_logf!("dir {}", dir);
             }
 
             // LATER Does this allow clipping into geometry?

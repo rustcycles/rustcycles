@@ -9,6 +9,8 @@
 [![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)
 [![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
 
+<!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
+<!-- Also check https://github.com/topics/tron to make sure it doesn't look blurry -->
 ![Gameplay](media/screenshot.png)
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.

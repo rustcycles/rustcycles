@@ -391,7 +391,10 @@ impl GameClient {
             let pos = scene.graph[cycle.node_handle].global_position();
             dbg_cross!(pos, 3.0, Color::GREEN);
         }
-        dbg_cross!(v!(5 5 5), 0.0, Color::WHITE);
+
+        dbg_line!(v!(10 5 5), v!(10 5 7));
+        dbg_arrow!(v!(7 5 5), v!(7 5 7));
+        dbg_cross!(v!(4 5 5), 0.0, Color::WHITE);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
@@ -421,7 +424,38 @@ impl GameClient {
 
 fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
     match shape.shape {
-        Shape::Line { begin, end } => todo!(),
+        Shape::Line { begin, end } => {
+            drawing_context.add_line(Line {
+                begin,
+                end,
+                color: shape.color,
+            });
+        }
+        Shape::Arrow { begin, end } => {
+            drawing_context.add_line(Line {
+                begin,
+                end,
+                color: shape.color,
+            });
+            let dir = end - begin;
+            // This is the classic way to make a 2D perpendicular vector
+            // (flip X and Y, negate one of them),
+            // just used in 3D - Y (up) is ignored.
+            // LATER Make this work for all directions (arrow with 4 side lines).
+            let perp_dir = Vec3::new(dir.z, dir.y, -dir.x);
+            let side_begin1 = end + (perp_dir - dir) * 0.25;
+            let side_begin2 = end + (-perp_dir - dir) * 0.25;
+            drawing_context.add_line(Line {
+                begin: side_begin1,
+                end,
+                color: shape.color,
+            });
+            drawing_context.add_line(Line {
+                begin: side_begin2,
+                end,
+                color: shape.color,
+            });
+        }
         Shape::Cross { point } => {
             let half_len = 0.5; // LATER cvar
             let dir = v!(1 1 1) * half_len;

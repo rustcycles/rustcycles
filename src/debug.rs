@@ -20,6 +20,40 @@ macro_rules! soft_assert {
     };
 }
 
+/// Draw a line from `begin` to `end` (both world coordinates).
+/// Optionally specify
+/// - how long it lasts in seconds (default is 0.0 which means 1 frame)
+/// - color
+#[macro_export]
+macro_rules! dbg_line {
+    ($begin:expr, $end:expr, $time:expr, $color:expr) => {
+        $crate::debug::details::debug_line($begin, $end, $time, $color);
+    };
+    ($begin:expr, $end:expr, $time:expr) => {
+        $crate::dbg_line!($begin, $end, $time, Color::RED);
+    };
+    ($begin:expr, $end:expr) => {
+        $crate::dbg_line!($begin, $end, 0.0);
+    };
+}
+
+/// Draw an arrow from `begin` to `end` (both world coordinates).
+/// Optionally specify
+/// - how long it lasts in seconds (default is 0.0 which means 1 frame)
+/// - color
+#[macro_export]
+macro_rules! dbg_arrow {
+    ($begin:expr, $end:expr, $time:expr, $color:expr) => {
+        $crate::debug::details::debug_arrow($begin, $end, $time, $color);
+    };
+    ($begin:expr, $end:expr, $time:expr) => {
+        $crate::dbg_arrow!($begin, $end, $time, Color::RED);
+    };
+    ($begin:expr, $end:expr) => {
+        $crate::dbg_arrow!($begin, $end, 0.0);
+    };
+}
+
 /// Draw a cross at the given world coordinates.
 /// Optionally specify
 /// - how long it lasts in seconds (default is 0.0 which means 1 frame)

@@ -32,17 +32,27 @@ macro_rules! v {
 
 pub(crate) type Vec3 = Vector3<f32>;
 
+/// QoL methods for nalgebra's Vector3.
+///
+/// Should be imported along with the rest of the prelude using a glob.
+///
 /// Nalgebra's coordinate system is right-handed, I think.
 pub(crate) trait Vec3Ext
 where
     Self: Sized,
 {
+    /// The column vector with a 1 as its first (X) component, and zero elsewhere.
     fn left() -> Self;
+    /// The column vector with a 1 as its second (Y) component, and zero elsewhere.
     fn up() -> Self;
+    /// The column vector with a 1 as its third (Z) component, and zero elsewhere.
     fn forward() -> Self;
 
+    /// The unit column vector with a 1 as its first (X) component, and zero elsewhere.
     fn left_axis() -> Unit<Self>;
+    /// The unit column vector with a 1 as its second (Y) component, and zero elsewhere.
     fn up_axis() -> Unit<Self>;
+    /// The unit column vector with a 1 as its third (Z) component, and zero elsewhere.
     fn forward_axis() -> Unit<Self>;
 }
 
@@ -68,13 +78,22 @@ impl Vec3Ext for Vec3 {
     }
 }
 
+/// QoL methods for fyrox's Node.
+///
+/// Should be imported along with the rest of the prelude using a glob.
 pub(crate) trait NodeExt {
+    /// The "side" vector of the global transform basis, might not be normalized.
     fn left_vec(&self) -> Vec3;
+    /// The "up" vector of the global transform basis, might not be normalized.
     fn up_vec(&self) -> Vec3;
+    /// The "look" vector of the global transform basis, might not be normalized.
     fn forward_vec(&self) -> Vec3;
 
+    /// The normalized "side" vector of the global transform basis.
     fn left_vec_normed(&self) -> Vec3;
+    /// The normalized "up" vector of the global transform basis.
     fn up_vec_normed(&self) -> Vec3;
+    /// The normalized "look" vector of the global transform basis.
     fn forward_vec_normed(&self) -> Vec3;
 }
 

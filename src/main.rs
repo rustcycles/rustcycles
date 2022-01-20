@@ -23,8 +23,7 @@ use strum_macros::EnumString;
 #[cfg(feature = "cli")]
 use structopt::StructOpt;
 
-use client::GameClient;
-use server::GameServer;
+use crate::{client::GameClient, debug::details::DEBUG_ENDPOINT, server::GameServer};
 
 // Master TODO list:
 // v0.1 - MVP:
@@ -160,6 +159,8 @@ fn client_server_main(opts: Opts) {
 }
 
 fn client_main(opts: Opts) {
+    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "C");
+
     // LATER Switch rg3d to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
     // and the other messages are hidden by default.
@@ -269,6 +270,8 @@ fn client_main(opts: Opts) {
 }
 
 fn server_main() {
+    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "S");
+
     // See note in client_main().
     Log::set_verbosity(MessageKind::Warning);
 

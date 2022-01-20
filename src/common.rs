@@ -82,14 +82,12 @@ impl GameState {
 
         for cycle in &self.cycles {
             let player = &self.players[cycle.player_handle];
-            if player.ps != PlayerState::Playing {
-                continue;
-            }
 
+            let playing = player.ps == PlayerState::Playing;
             let input = player.input;
             let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
-            if input.forward || input.backward {
+            if playing && (input.forward || input.backward) {
                 let dir = rot * Vec3::forward();
                 let wheel_accel = if input.forward {
                     dir * dt * 50.0
@@ -100,7 +98,11 @@ impl GameState {
                 let mut lin_vel = body.lin_vel();
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
+                dbg_arrow!(v!(0 3 0), 1000.0 * dir.normalize());
+                dbg_logd!(dir); // FIXME
+                dbg_logf!("dir {}", dir);
             }
+
             // LATER Does this allow clipping into geometry?
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses

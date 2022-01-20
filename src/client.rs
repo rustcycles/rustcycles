@@ -56,11 +56,11 @@ impl GameClient {
             // LATER Don't block the main thread - no sleep in async
             // LATER Limit the number of attempts.
             if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
-                println!("C connect attempts: {}", connect_attempts);
+                dbg_logf!("connect attempts: {}", connect_attempts);
                 break stream;
             }
             if connect_attempts % 100 == 0 {
-                println!("C connect attempts: {}", connect_attempts);
+                dbg_logf!("connect attempts: {}", connect_attempts);
             }
             thread::sleep(Duration::from_millis(10));
         };
@@ -142,18 +142,18 @@ impl GameClient {
                         todo!("init projectiles");
                     }
 
-                    println!("C init attempts: {}", init_attempts);
+                    dbg_logf!("init attempts: {}", init_attempts);
                     break lp;
                 } else {
                     panic!("First message wasn't init"); // LATER Don't crash
                 }
             }
             if init_attempts % 100 == 0 {
-                println!("C init attempts: {}", init_attempts);
+                dbg_logf!("init attempts: {}", init_attempts);
             }
             thread::sleep(Duration::from_millis(10));
         };
-        println!("C local_player_index is {}", lp.player_handle.index());
+        dbg_logf!("local_player_index is {}", lp.player_handle.index());
 
         Self {
             mouse_grabbed: false,
@@ -486,7 +486,7 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                 color: shape.color,
             });
 
-            let from_origin = false; // LATER cvar
+            let from_origin = true; // LATER cvar
             if from_origin {
                 drawing_context.add_line(Line {
                     begin: Vec3::zeros(),

@@ -10,6 +10,22 @@ use rg3d::core::color::Color;
 
 use crate::prelude::*;
 
+/// Private helper to print the name and value of each given variable.
+/// Not meant to be used directly.
+#[macro_export]
+macro_rules! __format_pairs {
+    ( $e:expr ) => {
+        format!("{}: {:.6?}", stringify!($e), $e)
+    };
+    ( $e:expr, $( $rest:expr ),+ ) => {
+        format!(
+            "{}, {}",
+            $crate::__format_pairs!($e),
+            $crate::__format_pairs!( $( $rest ),+ )
+        )
+    };
+}
+
 /// Helper struct, use one of the `dbg_*!()` macros.
 pub(crate) enum Shape {
     Line { begin: Vec3, end: Vec3 },
@@ -51,6 +67,7 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
 }
 
 thread_local! {
+    pub(crate) static DEBUG_ENDPOINT: RefCell<&'static str> = RefCell::new("UNKNOWN");
     pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 

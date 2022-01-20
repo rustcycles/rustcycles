@@ -103,6 +103,8 @@ fn main() {
     // but it adds a couple hundred ms to incremental debug builds.
     // So for dev builds we use this crude way of parsing input instead
     // to build and therefore iterate a tiny bit faster.
+    //
+    // If this gets too complex, might wanna consider https://github.com/RazrFalcon/pico-args.
     let args = env::args().skip(1); // Skip path to self
     for arg in args {
         match arg.as_str() {

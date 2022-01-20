@@ -118,7 +118,7 @@ impl GameState {
         let player = self.players.free(player_handle);
         if let Some(handle) = player.cycle_handle {
             let cycle = self.cycles.free(handle);
-            scene.remove_node(cycle.node_handle);
+            scene.remove_node(cycle.body_handle);
         }
     }
 
@@ -149,7 +149,6 @@ impl GameState {
         .build(&mut scene.graph);
 
         let cycle = Cycle {
-            node_handle,
             body_handle,
             player_handle,
         };

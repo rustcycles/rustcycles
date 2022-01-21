@@ -13,6 +13,7 @@ use rg3d::{
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
     gui::{
+        brush::Brush,
         formatted_text::WrapMode,
         message::MessageDirection,
         text::{TextBuilder, TextMessage},
@@ -59,10 +60,11 @@ pub(crate) struct GameClient {
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
-        let debug_text = TextBuilder::new(WidgetBuilder::new())
-            // Word wrap doesn't work if there's an extremely long word.
-            .with_wrap(WrapMode::Letter)
-            .build(&mut engine.user_interface.build_ctx());
+        let debug_text =
+            TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
+                // Word wrap doesn't work if there's an extremely long word.
+                .with_wrap(WrapMode::Letter)
+                .build(&mut engine.user_interface.build_ctx());
 
         let mut connect_attempts = 0;
         let mut stream = loop {

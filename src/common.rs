@@ -98,10 +98,12 @@ impl GameState {
                 let mut lin_vel = body.lin_vel();
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
-                dbg_arrow!(v!(0 3 0), 1000.0 * dir.normalize());
-                //dbg_logd!(dir); // FIXME
-                //dbg_logf!("dir {}", dir);
             }
+            let dir = rot * Vec3::forward();
+            dbg_arrow!(v!(0 3 0), dir.normalize());
+            //dbg_textd!(rot, dir);
+            dbg_textf!("{rot}, {dir}");
+            dbg_textf!("{}", "abcdefghi".repeat(100));
 
             // LATER Does this allow clipping into geometry?
             //  Use an impulse proportional to mouse movement instead?

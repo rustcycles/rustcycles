@@ -58,9 +58,12 @@ pub(crate) struct GameClient {
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
-        let debug_text = TextBuilder::new(WidgetBuilder::new())
-            .with_wrap(WrapMode::Letter)
-            .build(&mut engine.user_interface.build_ctx());
+        let debug_text = TextBuilder::new(
+            WidgetBuilder::new().with_width(engine.get_window().inner_size().width as f32),
+        )
+        // Word wrap doesn't work if there's an extremely long word.
+        .with_wrap(WrapMode::Letter)
+        .build(&mut engine.user_interface.build_ctx());
 
         let mut connect_attempts = 0;
         let mut stream = loop {

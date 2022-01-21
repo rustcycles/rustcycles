@@ -66,6 +66,7 @@ use crate::{client::GameClient, debug::details::DEBUG_ENDPOINT, server::GameServ
 //  rbody attached differently in editor vs game
 //  Not being able to find .options files shouldn't be a warning
 //  [ERROR]: Unable to load texture "data/skybox/top.png"! Reason FileLoadError(Io(Os { code: 2, kind: NotFound, message: "No such file or directory" }))
+//  Statistics no Debug
 
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "cli", derive(StructOpt))]

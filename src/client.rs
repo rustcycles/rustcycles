@@ -11,6 +11,11 @@ use rg3d::{
     engine::Engine,
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
+    gui::{
+        message::MessageDirection,
+        text::{TextBuilder, TextMessage},
+        widget::WidgetBuilder,
+    },
     scene::{
         base::BaseBuilder,
         camera::{CameraBuilder, SkyBoxBuilder},
@@ -50,6 +55,16 @@ pub(crate) struct GameClient {
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
+        let debug_text = TextBuilder::new(WidgetBuilder::new().with_width(400.0))
+            .build(&mut engine.user_interface.build_ctx());
+        engine.user_interface.send_message(TextMessage::text(
+            debug_text,
+            MessageDirection::ToWidget,
+            "test".to_owned(),
+        ));
+
+        dbg_logf!("{}", engine.renderer.get_statistics());
+
         let mut connect_attempts = 0;
         let mut stream = loop {
             connect_attempts += 1;
@@ -78,6 +93,9 @@ impl GameClient {
             .ok();
 
         let scene = &mut engine.scenes[gs.scene];
+
+        dbg_logf!("{}", scene.performance_statistics);
+
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
                 TransformBuilder::new()

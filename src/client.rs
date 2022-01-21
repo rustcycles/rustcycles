@@ -422,9 +422,7 @@ impl GameClient {
         }
         camera.local_transform_mut().set_position(camera_pos);
 
-        // Debug
-        scene.drawing_context.clear_lines();
-
+        // Testing
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
             dbg_cross!(body_pos, 5.0, Color::GREEN);
@@ -433,6 +431,13 @@ impl GameClient {
         dbg_line!(v!(10 5 5), v!(10 5 7));
         dbg_arrow!(v!(7 5 5), v!(7 5 7));
         dbg_cross!(v!(4 5 5), 0.0, Color::WHITE);
+
+        // Debug
+        scene.drawing_context.clear_lines();
+
+        // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
+        // Keep this first so it draws below other debug stuff.
+        scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
@@ -461,9 +466,6 @@ impl GameClient {
             MessageDirection::ToWidget,
             debug_string,
         ));
-
-        // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
-        scene.graph.physics.draw(&mut scene.drawing_context);
 
         debug::details::cleanup();
     }

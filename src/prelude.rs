@@ -14,9 +14,11 @@ use rg3d::{
 // so we import it here to make it part of prelude.
 pub use crate::v;
 
-/// Shorthand for Vector3::new().
+/// Shorthand for `Vector3::new()`.
 ///
-/// Short name, no commas between numbers, no decimal point.
+/// Short name, no decimal point (casts to f32), no commas between numbers.
+///
+/// X, Y, Z is left, up, forward.
 ///
 /// # Usage
 ///
@@ -30,6 +32,9 @@ macro_rules! v {
     };
 }
 
+/// Shorthand for `Vector3<f32>`
+///
+/// X, Y, Z is left, up, forward.
 pub(crate) type Vec3 = Vector3<f32>;
 
 /// QoL methods for nalgebra's Vector3.

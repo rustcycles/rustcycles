@@ -57,7 +57,7 @@ pub(crate) struct GameClient {
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
-        let debug_text = TextBuilder::new(WidgetBuilder::new().with_width(400.0))
+        let debug_text = TextBuilder::new(WidgetBuilder::new().with_width(1280.0))
             .build(&mut engine.user_interface.build_ctx());
 
         let mut connect_attempts = 0;

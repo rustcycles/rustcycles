@@ -194,7 +194,7 @@ fn client_main(opts: Opts) {
             Event::WindowEvent { event, .. } => {
                 match event {
                     WindowEvent::Resized(size) => {
-                        client.engine.set_frame_size(size.into()).unwrap();
+                        client.resized(size);
                     }
                     WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit;

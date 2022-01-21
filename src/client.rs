@@ -8,6 +8,7 @@ use rg3d::{
         color::Color,
         pool::Handle,
     },
+    dpi::PhysicalSize,
     engine::Engine,
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
@@ -15,7 +16,7 @@ use rg3d::{
         formatted_text::WrapMode,
         message::MessageDirection,
         text::{TextBuilder, TextMessage},
-        widget::WidgetBuilder,
+        widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
     scene::{
@@ -58,12 +59,10 @@ pub(crate) struct GameClient {
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
-        let debug_text = TextBuilder::new(
-            WidgetBuilder::new().with_width(engine.get_window().inner_size().width as f32),
-        )
-        // Word wrap doesn't work if there's an extremely long word.
-        .with_wrap(WrapMode::Letter)
-        .build(&mut engine.user_interface.build_ctx());
+        let debug_text = TextBuilder::new(WidgetBuilder::new())
+            // Word wrap doesn't work if there's an extremely long word.
+            .with_wrap(WrapMode::Letter)
+            .build(&mut engine.user_interface.build_ctx());
 
         let mut connect_attempts = 0;
         let mut stream = loop {
@@ -182,6 +181,26 @@ impl GameClient {
             server_messages,
             debug_text,
         }
+    }
+
+    pub(crate) fn resized(&mut self, size: PhysicalSize<u32>) {
+        // This is also called when the window is first created.
+
+        self.engine.set_frame_size(size.into()).unwrap();
+
+        // mrDIMAS on discord:
+        // The root element of the UI is Canvas,
+        // it has infinite constraints so it does not stretch its contents.
+        // If you'll have some complex UI, I'd advise you to create either
+        // a window-sized Border or Grid and attach all your ui elements to it,
+        // instead of root canvas.
+        self.engine
+            .user_interface
+            .send_message(WidgetMessage::width(
+                self.debug_text,
+                MessageDirection::ToWidget,
+                size.width as f32,
+            ));
     }
 
     pub(crate) fn focused(&mut self, focus: bool) {

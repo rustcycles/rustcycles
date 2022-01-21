@@ -73,9 +73,12 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
 
 thread_local! {
     pub(crate) static DEBUG_ENDPOINT: RefCell<&'static str> = RefCell::new("UNKNOWN");
+
+    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
     pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 
 pub(crate) fn cleanup() {
+    DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
     DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
 }

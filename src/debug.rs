@@ -41,6 +41,35 @@ macro_rules! dbg_logd {
     };
 }
 
+/// Print text onto the screen. Uses `println!(..)`-style formatting.
+///
+/// Useful for printing debug info each frame.
+#[macro_export]
+macro_rules! dbg_textf {
+    ( ) => {
+        dbg_textf!("");
+    };
+    ( $( $t:tt )* ) => {
+        let s = format!( $( $t )* );
+        $crate::debug::details::DEBUG_TEXTS.with(|texts| {
+            texts.borrow_mut().push(s)
+        });
+    };
+}
+
+/// Print variables onto the screen formatted as `var1: value1, var2: value2`.
+///
+/// Useful for printing debug info each frame.
+#[macro_export]
+macro_rules! dbg_textd {
+    ( $( $e:expr ),* ) => {
+        let s = $crate::__format_pairs!( $( $e ),* );
+        $crate::debug::details::DEBUG_TEXTS.with(|texts| {
+            texts.borrow_mut().push(s)
+        });
+    };
+}
+
 /// Draw a line from `begin` to `end` (both world coordinates).
 /// Optionally specify
 /// - how long it lasts in seconds (default is 0.0 which means 1 frame)
@@ -118,6 +147,14 @@ mod tests {
         dbg_logd!();
         dbg_logd!(x);
         dbg_logd!(x, y, 7);
+
+        dbg_textf!();
+        dbg_textf!("abcd");
+        dbg_textf!("x: {}, y: {y}, 7: {}", x, 7);
+
+        dbg_textd!();
+        dbg_textd!(x);
+        dbg_textd!(x, y, 7);
     }
 
     #[test]

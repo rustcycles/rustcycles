@@ -15,6 +15,7 @@ use rg3d::{
         message::MessageDirection,
         text::{TextBuilder, TextMessage},
         widget::WidgetBuilder,
+        UiNode,
     },
     scene::{
         base::BaseBuilder,
@@ -33,7 +34,7 @@ use crate::{
     },
     debug::{
         self,
-        details::{DebugShape, Shape, DEBUG_SHAPES},
+        details::{DebugShape, Shape, DEBUG_SHAPES, DEBUG_TEXTS},
     },
     prelude::*,
 };
@@ -51,19 +52,13 @@ pub(crate) struct GameClient {
     stream: TcpStream,
     buffer: VecDeque<u8>,
     server_messages: Vec<ServerMessage>,
+    debug_text: Handle<UiNode>,
 }
 
 impl GameClient {
     pub(crate) async fn new(mut engine: Engine) -> Self {
         let debug_text = TextBuilder::new(WidgetBuilder::new().with_width(400.0))
             .build(&mut engine.user_interface.build_ctx());
-        engine.user_interface.send_message(TextMessage::text(
-            debug_text,
-            MessageDirection::ToWidget,
-            "test".to_owned(),
-        ));
-
-        dbg_logf!("{}", engine.renderer.get_statistics());
 
         let mut connect_attempts = 0;
         let mut stream = loop {
@@ -93,8 +88,6 @@ impl GameClient {
             .ok();
 
         let scene = &mut engine.scenes[gs.scene];
-
-        dbg_logf!("{}", scene.performance_statistics);
 
         let camera = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
@@ -182,6 +175,7 @@ impl GameClient {
             stream,
             buffer,
             server_messages,
+            debug_text,
         }
     }
 
@@ -423,10 +417,29 @@ impl GameClient {
                 shape.time -= dt;
             }
         });
-        debug::details::cleanup();
+
+        let mut debug_string = String::new();
+        debug_string.push_str(&self.engine.renderer.get_statistics().to_string());
+        debug_string.push_str(&scene.performance_statistics.to_string());
+        debug_string.push('\n');
+        debug_string.push('\n');
+        DEBUG_TEXTS.with(|texts| {
+            let texts = texts.borrow();
+            for text in texts.iter() {
+                debug_string.push_str(text);
+                debug_string.push('\n');
+            }
+        });
+        self.engine.user_interface.send_message(TextMessage::text(
+            self.debug_text,
+            MessageDirection::ToWidget,
+            debug_string,
+        ));
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         scene.graph.physics.draw(&mut scene.drawing_context);
+
+        debug::details::cleanup();
     }
 
     /// Send all once-per-frame stuff to the server.

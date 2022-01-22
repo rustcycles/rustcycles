@@ -397,9 +397,13 @@ impl GameClient {
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
-        let yaw = Rotation3::from_axis_angle(&Vec3::up_axis(), self.lp.input.yaw.0.to_radians());
-        let x = yaw * Vec3::left_axis();
-        let pitch = UnitQuaternion::from_axis_angle(&x, self.lp.input.pitch.0.to_radians());
+        let yaw_angle = self.lp.input.yaw.0.to_radians();
+        let yaw = Rotation3::from_axis_angle(&Vec3::up_axis(), yaw_angle);
+
+        let pitch_angle = self.lp.input.pitch.0.to_radians();
+        let pitch_axis = yaw * Vec3::left_axis();
+        let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
+
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
         let forward = camera.forward_vec_normed();

@@ -68,7 +68,7 @@ where
             Ok(0) => {
                 // The connection has been closed, don't get stuck in this loop.
                 // This can happen for example when the server crashes.
-                println!("Connection closed when reading");
+                dbg_logf!("Connection closed when reading");
                 closed = true;
                 break;
             }
@@ -80,7 +80,7 @@ where
                 break;
             }
             Err(e) => {
-                println!("Connection closed when reading - error: {}", e);
+                dbg_logf!("Connection closed when reading - error: {}", e);
                 closed = true;
                 break;
             }

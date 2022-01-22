@@ -203,14 +203,14 @@ fn client_main(opts: Opts) {
                         // LATER might be useful for console/chat?
                     }
                     WindowEvent::Focused(focus) => {
-                        //println!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
+                        //dbg_logf!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
 
                         client.focused(focus);
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
                         // NOTE: This event is repeated if the key is held, that means
                         // there can be more `state: Pressed` events before a `state: Released`.
-                        // println!(
+                        // dbg_logf!(
                         //     "{} keyboard input {:?}",
                         //     clock.elapsed().as_secs_f32(),
                         //     input
@@ -219,7 +219,7 @@ fn client_main(opts: Opts) {
                         client.keyboard_input(input);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
-                        println!(
+                        dbg_logf!(
                             "{} wheel {:?} {:?}",
                             clock.elapsed().as_secs_f32(),
                             delta,
@@ -242,7 +242,7 @@ fn client_main(opts: Opts) {
                         // Is it limited by my polling rate? Would it be helpful to teach players how to increase it?
                         // Sometimes i get 4 events every 16 ms. Detect this.
                         // https://github.com/martin-t/rustcycles/issues/1
-                        // println!(
+                        // dbg_logf!(
                         //     "{} DeviceEvent::MouseMotion {:?}",
                         //     clock.elapsed().as_secs_f32(),
                         //     delta
@@ -265,7 +265,7 @@ fn client_main(opts: Opts) {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
             Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => println!("C bye"),
+            Event::LoopDestroyed => dbg_logf!("bye"),
         }
     });
 }
@@ -313,7 +313,7 @@ fn server_main() {
             }
             Event::RedrawRequested(_) => {}
             Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => println!("S bye"),
+            Event::LoopDestroyed => dbg_logf!("bye"),
         }
     });
 }

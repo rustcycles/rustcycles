@@ -226,7 +226,7 @@ impl GameClient {
             D => self.lp.input.right = pressed,
             c => {
                 if pressed {
-                    println!("C pressed scancode: {}", c);
+                    dbg_logf!("pressed scancode: {}", c);
                 }
             }
         }
@@ -332,7 +332,7 @@ impl GameClient {
                 }
                 ServerMessage::Observe { player_index } => {
                     self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Observing;
-                    println!("C player {} is now observing", player_index);
+                    dbg_logf!("player {} is now observing", player_index);
                 }
                 ServerMessage::Spectate {
                     player_index,
@@ -341,14 +341,15 @@ impl GameClient {
                     let spectatee_handle = self.gs.players.handle_from_index(spectatee_index);
                     self.gs.players.at_mut(player_index).unwrap().ps =
                         PlayerState::Spectating { spectatee_handle };
-                    println!(
-                        "C player {} is now spectating player {}",
-                        player_index, spectatee_index
+                    dbg_logf!(
+                        "player {} is now spectating player {}",
+                        player_index,
+                        spectatee_index
                     );
                 }
                 ServerMessage::Join { player_index } => {
                     self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Playing;
-                    println!("C player {} is now playing", player_index);
+                    dbg_logf!("player {} is now playing", player_index);
                 }
                 ServerMessage::SpawnCycle(PlayerCycle {
                     player_index,

@@ -76,7 +76,7 @@ impl GameServer {
                     // Also how does it interact with flushing the stram after each write?
                     stream.set_nodelay(true).unwrap();
                     stream.set_nonblocking(true).unwrap();
-                    println!("S accept {}", addr);
+                    dbg_logf!("accept {}", addr);
 
                     // Add player
                     // This is sent to all clients except the new one.
@@ -138,14 +138,14 @@ impl GameServer {
                     ClientMessage::Join => {
                         self.gs.players[client.player_handle].ps = PlayerState::Playing;
                         let player_index = client.player_handle.index();
-                        println!("S player {} is now playing", player_index);
+                        dbg_logf!("player {} is now playing", player_index);
                         let msg = ServerMessage::Join { player_index };
                         messages_to_all.push(msg);
                     }
                     ClientMessage::Observe => {
                         self.gs.players[client.player_handle].ps = PlayerState::Observing;
                         let player_index = client.player_handle.index();
-                        println!("S player {} is now observing", player_index);
+                        dbg_logf!("player {} is now observing", player_index);
                         let msg = ServerMessage::Observe { player_index };
                         messages_to_all.push(msg);
                     }
@@ -226,8 +226,8 @@ impl GameServer {
         match dest {
             SendDest::One(handle) => {
                 if let Err(e) = net::send(&network_message, &mut self.clients[handle].stream) {
-                    println!(
-                        "S Error in network_send One - index {}: {:?}",
+                    dbg_logf!(
+                        "Error in network_send One - index {}: {:?}",
                         handle.index(),
                         e
                     );
@@ -237,8 +237,8 @@ impl GameServer {
             SendDest::All => {
                 for (handle, client) in self.clients.pair_iter_mut() {
                     if let Err(e) = net::send(&network_message, &mut client.stream) {
-                        println!(
-                            "S Error in network_send All - index {}: {:?}",
+                        dbg_logf!(
+                            "Error in network_send All - index {}: {:?}",
                             handle.index(),
                             e
                         );

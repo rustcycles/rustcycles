@@ -160,7 +160,7 @@ fn client_server_main(opts: Opts) {
 }
 
 fn client_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "C");
+    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "cl");
 
     // LATER Switch rg3d to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
@@ -271,7 +271,7 @@ fn client_main(opts: Opts) {
 }
 
 fn server_main() {
-    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "S");
+    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "sv");
 
     // See note in client_main().
     Log::set_verbosity(MessageKind::Warning);

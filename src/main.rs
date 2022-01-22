@@ -58,7 +58,7 @@ use crate::{client::GameClient, debug::details::DEBUG_ENDPOINT, server::GameServ
 
 // LATERs:
 //  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
-//  - [ ] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
+//  - [x] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
 //  - [ ] If possible, lint against unwrap, print, println, dbg, ...
 
 // TODO rg3d bugs:

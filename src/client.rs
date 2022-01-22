@@ -377,6 +377,7 @@ impl GameClient {
                             .set_position(cycle_physics.translation);
                         body.local_transform_mut()
                             .set_rotation(cycle_physics.rotation);
+                        dbg_textd!(cycle_physics.rotation);
                         body.set_lin_vel(cycle_physics.velocity);
                     }
                 }
@@ -394,6 +395,11 @@ impl GameClient {
         }
 
         let scene = &mut self.engine.scenes[self.gs.scene];
+
+        let player_cycle_handle = self.gs.players[self.lp.player_handle].cycle_handle.unwrap();
+        let player_body_handle = self.gs.cycles[player_cycle_handle].body_handle;
+        let player_cycle_pos = **scene.graph[player_body_handle].local_transform().position();
+
         let camera = &mut scene.graph[self.camera];
 
         // Camera turning
@@ -404,24 +410,32 @@ impl GameClient {
         let pitch_axis = yaw * Vec3::left_axis();
         let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
 
-        camera.local_transform_mut().set_rotation(pitch * yaw);
+        let cam_rot = pitch * yaw;
+        camera.local_transform_mut().set_rotation(cam_rot);
 
         // Camera movement
-        let forward = camera.forward_vec_normed();
-        let left = camera.left_vec_normed();
         let mut camera_pos = **camera.local_transform().position();
-        let camera_speed = 10.0;
-        if self.lp.input.forward {
-            camera_pos += forward * dt * camera_speed;
-        }
-        if self.lp.input.backward {
-            camera_pos += -forward * dt * camera_speed;
-        }
-        if self.lp.input.left {
-            camera_pos += left * dt * camera_speed;
-        }
-        if self.lp.input.right {
-            camera_pos += -left * dt * camera_speed;
+        if ps == PlayerState::Observing {
+            let forward = camera.forward_vec_normed();
+            let left = camera.left_vec_normed();
+            let camera_speed = 10.0;
+            if self.lp.input.forward {
+                camera_pos += forward * dt * camera_speed;
+            }
+            if self.lp.input.backward {
+                camera_pos += -forward * dt * camera_speed;
+            }
+            if self.lp.input.left {
+                camera_pos += left * dt * camera_speed;
+            }
+            if self.lp.input.right {
+                camera_pos += -left * dt * camera_speed;
+            }
+        } else if ps == PlayerState::Playing {
+            // LATER cvars
+            let back = -(cam_rot * Vec3::forward() * 2.0);
+            let up = Vec3::up() * 0.5;
+            camera_pos = player_cycle_pos + back + up;
         }
         camera.local_transform_mut().set_position(camera_pos);
 

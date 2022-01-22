@@ -81,7 +81,7 @@ impl GameState {
             let input = player.input;
             let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
-            if playing && (input.forward || input.backward) {
+            if playing {
                 let forward = rot * Vec3::forward();
                 let left = rot * Vec3::left();
 

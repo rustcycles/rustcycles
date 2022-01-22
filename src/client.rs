@@ -432,9 +432,19 @@ impl GameClient {
             dbg_cross!(body_pos, 5.0, Color::GREEN);
         }
 
-        dbg_line!(v!(10 5 5), v!(10 5 7));
-        dbg_arrow!(v!(7 5 5), v!(7 5 7));
-        dbg_cross!(v!(4 5 5), 0.0, Color::WHITE);
+        dbg_line!(v!(15 5 5), v!(15 5 7));
+
+        dbg_arrow!(v!(10 5 5), v!(10 5 7)); // Forward
+        dbg_arrow!(v!(10 5 5), v!(10 5 4)); // Back
+        dbg_arrow!(v!(10 5 5), v!(9 5 5)); // Left
+        dbg_arrow!(v!(10 5 5), v!(11 5 5)); // Right
+        dbg_arrow!(v!(10 5 5), v!(10 6 5)); // Up
+        dbg_arrow!(v!(10 5 5), v!(10 4 5)); // Down
+
+        dbg_arrow!(v!(10 10 5), v!(11 11 6));
+        dbg_arrow!(v!(10 10 10), v!(12 12 12));
+
+        dbg_cross!(v!(5 5 5), 0.0, Color::WHITE);
 
         // Debug
         scene.drawing_context.clear_lines();
@@ -501,21 +511,87 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                 color: shape.color,
             });
             let dir = end - begin;
+
             // This is the classic way to make a 2D perpendicular vector
-            // (flip X and Y, negate one of them),
-            // just used in 3D - Y (up) is ignored.
-            // LATER Make this work for all directions (arrow with 4 side lines).
-            let perp_dir = Vec3::new(dir.z, dir.y, -dir.x);
-            let side_begin1 = end + (perp_dir - dir) * 0.25;
-            let side_begin2 = end + (-perp_dir - dir) * 0.25;
+            // (flip X and Y, negate one of them), just used in 3D - one axis is ignored.
+
+            // let perp_dir_x = Vec3::new(dir.x, dir.z, -dir.y);
+            // let perp_dir_y = Vec3::new(dir.z, dir.y, -dir.x);
+            // let perp_dir_z = Vec3::new(dir.y, -dir.x, dir.z);
+            //let perp_dir_vert =
+            // let side_begin1 = end + (perp_dir_horiz - dir) * 0.25;
+            // let side_begin2 = end + (-perp_dir_horiz - dir) * 0.25;
+            // drawing_context.add_line(Line {
+            //     begin: side_begin1,
+            //     end,
+            //     color: shape.color,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: side_begin2,
+            //     end,
+            //     color: shape.color,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: end + perp_dir_x * 0.25,
+            //     end: end - perp_dir_x * 0.25,
+            //     color: Color::WHITE,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: end + perp_dir_y * 0.25,
+            //     end: end - perp_dir_y * 0.25,
+            //     color: Color::WHITE,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: end + perp_dir_z * 0.25,
+            //     end: end - perp_dir_z * 0.25,
+            //     color: Color::WHITE,
+            // });
+
+            // let px = dir.cross(&Vec3::x());
+            // let py = dir.cross(&Vec3::y()) + v!(0 0.1 0);
+            // let pz = dir.cross(&Vec3::z());
+            // drawing_context.add_line(Line {
+            //     begin: end + px * 0.25,
+            //     end: end - px * 0.25,
+            //     color: Color::RED,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: end + py * 0.5,
+            //     end: end - py * 0.25,
+            //     color: Color::GREEN,
+            // });
+            // drawing_context.add_line(Line {
+            //     begin: end + pz * 0.5,
+            //     end: end - pz * 0.25,
+            //     color: Color::WHITE,
+            // });
+
+            // We want two of the side lines to be above and below the arrow body
+            // and the other two to the sides if the arrow is pointing horizontally
+            // and appear pitched up/down if not.
+
+            let rot = UnitQuaternion::face_towards(&dir, &Vec3::up());
+            let len = dir.magnitude();
+            let left = rot * Vec3::left() * len;
+            let up = rot * Vec3::up() * len;
             drawing_context.add_line(Line {
-                begin: side_begin1,
-                end,
+                begin: end,
+                end: end + (-dir + left) * 0.25,
                 color: shape.color,
             });
             drawing_context.add_line(Line {
-                begin: side_begin2,
-                end,
+                begin: end,
+                end: end + (-dir - left) * 0.25,
+                color: shape.color,
+            });
+            drawing_context.add_line(Line {
+                begin: end,
+                end: end + (-dir + up) * 0.25,
+                color: shape.color,
+            });
+            drawing_context.add_line(Line {
+                begin: end,
+                end: end + (-dir - up) * 0.25,
                 color: shape.color,
             });
         }
@@ -549,7 +625,7 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                 color: shape.color,
             });
 
-            let from_origin = true; // LATER cvar
+            let from_origin = false; // LATER cvar
             if from_origin {
                 drawing_context.add_line(Line {
                     begin: Vec3::zeros(),

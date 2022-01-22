@@ -8,9 +8,7 @@
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
 
-use rg3d::{core::pool::Handle, scene::node::Node};
-
-use crate::common::Input;
+use crate::{common::Input, prelude::*};
 
 /// A client connected to a server. Can be observing, spectating or playing.
 #[derive(Debug)]

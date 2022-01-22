@@ -7,18 +7,12 @@ pub(crate) mod net;
 use std::fmt::{self, Debug, Formatter};
 
 use rg3d::{
-    core::{
-        algebra::UnitQuaternion,
-        pool::{Handle, Pool},
-    },
+    core::pool::Pool,
     engine::Engine,
     resource::model::Model,
     scene::{
-        base::BaseBuilder,
         collider::{ColliderBuilder, ColliderShape},
         rigidbody::RigidBodyBuilder,
-        transform::TransformBuilder,
-        Scene,
     },
 };
 use serde::{Deserialize, Serialize};

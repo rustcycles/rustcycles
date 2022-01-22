@@ -6,17 +6,18 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
-use rg3d::{
-    core::pool::{Handle, Pool},
-    engine::Engine,
-};
+use rg3d::{core::pool::Pool, engine::Engine};
 
-use crate::common::{
-    entities::{Player, PlayerState},
-    messages::{
-        AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage, UpdatePhysics,
+use crate::{
+    common::{
+        entities::{Player, PlayerState},
+        messages::{
+            AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage,
+            UpdatePhysics,
+        },
+        net, GameState,
     },
-    net, GameState,
+    prelude::*,
 };
 
 /// Game server.

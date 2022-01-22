@@ -1,12 +1,20 @@
 //! A bunch of QoL macros, traits and functions
 //! to make gamedev in Rust faster and saner.
 //!
-//! Most files in this game should import it via
+//! Should be imported in most files via
 //! `use crate::prelude::*`.
 
-use rg3d::{
-    core::algebra::{Unit, Vector3},
-    scene::node::Node,
+use rg3d::core::algebra::Vector3;
+
+// Make the most commonly used types available.
+// Criteria for inclusion: used in a lot of files and doesn't collide.
+pub use rg3d::{
+    core::{
+        algebra::{Unit, UnitQuaternion},
+        color::Color,
+        pool::Handle,
+    },
+    scene::{base::BaseBuilder, node::Node, transform::TransformBuilder, Scene},
 };
 
 // Visibility of macros by example works diffrently from normal items,

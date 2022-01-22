@@ -159,17 +159,16 @@ mod tests {
 
     #[test]
     fn test_drawing_compiles_no_import() {
-        // Intentionally don't import Color to test the macro still works.
         dbg_line!(v!(1 2 3), v!(4 5 6));
         dbg_line!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, rg3d::core::color::Color::BLUE);
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE);
 
         dbg_arrow!(v!(1 2 3), v!(4 5 6));
         dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, rg3d::core::color::Color::BLUE);
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE);
 
         dbg_cross!(v!(1 2 3));
         dbg_cross!(v!(1 2 3), 5.0);
-        dbg_cross!(v!(1 2 3), 5.0, rg3d::core::color::Color::BLUE);
+        dbg_cross!(v!(1 2 3), 5.0, Color::BLUE);
     }
 }

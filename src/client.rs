@@ -3,11 +3,6 @@
 use std::{collections::VecDeque, net::TcpStream, thread, time::Duration};
 
 use rg3d::{
-    core::{
-        algebra::{Rotation3, UnitQuaternion},
-        color::Color,
-        pool::Handle,
-    },
     dpi::PhysicalSize,
     engine::Engine,
     error::ExternalError,
@@ -21,11 +16,8 @@ use rg3d::{
         UiNode,
     },
     scene::{
-        base::BaseBuilder,
         camera::{CameraBuilder, Projection, SkyBoxBuilder},
         debug::{Line, SceneDrawingContext},
-        node::Node,
-        transform::TransformBuilder,
     },
 };
 
@@ -404,7 +396,7 @@ impl GameClient {
 
         // Camera turning
         let yaw_angle = self.lp.input.yaw.0.to_radians();
-        let yaw = Rotation3::from_axis_angle(&Vec3::up_axis(), yaw_angle);
+        let yaw = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), yaw_angle);
 
         let pitch_angle = self.lp.input.pitch.0.to_radians();
         let pitch_axis = yaw * Vec3::left_axis();

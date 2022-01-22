@@ -2,7 +2,6 @@
 //!
 //! LATER These will form the basis of demo recording and replay.
 
-use rg3d::core::algebra::UnitQuaternion;
 use serde::{Deserialize, Serialize};
 
 use crate::{common::Input, prelude::*};

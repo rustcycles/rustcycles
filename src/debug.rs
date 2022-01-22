@@ -26,6 +26,22 @@ macro_rules! soft_assert {
     };
 }
 
+/// Same as `panic!()` but prints whether in happened in client or server.
+#[macro_export]
+macro_rules! dbg_panic {
+    ( ) => {
+        dbg_panic!("explicit dbg_panic")
+    };
+    ( $($arg:tt)* ) => {
+        {
+            let msg = format!( $( $arg )* );
+            $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
+                panic!("{} {}", endpoint.borrow(), msg);
+            });
+        }
+    };
+}
+
 /// Print text into stdout. Uses `println!(..)`-style formatting.
 #[macro_export]
 macro_rules! dbg_logf {
@@ -151,9 +167,26 @@ mod tests {
         soft_assert!(2 + 2 == 5, "custom message {}", 42);
 
         // Test the macros in expression position
-        match true {
-            true => soft_assert!(true),
-            false => soft_assert!(false, "custom message {}", 42),
+        #[allow(unreachable_patterns)]
+        match 0 {
+            _ => soft_assert!(false),
+            _ => soft_assert!(false, "custom message {}", 42),
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_dbg_panic() {
+        dbg_panic!();
+        dbg_panic!("message");
+        dbg_panic!("custom message {}", 42);
+
+        // Test the macros in expression position
+        #[allow(unreachable_patterns)]
+        match 0 {
+            _ => dbg_panic!(),
+            _ => dbg_panic!("message"),
+            _ => dbg_panic!("custom message {}", 42),
         }
     }
 

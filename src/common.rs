@@ -88,12 +88,23 @@ impl GameState {
             let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing && (input.forward || input.backward) {
-                let dir = rot * Vec3::forward();
-                let wheel_accel = if input.forward {
-                    dir * dt * 50.0
-                } else {
-                    -dir * dt * 50.0
-                };
+                let forward = rot * Vec3::forward();
+                let left = rot * Vec3::left();
+
+                let mut wheel_accel = Vec3::zeros();
+                if input.forward {
+                    wheel_accel += forward * dt * 50.0;
+                }
+                if input.backward {
+                    wheel_accel -= forward * dt * 50.0;
+                }
+                // FIXME doesn't work
+                if input.left {
+                    wheel_accel += left * dt * 50.0;
+                }
+                if input.right {
+                    wheel_accel -= left * dt * 50.0;
+                }
 
                 let mut lin_vel = body.lin_vel();
                 lin_vel += wheel_accel;

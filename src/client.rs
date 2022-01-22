@@ -116,7 +116,7 @@ impl GameClient {
             init_attempts += 1;
             let closed = net::receive(&mut stream, &mut buffer, &mut server_messages);
             if closed {
-                panic!("connection closed before init"); // LATER Don't crash
+                dbg_panic!("connection closed before init"); // LATER Don't crash
             }
             if !server_messages.is_empty() {
                 let message = server_messages.remove(0);
@@ -154,7 +154,7 @@ impl GameClient {
                     dbg_logf!("init attempts: {}", init_attempts);
                     break lp;
                 } else {
-                    panic!("First message wasn't init"); // LATER Don't crash
+                    dbg_panic!("First message wasn't init"); // LATER Don't crash
                 }
             }
             if init_attempts % 100 == 0 {
@@ -317,7 +317,7 @@ impl GameClient {
         for message in self.server_messages.drain(..) {
             match message {
                 ServerMessage::InitData(_) => {
-                    panic!("Received unexpected init")
+                    dbg_panic!("Received unexpected init")
                 }
                 ServerMessage::AddPlayer(add_player) => {
                     let player = Player::new(None);

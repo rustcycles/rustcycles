@@ -111,7 +111,7 @@ fn main() {
             "client" => opts.endpoint = Some(Endpoint::Client),
             "server" => opts.endpoint = Some(Endpoint::Server),
             "--windowed" => opts.windowed = true,
-            other => panic!("unexpected argument: {other}"),
+            other => dbg_panic!("unexpected argument: {other}"),
         }
     }
 

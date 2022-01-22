@@ -22,7 +22,7 @@ use rg3d::{
     },
     scene::{
         base::BaseBuilder,
-        camera::{CameraBuilder, SkyBoxBuilder},
+        camera::{CameraBuilder, Projection, SkyBoxBuilder},
         debug::{Line, SceneDrawingContext},
         node::Node,
         transform::TransformBuilder,
@@ -249,7 +249,7 @@ impl GameClient {
         match button {
             rg3d::event::MouseButton::Left => self.lp.input.fire1 = pressed,
             rg3d::event::MouseButton::Right => self.lp.input.fire2 = pressed,
-            rg3d::event::MouseButton::Middle => {}
+            rg3d::event::MouseButton::Middle => self.lp.input.zoom = pressed,
             rg3d::event::MouseButton::Other(_) => {}
         }
 
@@ -406,10 +406,9 @@ impl GameClient {
 
         camera.local_transform_mut().set_rotation(pitch * yaw);
 
+        // Camera movement
         let forward = camera.forward_vec_normed();
         let left = camera.left_vec_normed();
-
-        // Camera movement
         let mut camera_pos = **camera.local_transform().position();
         let camera_speed = 10.0;
         if self.lp.input.forward {
@@ -425,6 +424,19 @@ impl GameClient {
             camera_pos += -left * dt * camera_speed;
         }
         camera.local_transform_mut().set_position(camera_pos);
+
+        // Camera zoom
+        let camera = camera.as_camera_mut();
+        if let Projection::Perspective(perspective) = camera.projection_mut() {
+            // LATER cvar
+            if self.lp.input.zoom {
+                perspective.fov = 20.0_f32.to_radians();
+            } else {
+                perspective.fov = 75.0_f32.to_radians();
+            }
+        } else {
+            unreachable!();
+        }
 
         // Testing
         for cycle in &self.gs.cycles {

@@ -176,6 +176,7 @@ pub(crate) struct Input {
     pub(crate) pitch: Deg,
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
+    pub(crate) zoom: bool,
     pub(crate) forward: bool,
     pub(crate) backward: bool,
     pub(crate) left: bool,
@@ -192,6 +193,9 @@ impl Debug for Input {
         }
         if self.fire2 {
             write!(f, "fire2 ")?;
+        }
+        if self.zoom {
+            write!(f, "zoom ")?;
         }
         if self.forward {
             write!(f, "forward ")?;

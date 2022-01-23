@@ -138,6 +138,8 @@ fn run(opts: Opts) {
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
 fn client_server_main(opts: Opts) {
+    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "cl+sv");
+
     // LATER Find a way to run client and server in one process,
     // maybe even one thread - sharing GameState woul be ideal for singleplayer.
     //
@@ -162,6 +164,7 @@ fn client_server_main(opts: Opts) {
 
     // We wanna close just the client and automatically close the server that way.
     client.wait().unwrap();
+    dbg_logf!("Client exitted, killing server");
     server.kill().unwrap();
 }
 

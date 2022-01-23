@@ -71,10 +71,12 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
     });
 }
 
+// LATER(multithreading) Make debug tools work correctly from all threads.
 thread_local! {
     // The default value here should be overwritten as soon as it's decided
     // whether the thread is a client or a server. If you see it in stdout/stderr,
-    // something is very wrong.
+    // something is very wrong - it crashed very early or somebody spawned
+    // more threads without setting this.
     pub(crate) static DEBUG_ENDPOINT: RefCell<&'static str> = RefCell::new("??cl/sv");
 
     pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());

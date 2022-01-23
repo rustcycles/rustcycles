@@ -21,7 +21,7 @@ macro_rules! soft_assert {
         if !$cond {
             // LATER Proper logging
             // LATER client vs server
-            println!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+            dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
         }
     };
 }
@@ -60,9 +60,13 @@ macro_rules! dbg_textf {
     };
     ( $( $t:tt )* ) => {
         {
-            let s = format!( $( $t )* );
+            let mut s = String::new();
+            $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
+                s.push_str(&format!("{} ", endpoint.borrow()));
+            });
+            s.push_str(&format!( $( $t )* ));
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {
-                texts.borrow_mut().push(s)
+                texts.borrow_mut().push(s);
             });
         }
     };
@@ -76,9 +80,7 @@ macro_rules! dbg_textd {
     ( $( $e:expr ),* ) => {
         {
             let s = $crate::__format_pairs!( $( $e ),* );
-            $crate::debug::details::DEBUG_TEXTS.with(|texts| {
-                texts.borrow_mut().push(s)
-            });
+            dbg_textf!("{}", s);
         }
     };
 }

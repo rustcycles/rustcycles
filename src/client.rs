@@ -297,6 +297,9 @@ impl GameClient {
 
             self.tick(dt);
 
+            // TODO This runs physics - maybe some gamelogic should run after it?
+            // What happens if we draw physics world both before and after?
+            // Same on server.
             self.engine.update(dt);
 
             self.sys_send_input();

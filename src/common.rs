@@ -92,7 +92,6 @@ impl GameState {
                 if input.backward {
                     wheel_accel -= forward * dt * 20.0;
                 }
-                // FIXME doesn't work
                 if input.left {
                     wheel_accel += left * dt * 20.0;
                 }

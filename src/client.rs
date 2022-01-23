@@ -1,6 +1,6 @@
 //! The client in a client-server multiplayer game architecture.
 
-use std::{collections::VecDeque, net::TcpStream, thread, time::Duration};
+use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Duration};
 
 use rg3d::{
     dpi::PhysicalSize,
@@ -527,7 +527,14 @@ impl GameClient {
 
     fn network_send(&mut self, message: ClientMessage) {
         let network_message = net::serialize(message);
-        net::send(&network_message, &mut self.stream).unwrap();
+        let res = net::send(&network_message, &mut self.stream);
+        if let Err(ref e) = res {
+            if e.kind() == ErrorKind::ConnectionReset {
+                dbg_logf!("Server disconnected, exitting");
+                std::process::exit(0);
+            }
+        }
+        res.unwrap();
     }
 }
 

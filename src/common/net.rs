@@ -1,7 +1,6 @@
 use std::{
     collections::VecDeque,
-    error::Error,
-    io::{ErrorKind, Read, Write},
+    io::{self, ErrorKind, Read, Write},
     net::TcpStream,
 };
 
@@ -29,7 +28,7 @@ where
 pub(crate) fn send(
     network_message: &NetworkMessage,
     stream: &mut TcpStream,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), io::Error> {
     // LATER Measure network usage.
     // LATER Try to minimize network usage.
     //       General purpose compression could help a bit,

@@ -72,6 +72,9 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
 }
 
 thread_local! {
+    // The default value here should be overwritten as soon as it's decided
+    // whether the thread is a client or a server. If you see it in stdout/stderr,
+    // something is very wrong.
     pub(crate) static DEBUG_ENDPOINT: RefCell<&'static str> = RefCell::new("??cl/sv");
 
     pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());

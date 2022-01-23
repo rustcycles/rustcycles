@@ -383,12 +383,12 @@ impl GameClient {
 
                     DEBUG_TEXTS.with(|texts| {
                         let mut texts = texts.borrow_mut();
-                        texts.extend(debug_texts.into_iter());
+                        texts.extend(debug_texts);
                     });
 
                     DEBUG_SHAPES.with(|shapes| {
                         let mut shapes = shapes.borrow_mut();
-                        shapes.extend(debug_shapes.into_iter());
+                        shapes.extend(debug_shapes);
                     })
                 }
             }

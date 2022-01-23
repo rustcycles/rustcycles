@@ -7,7 +7,7 @@ mod common;
 mod prelude;
 mod server;
 
-use std::{env, process::Command};
+use std::{env, panic, process::Command};
 
 use rg3d::{
     core::instant::Instant,
@@ -119,6 +119,15 @@ fn main() {
 }
 
 fn run(opts: Opts) {
+    let prev_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        DEBUG_ENDPOINT.with(|endpoint| {
+            eprintln!("{} is panicking:", endpoint.borrow());
+        });
+
+        prev_hook(panic_info);
+    }));
+
     match opts.endpoint {
         None => client_server_main(opts),
         Some(Endpoint::Client) => client_main(opts),

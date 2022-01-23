@@ -111,7 +111,7 @@ impl GameServer {
                     ErrorKind::WouldBlock => {
                         break;
                     }
-                    _ => dbg_panic!("network error (accept): {}", err),
+                    _ => panic!("network error (accept): {}", err),
                 },
             }
         }

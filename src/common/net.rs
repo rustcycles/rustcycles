@@ -19,8 +19,10 @@ pub(crate) fn serialize<M>(message: M) -> NetworkMessage
 where
     M: Serialize,
 {
-    let buf = bincode::serialize(&message).unwrap();
-    let content_len = u16::try_from(buf.len()).unwrap().to_le_bytes();
+    let buf = bincode::serialize(&message).expect("bincode failed to serialize message");
+    let content_len = u16::try_from(buf.len())
+        .expect("bincode message length overflowed")
+        .to_le_bytes();
     NetworkMessage { content_len, buf }
 }
 

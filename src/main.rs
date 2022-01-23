@@ -121,10 +121,7 @@ fn main() {
 fn run(opts: Opts) {
     let prev_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
-        DEBUG_ENDPOINT.with(|endpoint| {
-            eprintln!("{} is panicking:", endpoint.borrow());
-        });
-
+        dbg_logf!("panicking");
         prev_hook(panic_info);
     }));
 

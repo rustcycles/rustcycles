@@ -6,7 +6,7 @@
 
 use std::cell::RefCell;
 
-use rg3d::core::color::Color;
+use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
@@ -32,6 +32,7 @@ macro_rules! __format_pairs {
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) enum Shape {
     Line { begin: Vec3, end: Vec3 },
     Arrow { begin: Vec3, end: Vec3 },
@@ -39,11 +40,24 @@ pub(crate) enum Shape {
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) struct DebugShape {
     pub(crate) shape: Shape,
     /// Time left (decreases every frame)
     pub(crate) time: f32,
+    #[serde(with = "ColorDef")]
     pub(crate) color: Color,
+}
+
+/// Fyrox's Color doesn't impl serde traits
+/// so we do this: https://serde.rs/remote-derive.html
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(remote = "Color")]
+pub struct ColorDef {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 /// Helper function, prefer `dbg_line!()` instead.

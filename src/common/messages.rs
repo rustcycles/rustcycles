@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{common::Input, prelude::*};
+use crate::{common::Input, debug::details::DebugShape, prelude::*};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {
@@ -41,7 +41,11 @@ pub(crate) enum ServerMessage {
     /// Remove the cycle from game state, for example when the player switches to observer mode.
     DespawnCycle { cycle_index: u32 },
     /// Update the translations, rotations, velocities, etc. of everything.
-    UpdatePhysics(UpdatePhysics),
+    Update {
+        update_physics: UpdatePhysics,
+        debug_texts: Vec<String>,
+        debug_shapes: Vec<DebugShape>,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize)]

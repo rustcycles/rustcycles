@@ -17,6 +17,7 @@ use crate::{
         },
         net, GameState,
     },
+    debug::details::{DEBUG_SHAPES, DEBUG_TEXTS},
     prelude::*,
 };
 
@@ -213,7 +214,28 @@ impl GameServer {
             cycle_physics.push(update);
         }
         let update_physics = UpdatePhysics { cycle_physics };
-        let message = ServerMessage::UpdatePhysics(update_physics);
+
+        // Send debug items, then elear everything on the server
+        // so it doesn't get sent again next frame.
+        // Calling debug::details::cleanup() would only clear expired.
+        let debug_texts = DEBUG_TEXTS.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            let ret = texts.clone();
+            texts.clear();
+            ret
+        });
+        let debug_shapes = DEBUG_SHAPES.with(|shapes| {
+            let mut shapes = shapes.borrow_mut();
+            let ret = shapes.clone();
+            shapes.clear();
+            ret
+        });
+
+        let message = ServerMessage::Update {
+            update_physics,
+            debug_texts,
+            debug_shapes,
+        };
         self.network_send(message, SendDest::All);
     }
 

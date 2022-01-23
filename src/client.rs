@@ -365,7 +365,11 @@ impl GameClient {
                     dbg!(cycle_index);
                     todo!("despawn cycle");
                 }
-                ServerMessage::UpdatePhysics(update_physics) => {
+                ServerMessage::Update {
+                    update_physics,
+                    debug_texts,
+                    debug_shapes,
+                } => {
                     for cycle_physics in update_physics.cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
@@ -376,6 +380,16 @@ impl GameClient {
                         dbg_textd!(cycle_physics.rotation);
                         body.set_lin_vel(cycle_physics.velocity);
                     }
+
+                    DEBUG_TEXTS.with(|texts| {
+                        let mut texts = texts.borrow_mut();
+                        texts.extend(debug_texts.into_iter());
+                    });
+
+                    DEBUG_SHAPES.with(|shapes| {
+                        let mut shapes = shapes.borrow_mut();
+                        shapes.extend(debug_shapes.into_iter());
+                    })
                 }
             }
         }

@@ -229,7 +229,7 @@ fn client_main(opts: Opts) {
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         dbg_logf!(
-                            "{} wheel {:?} {:?}",
+                            "{} mouse wheel {:?} {:?}",
                             clock.elapsed().as_secs_f32(),
                             delta,
                             phase

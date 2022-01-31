@@ -106,6 +106,10 @@ thread_local! {
     pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 
+pub(crate) fn default_color() -> Color {
+    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
+}
+
 pub(crate) fn cleanup() {
     DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
     DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));

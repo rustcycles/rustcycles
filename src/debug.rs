@@ -95,7 +95,7 @@ macro_rules! dbg_line {
         $crate::debug::details::debug_line($begin, $end, $time, $color)
     };
     ($begin:expr, $end:expr, $time:expr) => {
-        $crate::dbg_line!($begin, $end, $time, rg3d::core::color::Color::RED)
+        $crate::dbg_line!($begin, $end, $time, $crate::debug::details::default_color())
     };
     ($begin:expr, $end:expr) => {
         $crate::dbg_line!($begin, $end, 0.0)
@@ -112,7 +112,7 @@ macro_rules! dbg_arrow {
         $crate::debug::details::debug_arrow($begin, $end, $time, $color)
     };
     ($begin:expr, $end:expr, $time:expr) => {
-        $crate::dbg_arrow!($begin, $end, $time, rg3d::core::color::Color::RED)
+        $crate::dbg_arrow!($begin, $end, $time, $crate::debug::details::default_color())
     };
     ($begin:expr, $end:expr) => {
         $crate::dbg_arrow!($begin, $end, 0.0)
@@ -129,7 +129,7 @@ macro_rules! dbg_cross {
         $crate::debug::details::debug_cross($point, $time, $color)
     };
     ($point:expr, $time:expr) => {
-        $crate::dbg_cross!($point, $time, rg3d::core::color::Color::RED)
+        $crate::dbg_cross!($point, $time, $crate::debug::details::default_color())
     };
     ($point:expr) => {
         $crate::dbg_cross!($point, 0.0)

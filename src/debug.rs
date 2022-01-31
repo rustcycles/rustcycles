@@ -32,7 +32,7 @@ macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
         {
             $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                print!("{} ", endpoint.borrow());
+                print!("{} ", endpoint.borrow().name);
             });
             println!( $( $t )* );
         }
@@ -62,7 +62,7 @@ macro_rules! dbg_textf {
         {
             let mut s = String::new();
             $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                s.push_str(&format!("{} ", endpoint.borrow()));
+                s.push_str(&format!("{} ", endpoint.borrow().name));
             });
             s.push_str(&format!( $( $t )* ));
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {

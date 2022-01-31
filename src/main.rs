@@ -23,7 +23,12 @@ use strum_macros::EnumString;
 #[cfg(feature = "cli")]
 use structopt::StructOpt;
 
-use crate::{client::GameClient, debug::details::DEBUG_ENDPOINT, server::GameServer};
+use crate::{
+    client::GameClient,
+    debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
+    prelude::*,
+    server::GameServer,
+};
 
 // Master TODO list:
 // v0.1 - MVP:
@@ -138,7 +143,12 @@ fn run(opts: Opts) {
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
 fn client_server_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "cl+sv");
+    DEBUG_ENDPOINT.with(|endpoint| {
+        *endpoint.borrow_mut() = DebugEndpoint {
+            name: "cl+sv",
+            default_color: Color::opaque(255, 255, 0),
+        }
+    });
 
     // LATER Find a way to run client and server in one process,
     // maybe even one thread - sharing GameState woul be ideal for singleplayer.
@@ -169,7 +179,12 @@ fn client_server_main(opts: Opts) {
 }
 
 fn client_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "cl");
+    DEBUG_ENDPOINT.with(|endpoint| {
+        *endpoint.borrow_mut() = DebugEndpoint {
+            name: "cl",
+            default_color: Color::RED,
+        }
+    });
 
     // LATER Switch rg3d to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
@@ -280,7 +295,12 @@ fn client_main(opts: Opts) {
 }
 
 fn server_main() {
-    DEBUG_ENDPOINT.with(|endpoint| *endpoint.borrow_mut() = "sv");
+    DEBUG_ENDPOINT.with(|endpoint| {
+        *endpoint.borrow_mut() = DebugEndpoint {
+            name: "sv",
+            default_color: Color::GREEN,
+        }
+    });
 
     // See note in client_main().
     Log::set_verbosity(MessageKind::Warning);

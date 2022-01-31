@@ -465,7 +465,7 @@ impl GameClient {
         // Testing
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
-            dbg_cross!(body_pos, 5.0, Color::GREEN);
+            dbg_cross!(body_pos, 5.0);
         }
 
         dbg_line!(v!(15 5 5), v!(15 5 7));

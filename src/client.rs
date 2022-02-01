@@ -477,10 +477,10 @@ impl GameClient {
         dbg_arrow!(v!(10 5 5), v!(10 6 5)); // Up
         dbg_arrow!(v!(10 5 5), v!(10 4 5)); // Down
 
-        dbg_arrow!(v!(10 10 5), v!(11 11 6));
-        dbg_arrow!(v!(10 10 10), v!(12 12 12));
+        dbg_arrow!(v!(10 10 5), v!(11 11 6), 0.0, BLUE);
+        dbg_arrow!(v!(10 10 10), v!(12 12 12), 0.0, BLUE2);
 
-        dbg_cross!(v!(5 5 5), 0.0, Color::WHITE);
+        dbg_cross!(v!(5 5 5), 0.0, CYAN);
 
         // Debug
         scene.drawing_context.clear_lines();

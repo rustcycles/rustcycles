@@ -8,7 +8,7 @@ use rg3d::core::algebra::Vector3;
 
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and doesn't collide.
-pub use rg3d::{
+pub(crate) use rg3d::{
     core::{
         algebra::{Unit, UnitQuaternion},
         color::Color,
@@ -16,6 +16,9 @@ pub use rg3d::{
     },
     scene::{base::BaseBuilder, node::Node, transform::TransformBuilder, Scene},
 };
+
+/// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
+pub(crate) use crate::debug::colors::*;
 
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root

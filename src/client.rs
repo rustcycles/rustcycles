@@ -362,7 +362,7 @@ impl GameClient {
                     self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
-                    dbg!(cycle_index);
+                    dbg_logd!(cycle_index);
                     todo!("despawn cycle");
                 }
                 ServerMessage::Update {

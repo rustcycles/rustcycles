@@ -33,5 +33,7 @@ rustflags = ["-Zshare-generics=n", "-Cforce-unwind-tables=y"]
 # Optional: bevy suggests reducing debug to 1 (line number tables), matklad / rust-analyzer suggests 0.
 # In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
 # Seems to have no effect for me on linux.
+# Note it's possible to set this for specific packages in Cargo.toml - e.g.
+# https://gitlab.com/veloren/airshipper/-/blob/1acd0e648162f87964f5a3d2c756d028f5ea3750/Cargo.toml#L22
 [profile.dev]
 debug = 1

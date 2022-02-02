@@ -1,4 +1,4 @@
-//! debug tools for logging and visualizing what is going on.
+//! Debug tools for logging and visualizing what is going on.
 //!
 //! LATER How does this interact with client vs server framerate?
 //! LATER Add usage examples

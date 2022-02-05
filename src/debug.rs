@@ -171,10 +171,13 @@ pub(crate) mod colors {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unit_cmp)] // https://github.com/rust-lang/rust-clippy/issues/4661
+
     // Don't import anything else here to test the macros properly use full paths.
     use crate::prelude::*;
 
     // LATER Test these do what they should, not just that they compile.
+    //          At least check the globals.
 
     #[test]
     fn test_soft_assert() {

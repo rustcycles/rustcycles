@@ -66,13 +66,6 @@ use crate::{
 //  - [x] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
 //  - [ ] If possible, lint against unwrap, print, println, dbg, ...
 
-// TODO rg3d bugs:
-//  rendering nondeterm
-//  rbody attached differently in editor vs game
-//  Not being able to find .options files shouldn't be a warning
-//  [ERROR]: Unable to load texture "data/skybox/top.png"! Reason FileLoadError(Io(Os { code: 2, kind: NotFound, message: "No such file or directory" }))
-//  Statistics no Debug
-
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "cli", derive(StructOpt))]
 struct Opts {

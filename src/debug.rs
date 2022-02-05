@@ -181,20 +181,32 @@ mod tests {
 
     #[test]
     fn test_soft_assert() {
-        // Neither should crash
-        soft_assert!(2 + 2 == 4);
-        soft_assert!(2 + 2 == 5);
+        // Identity function which counts how many times it's executed
+        // to make sure macros only evaluate each input once.
+        let mut execution_count = 0;
+        let mut id = |x| {
+            execution_count += 1;
+            x
+        };
 
-        soft_assert!(2 + 2 == 4, "custom message {}", 42);
-        soft_assert!(2 + 2 == 5, "custom message {}", 42);
+        soft_assert!(2 + 2 == id(4));
+        soft_assert!(2 + 2 == id(5));
+
+        soft_assert!(2 + 2 == id(4), "custom message {}", 42);
+        soft_assert!(2 + 2 == id(5), "custom message {}", 42);
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
-            _ => soft_assert!(false),
-            _ => soft_assert!(false, "custom message {}", 42),
+            _ => soft_assert!(2 + 2 == id(4)),
+            _ => soft_assert!(2 + 2 == id(5)),
+
+            _ => soft_assert!(2 + 2 == id(4), "custom message {}", 42),
+            _ => soft_assert!(2 + 2 == id(5), "custom message {}", 42),
         };
         assert_eq!(nothing, ());
+
+        assert_eq!(execution_count, 8);
     }
 
     #[test]

@@ -7,13 +7,17 @@
 // in expression position, e.g. in match statements - see tests.
 // This means they shouldn't end with semicolons
 // or should be wrapped with an extra pair of curly braces.
+// They should evaluate to `()`.
 
 #![allow(dead_code)]
 
 pub(crate) mod details;
 
+/// Same as `assert!` but only prints a message without crashing.
 #[macro_export]
 macro_rules! soft_assert {
+    // The matchers are the same as in stdlib's assert.
+    // The rest is an approximation of the same message format.
     ($cond:expr $(,)?) => {
         soft_assert!($cond, stringify!($cond))
     };

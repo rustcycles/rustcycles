@@ -187,10 +187,11 @@ mod tests {
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
-        match 0 {
+        let nothing = match 0 {
             _ => soft_assert!(false),
             _ => soft_assert!(false, "custom message {}", 42),
-        }
+        };
+        assert_eq!(nothing, ());
     }
 
     #[test]
@@ -216,7 +217,7 @@ mod tests {
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
-        match 0 {
+        let nothing = match 0 {
             _ => dbg_logf!(),
             _ => dbg_logf!("abcd"),
             _ => dbg_logf!("x: {}, y: {y}, 7: {}", x, 7),
@@ -232,7 +233,8 @@ mod tests {
             _ => dbg_textd!(),
             _ => dbg_textd!(x),
             _ => dbg_textd!(x, y, 7),
-        }
+        };
+        assert_eq!(nothing, ());
     }
 
     #[test]
@@ -251,7 +253,7 @@ mod tests {
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
-        match 0 {
+        let nothing = match 0 {
             _ => dbg_line!(v!(1 2 3), v!(4 5 6)),
             _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0),
             _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE),
@@ -263,6 +265,7 @@ mod tests {
             _ => dbg_cross!(v!(1 2 3)),
             _ => dbg_cross!(v!(1 2 3), 5.0),
             _ => dbg_cross!(v!(1 2 3), 5.0, Color::BLUE),
-        }
+        };
+        assert_eq!(nothing, ());
     }
 }

@@ -6,7 +6,7 @@ pub(crate) mod net;
 
 use std::fmt::{self, Debug, Formatter};
 
-use rg3d::{
+use fyrox::{
     core::pool::Pool,
     engine::Engine,
     resource::model::Model,

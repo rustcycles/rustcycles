@@ -2,7 +2,7 @@
 
 use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Duration};
 
-use rg3d::{
+use fyrox::{
     dpi::PhysicalSize,
     engine::Engine,
     error::ExternalError,
@@ -239,10 +239,10 @@ impl GameClient {
 
         let pressed = state == ElementState::Pressed;
         match button {
-            rg3d::event::MouseButton::Left => self.lp.input.fire1 = pressed,
-            rg3d::event::MouseButton::Right => self.lp.input.fire2 = pressed,
-            rg3d::event::MouseButton::Middle => self.lp.input.zoom = pressed,
-            rg3d::event::MouseButton::Other(_) => {}
+            fyrox::event::MouseButton::Left => self.lp.input.fire1 = pressed,
+            fyrox::event::MouseButton::Right => self.lp.input.fire2 = pressed,
+            fyrox::event::MouseButton::Middle => self.lp.input.zoom = pressed,
+            fyrox::event::MouseButton::Other(_) => {}
         }
 
         self.sys_send_input();

@@ -4,11 +4,11 @@
 //! Should be imported in most files via
 //! `use crate::prelude::*`.
 
-use rg3d::core::algebra::Vector3;
+use fyrox::core::algebra::Vector3;
 
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and doesn't collide.
-pub(crate) use rg3d::{
+pub(crate) use fyrox::{
     core::{
         algebra::{Unit, UnitQuaternion},
         color::Color,

@@ -735,6 +735,117 @@ dependencies = [
 ]
 
 [[package]]
+name = "fyrox"
+version = "0.24.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "bitflags",
+ "ddsfile",
+ "fxhash",
+ "fyrox-core",
+ "fyrox-resource",
+ "fyrox-sound",
+ "fyrox-ui",
+ "glow",
+ "glutin",
+ "image",
+ "inflate",
+ "lazy_static",
+ "notify",
+ "rapier2d",
+ "rapier3d",
+ "rayon",
+ "ron",
+ "serde",
+ "strum",
+ "strum_macros",
+ "tbc",
+ "thiserror",
+ "walkdir",
+ "winit",
+]
+
+[[package]]
+name = "fyrox-core"
+version = "0.19.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "arrayvec",
+ "base64",
+ "byteorder",
+ "futures",
+ "fxhash",
+ "fyrox-core-derive",
+ "instant",
+ "js-sys",
+ "lazy_static",
+ "memoffset",
+ "nalgebra",
+ "num-traits 0.2.14",
+ "parking_lot",
+ "rand",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "fyrox-core-derive"
+version = "0.14.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "convert_case",
+ "darling",
+ "fxhash",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "fyrox-resource"
+version = "0.3.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "fyrox-core",
+]
+
+[[package]]
+name = "fyrox-sound"
+version = "0.26.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "alsa-sys",
+ "core-foundation-sys 0.8.3",
+ "coreaudio-sys",
+ "fyrox-core",
+ "fyrox-resource",
+ "hound",
+ "hrtf",
+ "lewton",
+ "strum",
+ "strum_macros",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "fyrox-ui"
+version = "0.15.0"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=14f652ecb5a7ba9f55809bc32671b6fecf0d804f#14f652ecb5a7ba9f55809bc32671b6fecf0d804f"
+dependencies = [
+ "copypasta",
+ "fontdue",
+ "fxhash",
+ "fyrox-core",
+ "lazy_static",
+ "notify",
+ "strum",
+ "strum_macros",
+ "sysinfo",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -893,9 +1004,9 @@ checksum = "8a164bb2ceaeff4f42542bdb847c41517c78a60f5649671b2a07312b6e117549"
 
 [[package]]
 name = "hrtf"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d98b081817fdd46ee439f18975b3764cafd56642e251d55ebf6faf9120be95da"
+checksum = "73088c4a5d7c9d21ee942a54611696f247c4bafc85e9261bf8c409b6857e75be"
 dependencies = [
  "byteorder",
  "rubato",
@@ -1864,120 +1975,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 
 [[package]]
-name = "rg3d"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c92865746b7d5b68fd2d30eb60a7f32ee8a85e54fd127948f72cc4cf317fda88"
-dependencies = [
- "bitflags",
- "ddsfile",
- "fxhash",
- "glow",
- "glutin",
- "image",
- "inflate",
- "lazy_static",
- "rapier2d",
- "rapier3d",
- "rayon",
- "rg3d-core",
- "rg3d-resource",
- "rg3d-sound",
- "rg3d-ui",
- "ron",
- "serde",
- "strum",
- "strum_macros",
- "tbc",
- "thiserror",
- "walkdir",
- "winit",
-]
-
-[[package]]
-name = "rg3d-core"
-version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f678b1ae403c8df4c56753937d0e0da16afdd59b93c9ee81b1a5a79f2cffc0fc"
-dependencies = [
- "arrayvec",
- "base64",
- "byteorder",
- "futures",
- "fxhash",
- "instant",
- "js-sys",
- "lazy_static",
- "memoffset",
- "nalgebra",
- "num-traits 0.2.14",
- "parking_lot",
- "rand",
- "rg3d-core-derive",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "rg3d-core-derive"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bed51e11fab0e6d5ab35c69fb4a230e9312501a67e2dfa31e786081a70f30103"
-dependencies = [
- "convert_case",
- "darling",
- "fxhash",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "rg3d-resource"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59e98bd4008b884943dd97e72eff0d3f3cd69110747aad36bffa57e5e3987ebe"
-dependencies = [
- "rg3d-core",
-]
-
-[[package]]
-name = "rg3d-sound"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70e251fb4b8b00881fa87b28b32a6bb46bf1fd18e59724d9616925b3aacfec33"
-dependencies = [
- "alsa-sys",
- "core-foundation-sys 0.8.3",
- "coreaudio-sys",
- "hound",
- "hrtf",
- "lewton",
- "rg3d-core",
- "rg3d-resource",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "rg3d-ui"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a74a478404d125166724951802ddb870dbb63ed658d96705a0514d58ded172e"
-dependencies = [
- "copypasta",
- "fontdue",
- "fxhash",
- "lazy_static",
- "notify",
- "rg3d-core",
- "strum",
- "strum_macros",
- "sysinfo",
-]
-
-[[package]]
 name = "ron"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1990,9 +1987,9 @@ dependencies = [
 
 [[package]]
 name = "rubato"
-version = "0.8.1"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b32df824bfec62fa252d850f346e867f43b66e5d429161f99ccfb7f1cb9ec148"
+checksum = "d29cf25e25288b595458df0e00c3065db08c31afe4b4e5a74cbfc5a9b8e763cd"
 dependencies = [
  "log",
  "num-complex",
@@ -2012,7 +2009,7 @@ name = "rustcycles"
 version = "0.0.0"
 dependencies = [
  "bincode",
- "rg3d",
+ "fyrox",
  "serde",
  "structopt",
  "strum",

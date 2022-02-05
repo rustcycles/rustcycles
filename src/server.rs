@@ -6,7 +6,7 @@ use std::{
     net::{SocketAddr, TcpListener, TcpStream},
 };
 
-use rg3d::{core::pool::Pool, engine::Engine};
+use fyrox::{core::pool::Pool, engine::Engine};
 
 use crate::{
     common::{

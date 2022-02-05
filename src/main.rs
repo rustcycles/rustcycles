@@ -9,7 +9,7 @@ mod server;
 
 use std::{env, panic, process::Command};
 
-use rg3d::{
+use fyrox::{
     core::instant::Instant,
     dpi::LogicalSize,
     engine::Engine,
@@ -199,7 +199,7 @@ fn client_main(opts: Opts) {
     let event_loop = EventLoop::new();
     // LATER no vsync
     let engine = Engine::new(window_builder, &event_loop, true).unwrap();
-    let mut client = rg3d::core::futures::executor::block_on(GameClient::new(engine));
+    let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
 
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
@@ -312,7 +312,7 @@ fn server_main() {
     let event_loop = EventLoop::new();
     // LATER Does vsync have any effect here?
     let engine = Engine::new(window_builder, &event_loop, false).unwrap();
-    let mut server = rg3d::core::futures::executor::block_on(GameServer::new(engine));
+    let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
 
     // Render pure black just once so the window doesn't look broken.
     server.engine.render().unwrap();

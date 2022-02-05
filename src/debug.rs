@@ -145,7 +145,7 @@ macro_rules! dbg_cross {
 /// Also this doesn't follow any standard color naming scheme
 /// and can change at any time.
 pub(crate) mod colors {
-    use rg3d::core::color::Color;
+    use fyrox::core::color::Color;
 
     /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
     pub(crate) const WHITE: Color = Color::WHITE;

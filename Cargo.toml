@@ -26,9 +26,9 @@ cli = ["structopt"]
 
 [dependencies]
 bincode = "1.3.3"
-rg3d = "0.24.0"
-#rg3d = { git = "https://github.com/rg3dengine/rg3d", rev = "8964b57f8f612ca4295bfaf677febee0c1e9eed8" }
-#rg3d = { path = "../rg3d" }
+#fyrox = "0.25.0"
+fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "14f652ecb5a7ba9f55809bc32671b6fecf0d804f" }
+#fyrox = { path = "../fyrox" }
 serde = "1.0.130"
 structopt = { version = "0.3.25", optional = true }
 strum = "0.23.0"

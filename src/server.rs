@@ -215,7 +215,7 @@ impl GameServer {
         }
         let update_physics = UpdatePhysics { cycle_physics };
 
-        // Send debug items, then elear everything on the server
+        // Send debug items, then clear everything on the server
         // so it doesn't get sent again next frame.
         // Calling debug::details::cleanup() would only clear expired.
         let debug_texts = DEBUG_TEXTS.with(|texts| {

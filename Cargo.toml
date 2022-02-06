@@ -29,6 +29,7 @@ bincode = "1.3.3"
 #fyrox = "0.25.0"
 fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "14f652ecb5a7ba9f55809bc32671b6fecf0d804f" }
 #fyrox = { path = "../fyrox" }
+inline_tweak = "1.0.8"
 serde = "1.0.130"
 structopt = { version = "0.3.25", optional = true }
 strum = "0.23.0"

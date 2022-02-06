@@ -4,6 +4,8 @@
 //! Should be imported in most files via
 //! `use crate::prelude::*`.
 
+#![allow(unused_imports)]
+
 use fyrox::core::algebra::Vector3;
 
 // Make the most commonly used types available.
@@ -17,13 +19,16 @@ pub(crate) use fyrox::{
     scene::{base::BaseBuilder, node::Node, transform::TransformBuilder, Scene},
 };
 
+// This doesn't increase compile times in any measureble way.
+pub(crate) use inline_tweak::tweak;
+
 /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
 pub(crate) use crate::debug::colors::*;
 
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root
 // so we import it here to make it part of prelude.
-pub use crate::v;
+pub(crate) use crate::v;
 
 /// Shorthand for `Vector3::new()`.
 ///

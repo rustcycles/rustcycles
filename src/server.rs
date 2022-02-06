@@ -57,7 +57,7 @@ impl GameServer {
             self.accept_new_connections();
             self.sys_receive();
 
-            self.gs.tick(&mut self.engine, dt);
+            self.gs.tick_before_physics(&mut self.engine, dt);
 
             self.engine.update(dt);
 

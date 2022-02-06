@@ -62,7 +62,7 @@ impl GameState {
         }
     }
 
-    pub(crate) fn tick(&mut self, engine: &mut Engine, dt: f32) {
+    pub(crate) fn tick_before_physics(&mut self, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.scene];
 
         for cycle in &self.cycles {

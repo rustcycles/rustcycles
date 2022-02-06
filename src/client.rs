@@ -3,6 +3,7 @@
 use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Duration};
 
 use fyrox::{
+    core::{algebra::Vector2, instant},
     dpi::PhysicalSize,
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
@@ -14,6 +15,7 @@ use fyrox::{
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
+    resource::texture::TextureKind,
     scene::{
         camera::{CameraBuilder, Projection, SkyBoxBuilder},
         debug::{Line, SceneDrawingContext},
@@ -292,14 +294,16 @@ impl GameClient {
 
             self.sys_receive_updates();
 
-            self.gs.tick(&mut self.engine, dt);
+            self.gs.tick_before_physics(&mut self.engine, dt);
 
-            self.tick(dt);
+            self.tick_before_physics(dt);
 
             // TODO This runs physics - maybe some gamelogic should run after it?
             // What happens if we draw physics world both before and after?
             // Same on server.
-            self.engine.update(dt);
+            self.engine_update(dt);
+
+            self.tick_after_physics(dt);
 
             self.sys_send_input();
         }
@@ -394,7 +398,7 @@ impl GameClient {
         }
     }
 
-    fn tick(&mut self, dt: f32) {
+    fn tick_before_physics(&mut self, dt: f32) {
         // Join / spec
         let ps = self.gs.players[self.lp.player_handle].ps;
         if ps == PlayerState::Observing && self.lp.input.fire1 {
@@ -517,6 +521,35 @@ impl GameClient {
         ));
 
         debug::details::cleanup();
+    }
+
+    pub fn engine_update(&mut self, dt: f32) {
+        let inner_size = self.engine.get_window().inner_size();
+        let window_size = Vector2::new(inner_size.width as f32, inner_size.height as f32);
+
+        self.engine.resource_manager.state().update(dt);
+        self.engine.renderer.update_caches(dt);
+        self.engine.handle_model_events();
+
+        for scene in self.engine.scenes.iter_mut().filter(|s| s.enabled) {
+            let frame_size = scene.render_target.as_ref().map_or(window_size, |rt| {
+                if let TextureKind::Rectangle { width, height } = rt.data_ref().kind() {
+                    Vector2::new(width as f32, height as f32)
+                } else {
+                    panic!("only rectangle textures can be used as render target!");
+                }
+            });
+
+            scene.update(frame_size, dt);
+        }
+
+        let time = instant::Instant::now();
+        self.engine.user_interface.update(window_size, dt);
+        self.engine.ui_time = instant::Instant::now() - time;
+    }
+
+    fn tick_after_physics(&mut self, _dt: f32) {
+        let scene = &mut self.engine.scenes[self.gs.scene];
     }
 
     /// Send all once-per-frame stuff to the server.

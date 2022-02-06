@@ -1,6 +1,27 @@
-//! Debug tools for logging and visualizing what is going on.
+//! Debug tools - soft asserts, logging, visualization in 3D.
 //!
-//! LATER How does this interact with client vs server framerate?
+//! # Soft asserts
+//!
+//! Games shouldn't crash. It's better to have a gamelogic or rendering bug
+//! than crash.
+//!
+//! There's a false dichotomy between fail-fast
+//! (what most well-designed languages prefer and encourage nowadays)
+//! and silently ignoring errors (what most old or poorly designed languages do).
+//! Failing fast makes sense for most applications,
+//! otherwise you risk corrupting user-data which is even worse than crashing.
+//! Silently ignoring errors also often leads to security vulnerabilities.
+//!
+//! Consider a third option - logging the error and attempting to continue.
+//!
+//! A corrupted game state is generally better than no game state.
+//! This should, of course, only be used in gamelogic code
+//! which is not concerned with security, doesn't save to disk, etc.
+//!
+//! LATER Gamecode will be sandboxed using WASM.
+//! LATER Offer a way for servers and clients to autoreport errors.
+//!
+//! LATER How does sending logs from sv to cl interact with cl vs sv framerates?
 //! LATER Add usage examples
 
 // Implementation note: the macros should be usable

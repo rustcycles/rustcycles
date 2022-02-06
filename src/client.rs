@@ -4,7 +4,6 @@ use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Du
 
 use fyrox::{
     dpi::PhysicalSize,
-    engine::Engine,
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
     gui::{

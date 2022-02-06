@@ -9,14 +9,23 @@
 use fyrox::core::algebra::Vector3;
 
 // Make the most commonly used types available.
-// Criteria for inclusion: used in a lot of files and doesn't collide.
+// Criteria for inclusion: used in a lot of files and unlikely to collide.
 pub(crate) use fyrox::{
     core::{
         algebra::{Unit, UnitQuaternion},
         color::Color,
-        pool::Handle,
+        pool::{Handle, Pool},
     },
-    scene::{base::BaseBuilder, node::Node, transform::TransformBuilder, Scene},
+    engine::Engine,
+    resource::model::Model,
+    scene::{
+        base::{Base, BaseBuilder},
+        collider::{Collider, ColliderBuilder, ColliderShape},
+        node::Node,
+        rigidbody::{RigidBody, RigidBodyBuilder, RigidBodyType},
+        transform::TransformBuilder,
+        Scene,
+    },
 };
 
 // This doesn't increase compile times in any measureble way.

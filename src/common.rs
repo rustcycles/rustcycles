@@ -6,15 +6,6 @@ pub(crate) mod net;
 
 use std::fmt::{self, Debug, Formatter};
 
-use fyrox::{
-    core::pool::Pool,
-    engine::Engine,
-    resource::model::Model,
-    scene::{
-        collider::{ColliderBuilder, ColliderShape},
-        rigidbody::RigidBodyBuilder,
-    },
-};
 use serde::{Deserialize, Serialize};
 
 use crate::{

@@ -117,7 +117,7 @@ macro_rules! dbg_textd {
 #[macro_export]
 macro_rules! dbg_line {
     ($begin:expr, $end:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_line($begin, $end, $time, $color)
+        $crate::debug::details::debug_line($begin, $end, $time as f32, $color)
     };
     ($begin:expr, $end:expr, $time:expr) => {
         $crate::dbg_line!($begin, $end, $time, $crate::debug::details::default_color())
@@ -134,7 +134,7 @@ macro_rules! dbg_line {
 #[macro_export]
 macro_rules! dbg_arrow {
     ($begin:expr, $end:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_arrow($begin, $end, $time, $color)
+        $crate::debug::details::debug_arrow($begin, $end, $time as f32, $color)
     };
     ($begin:expr, $end:expr, $time:expr) => {
         $crate::dbg_arrow!($begin, $end, $time, $crate::debug::details::default_color())
@@ -151,7 +151,7 @@ macro_rules! dbg_arrow {
 #[macro_export]
 macro_rules! dbg_cross {
     ($point:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_cross($point, $time, $color)
+        $crate::debug::details::debug_cross($point, $time as f32, $color)
     };
     ($point:expr, $time:expr) => {
         $crate::dbg_cross!($point, $time, $crate::debug::details::default_color())
@@ -276,31 +276,37 @@ mod tests {
     #[test]
     fn test_drawing_compiles_no_import() {
         dbg_line!(v!(1 2 3), v!(4 5 6));
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5);
         dbg_line!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE);
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5, BLUE);
+        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, BLUE);
 
         dbg_arrow!(v!(1 2 3), v!(4 5 6));
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5);
         dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE);
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5, BLUE);
+        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, BLUE);
 
         dbg_cross!(v!(1 2 3));
+        dbg_cross!(v!(1 2 3), 5);
         dbg_cross!(v!(1 2 3), 5.0);
-        dbg_cross!(v!(1 2 3), 5.0, Color::BLUE);
+        dbg_cross!(v!(1 2 3), 5, BLUE);
+        dbg_cross!(v!(1 2 3), 5.0, BLUE);
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
             _ => dbg_line!(v!(1 2 3), v!(4 5 6)),
             _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0),
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE),
+            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
 
             _ => dbg_arrow!(v!(1 2 3), v!(4 5 6)),
             _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0),
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, Color::BLUE),
+            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
 
             _ => dbg_cross!(v!(1 2 3)),
             _ => dbg_cross!(v!(1 2 3), 5.0),
-            _ => dbg_cross!(v!(1 2 3), 5.0, Color::BLUE),
+            _ => dbg_cross!(v!(1 2 3), 5.0, BLUE),
         };
         assert_eq!(nothing, ());
     }

@@ -297,15 +297,21 @@ mod tests {
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
             _ => dbg_line!(v!(1 2 3), v!(4 5 6)),
+            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5),
             _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0),
+            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5, BLUE),
             _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
 
             _ => dbg_arrow!(v!(1 2 3), v!(4 5 6)),
+            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5),
             _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0),
+            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5, BLUE),
             _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
 
             _ => dbg_cross!(v!(1 2 3)),
+            _ => dbg_cross!(v!(1 2 3), 5),
             _ => dbg_cross!(v!(1 2 3), 5.0),
+            _ => dbg_cross!(v!(1 2 3), 5, BLUE),
             _ => dbg_cross!(v!(1 2 3), 5.0, BLUE),
         };
         assert_eq!(nothing, ());

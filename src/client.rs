@@ -296,10 +296,26 @@ impl GameClient {
 
             self.tick(dt);
 
+            let scene = &mut self.engine.scenes[self.gs.scene];
+            let body_handle = RigidBodyBuilder::new(
+                BaseBuilder::new().with_local_transform(
+                    TransformBuilder::new()
+                        .with_local_position(v!(3 3 3))
+                        .build(),
+                ),
+            )
+            .build(&mut scene.graph);
+            dbg!(scene.graph[body_handle].global_position());
+
             // TODO This runs physics - maybe some gamelogic should run after it?
             // What happens if we draw physics world both before and after?
             // Same on server.
             self.engine.update(dt);
+
+            let scene = &mut self.engine.scenes[self.gs.scene];
+            dbg!(scene.graph[body_handle].global_position());
+
+            panic!();
 
             self.sys_send_input();
         }

@@ -227,7 +227,7 @@ mod tests {
         };
         assert_eq!(nothing, ());
 
-        assert_eq!(execution_count, 8);
+        assert_eq!(execution_count, 4 + 1); // +1 because only one match arm runs
     }
 
     #[test]

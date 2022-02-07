@@ -214,10 +214,16 @@ impl GameClient {
     pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
         // Use scancodes, not virtual keys, because they don't depend on layout.
         const ESC: ScanCode = 1;
+        const TAB: ScanCode = 15;
         const W: ScanCode = 17;
+        const CTRL: ScanCode = 29;
         const A: ScanCode = 30;
         const S: ScanCode = 31;
         const D: ScanCode = 32;
+        const SHIFT: ScanCode = 42;
+        const Z: ScanCode = 44;
+        const ALT: ScanCode = 56;
+        const BACKSLASH: ScanCode = 86;
         let pressed = input.state == ElementState::Pressed;
         match input.scancode {
             ESC => self.set_mouse_grab(false),
@@ -225,6 +231,9 @@ impl GameClient {
             A => self.lp.input.left = pressed,
             S => self.lp.input.backward = pressed,
             D => self.lp.input.right = pressed,
+            TAB | SHIFT | CTRL | ALT | BACKSLASH | Z => {
+                // Don't print anything, it just spams stdout when switching windows.
+            }
             c => {
                 if pressed {
                     dbg_logf!("pressed unhandled scancode: {}", c);

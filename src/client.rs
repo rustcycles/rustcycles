@@ -227,7 +227,7 @@ impl GameClient {
             D => self.lp.input.right = pressed,
             c => {
                 if pressed {
-                    dbg_logf!("pressed scancode: {}", c);
+                    dbg_logf!("pressed unhandled scancode: {}", c);
                 }
             }
         }

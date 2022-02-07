@@ -35,7 +35,7 @@ macro_rules! __format_pairs {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) enum Shape {
     Line { begin: Vec3, end: Vec3 },
-    Arrow { begin: Vec3, end: Vec3 },
+    Arrow { begin: Vec3, dir: Vec3 },
     Cross { point: Vec3 },
 }
 
@@ -67,8 +67,8 @@ pub(crate) fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
 }
 
 /// Helper function, prefer `dbg_line!()` instead.
-pub(crate) fn debug_arrow(begin: Vec3, end: Vec3, time: f32, color: Color) {
-    let shape = Shape::Arrow { begin, end };
+pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
+    let shape = Shape::Arrow { begin, dir };
     debug_shape(shape, time, color);
 }
 

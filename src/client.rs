@@ -474,15 +474,15 @@ impl GameClient {
 
         dbg_line!(v!(15 5 5), v!(15 5 7));
 
-        dbg_arrow!(v!(10 5 5), v!(10 5 7)); // Forward
-        dbg_arrow!(v!(10 5 5), v!(10 5 4)); // Back
-        dbg_arrow!(v!(10 5 5), v!(9 5 5)); // Left
-        dbg_arrow!(v!(10 5 5), v!(11 5 5)); // Right
-        dbg_arrow!(v!(10 5 5), v!(10 6 5)); // Up
-        dbg_arrow!(v!(10 5 5), v!(10 4 5)); // Down
+        dbg_arrow!(v!(10 5 5), v!(0 0 2)); // Forward
+        dbg_arrow!(v!(10 5 5), v!(0 0 -1)); // Back
+        dbg_arrow!(v!(10 5 5), v!(-1 0 0)); // Left
+        dbg_arrow!(v!(10 5 5), v!(1 0 0)); // Right
+        dbg_arrow!(v!(10 5 5), v!(0 1 0)); // Up
+        dbg_arrow!(v!(10 5 5), v!(0 -1 0)); // Down
 
-        dbg_arrow!(v!(10 10 5), v!(11 11 6), 0.0, BLUE);
-        dbg_arrow!(v!(10 10 10), v!(12 12 12), 0.0, BLUE2);
+        dbg_arrow!(v!(10 10 5), v!(1 1 1), 0.0, BLUE);
+        dbg_arrow!(v!(10 10 10), v!(2 2 2), 0.0, BLUE2);
 
         dbg_cross!(v!(5 5 5), 0.0, CYAN);
 
@@ -580,7 +580,8 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                 color: shape.color,
             });
         }
-        Shape::Arrow { begin, end } => {
+        Shape::Arrow { begin, dir } => {
+            let end = begin + dir;
             drawing_context.add_line(Line {
                 begin,
                 end,
@@ -591,7 +592,6 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
             // and the other two to the sides if the arrow is pointing horizontally
             // and appear pitched up/down if not.
 
-            let dir = end - begin;
             let rot = UnitQuaternion::face_towards(&dir, &Vec3::up());
             let len = dir.magnitude();
             let left = rot * Vec3::left() * len;

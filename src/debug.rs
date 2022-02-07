@@ -110,7 +110,7 @@ macro_rules! dbg_textd {
     };
 }
 
-/// Draw a line from `begin` to `end` (both world coordinates).
+/// Draw a line from `begin` to `end` (in world coordinates).
 /// Optionally specify
 /// - how long it lasts in seconds (default is 0.0 which means 1 frame)
 /// - color
@@ -127,20 +127,20 @@ macro_rules! dbg_line {
     };
 }
 
-/// Draw an arrow from `begin` to `end` (both world coordinates).
+/// Draw an arrow from `begin` to `begin + dir` (in world coordinates).
 /// Optionally specify
 /// - how long it lasts in seconds (default is 0.0 which means 1 frame)
 /// - color
 #[macro_export]
 macro_rules! dbg_arrow {
-    ($begin:expr, $end:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_arrow($begin, $end, $time as f32, $color)
+    ($begin:expr, $dir:expr, $time:expr, $color:expr) => {
+        $crate::debug::details::debug_arrow($begin, $dir, $time as f32, $color)
     };
-    ($begin:expr, $end:expr, $time:expr) => {
-        $crate::dbg_arrow!($begin, $end, $time, $crate::debug::details::default_color())
+    ($begin:expr, $dir:expr, $time:expr) => {
+        $crate::dbg_arrow!($begin, $dir, $time, $crate::debug::details::default_color())
     };
-    ($begin:expr, $end:expr) => {
-        $crate::dbg_arrow!($begin, $end, 0.0)
+    ($begin:expr, $dir:expr) => {
+        $crate::dbg_arrow!($begin, $dir, 0.0)
     };
 }
 

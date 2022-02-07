@@ -103,7 +103,7 @@ impl GameState {
             dbg_textd!(rot, dir);
             dbg_textf!("rot {rot}, dir {dir:?}");
 
-            // LATER Does this allow clipping into geometry?
+            // LATER Does this allow clipping into geometry? Yes.
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
             // FIXME this is broken

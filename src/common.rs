@@ -99,8 +99,7 @@ impl GameState {
                 body.set_lin_vel(lin_vel);
             }
             let dir = rot * Vec3::forward();
-            let offset = v!(0 3 0);
-            dbg_arrow!(offset, dir.normalize(), 0.5);
+            dbg_arrow!(v!(0 3 0), dir.normalize(), 0.5);
             dbg_textd!(rot, dir);
             dbg_textf!("rot {rot}, dir {dir:?}");
 

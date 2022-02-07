@@ -295,6 +295,9 @@ impl GameClient {
 
             self.sys_receive_updates();
 
+            self.test_engine_latency(v!(-3 4 3), 2);
+            self.test_engine_latency(v!(-5 4 3), 4);
+
             self.gs.tick_before_physics(&mut self.engine, dt);
 
             self.tick_before_physics(dt);
@@ -306,10 +309,21 @@ impl GameClient {
 
             self.tick_after_physics(dt);
 
+            self.test_engine_latency(v!(-7 4 3), 4);
+
             self.sys_send_input();
         }
 
         self.engine.get_window().request_redraw();
+    }
+
+    fn test_engine_latency(&self, pos: Vec3, steps: usize) {
+        let step = (self.gs.frame_number % steps) as f32;
+        let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
+        let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
+        let dir = rot * Vec3::up();
+        dbg_arrow!(pos, dir);
+        dbg_textd!(dir);
     }
 
     fn sys_receive_updates(&mut self) {

@@ -291,6 +291,7 @@ impl GameClient {
 
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
+            self.gs.frame_number += 1;
 
             self.sys_receive_updates();
 

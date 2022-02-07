@@ -21,6 +21,9 @@ pub(crate) struct GameState {
     /// LATER d_speed, pause, configurable dt (don't forget integration_parameters.dt)
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     pub(crate) game_time: f32,
+    /// Currently this is not synced between client and server,
+    /// it's just a debugging aid (e.g. run something on odd/even frames).
+    pub(crate) frame_number: usize,
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
     pub(crate) players: Pool<Player>,
@@ -55,6 +58,7 @@ impl GameState {
 
         Self {
             game_time: 0.0,
+            frame_number: 0,
             scene,
             cycle_model,
             players: Pool::new(),

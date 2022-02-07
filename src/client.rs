@@ -381,7 +381,6 @@ impl GameClient {
                             .set_position(cycle_physics.translation);
                         body.local_transform_mut()
                             .set_rotation(cycle_physics.rotation);
-                        dbg_textd!(cycle_physics.rotation);
                         body.set_lin_vel(cycle_physics.velocity);
                     }
 

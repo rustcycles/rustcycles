@@ -100,8 +100,6 @@ impl GameState {
             }
             let dir = rot * Vec3::forward();
             dbg_arrow!(v!(0 3 0), dir.normalize(), 0.5);
-            dbg_textd!(rot, dir);
-            dbg_textf!("rot {rot}, dir {dir:?}");
 
             // LATER Does this allow clipping into geometry? Yes.
             //  Use an impulse proportional to mouse movement instead?

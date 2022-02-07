@@ -595,11 +595,13 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
             // When it's not horizontal, we want it to appear pitched up/down,
             // no weird rotations around the axis.
 
+            // Make sure dir and up are not colinear.
             let up = if dir.x < f32::EPSILON && dir.z < f32::EPSILON {
                 Vec3::forward()
             } else {
                 Vec3::up()
             };
+
             let rot = UnitQuaternion::face_towards(&dir, &up);
             let len = dir.magnitude();
             let left = rot * Vec3::left() * len;

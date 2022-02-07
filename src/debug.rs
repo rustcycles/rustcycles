@@ -161,6 +161,17 @@ macro_rules! dbg_cross {
     };
 }
 
+/// Draw RGB basis vectors at `point`, rotated by `rot`.
+#[macro_export]
+macro_rules! dbg_rot {
+    ($point:expr, $rot:expr, $time:expr) => {
+        $crate::debug::details::debug_rot($point, $rot, $time as f32)
+    };
+    ($point:expr, $rot:expr) => {
+        $crate::dbg_rot!($point, $rot, 0.0)
+    };
+}
+
 /// These only exist for convenience when debugging,
 /// normal code should use `Color::YOUR_COLOR_HERE` in full.
 /// Also this doesn't follow any standard color naming scheme
@@ -293,6 +304,10 @@ mod tests {
         dbg_cross!(v!(1 2 3), 5, BLUE);
         dbg_cross!(v!(1 2 3), 5.0, BLUE);
 
+        let rot = UnitQuaternion::from_euler_angles(0.1, 0.2, 0.3);
+        dbg_rot!(v!(1 2 3), rot);
+        dbg_rot!(v!(1 2 3), rot, 5.0);
+
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
@@ -313,6 +328,9 @@ mod tests {
             _ => dbg_cross!(v!(1 2 3), 5.0),
             _ => dbg_cross!(v!(1 2 3), 5, BLUE),
             _ => dbg_cross!(v!(1 2 3), 5.0, BLUE),
+
+            _ => dbg_rot!(v!(1 2 3), rot),
+            _ => dbg_rot!(v!(1 2 3), rot, 5.0),
         };
         assert_eq!(nothing, ());
     }

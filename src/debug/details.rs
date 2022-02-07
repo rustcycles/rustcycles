@@ -34,9 +34,21 @@ macro_rules! __format_pairs {
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) enum Shape {
-    Line { begin: Vec3, end: Vec3 },
-    Arrow { begin: Vec3, dir: Vec3 },
-    Cross { point: Vec3 },
+    Line {
+        begin: Vec3,
+        end: Vec3,
+    },
+    Arrow {
+        begin: Vec3,
+        dir: Vec3,
+    },
+    Cross {
+        point: Vec3,
+    },
+    Rot {
+        point: Vec3,
+        rot: UnitQuaternion<f32>,
+    },
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
@@ -76,6 +88,13 @@ pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
 pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
     let shape = Shape::Cross { point };
     debug_shape(shape, time, color);
+}
+
+/// Helper function, prefer `dbg_cross!()` instead.
+pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32) {
+    let shape = Shape::Rot { point, rot };
+    // Color is not used
+    debug_shape(shape, time, Color::WHITE);
 }
 
 fn debug_shape(shape: Shape, time: f32, color: Color) {

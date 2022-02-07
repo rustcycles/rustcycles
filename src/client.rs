@@ -427,6 +427,7 @@ impl GameClient {
         let cam_rot = pitch * yaw;
         camera.local_transform_mut().set_rotation(cam_rot);
 
+        dbg_rot!(v!(0 7 0), cam_rot);
         dbg_arrow!(v!(0 5 0), cam_rot * Vec3::forward());
 
         // Camera movement
@@ -665,6 +666,10 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                     color: shape.color,
                 });
             }
+        }
+        Shape::Rot { point, rot } => {
+            let matrix = rot.to_homogeneous().append_translation(&point);
+            drawing_context.draw_transform(matrix);
         }
     }
 }

@@ -66,7 +66,7 @@ pub(crate) type Vec3 = Vector3<f32>;
 ///
 /// Should be imported along with the rest of the prelude using a glob.
 ///
-/// Nalgebra's coordinate system is right-handed, I think.
+/// Nalgebra's coordinate system is right-handed.
 pub(crate) trait Vec3Ext
 where
     Self: Sized,

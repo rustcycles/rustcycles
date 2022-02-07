@@ -427,6 +427,8 @@ impl GameClient {
         let cam_rot = pitch * yaw;
         camera.local_transform_mut().set_rotation(cam_rot);
 
+        dbg_arrow!(v!(0 5 0), cam_rot * Vec3::forward());
+
         // Camera movement
         let mut camera_pos = **camera.local_transform().position();
         if ps == PlayerState::Observing {
@@ -588,11 +590,17 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
                 color: shape.color,
             });
 
-            // We want two of the side lines to be above and below the arrow body
-            // and the other two to the sides if the arrow is pointing horizontally
-            // and appear pitched up/down if not.
+            // When the arrow is horizontal, we want two of the side lines
+            // to be above and below the arrow body and the other two to the sides.
+            // When it's not horizontal, we want it to appear pitched up/down,
+            // no weird rotations around the axis.
 
-            let rot = UnitQuaternion::face_towards(&dir, &Vec3::up());
+            let up = if dir.x < f32::EPSILON && dir.z < f32::EPSILON {
+                Vec3::forward()
+            } else {
+                Vec3::up()
+            };
+            let rot = UnitQuaternion::face_towards(&dir, &up);
             let len = dir.magnitude();
             let left = rot * Vec3::left() * len;
             let up = rot * Vec3::up() * len;

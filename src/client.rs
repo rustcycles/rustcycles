@@ -259,7 +259,8 @@ impl GameClient {
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
         if !self.mouse_grabbed {
-            // LATER (privacy) Recheck we're not handling mouse movement when minimized (and especially not sending to server)
+            // LATER (privacy) Recheck we're not handling mouse movement when minimized
+            //  (and especially not sending to server)
             return;
         }
 
@@ -269,7 +270,9 @@ impl GameClient {
         let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal;
         let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical;
 
-        // Subtract, don't add the delta X - rotations follow the right hand rule
+        // Subtract, don't add the delta X.
+        // Nalgebra rotations follow the right hand rule,
+        // thumb points in +Z, the curl of fingers shows direction.
         self.lp.input.yaw.0 -= delta_yaw; // LATER Normalize to [0, 360°) or something
         self.lp.input.pitch.0 = (self.lp.input.pitch.0 + delta_pitch).clamp(-90.0, 90.0);
     }

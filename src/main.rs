@@ -277,7 +277,7 @@ fn client_main(opts: Opts) {
 
                         // LATER This doesn't have enough precision,
                         //  and neither do the other events.
-                        //dbg_logd!(delta);
+                        dbg_logd!(delta);
 
                         client.mouse_motion(delta);
                     }

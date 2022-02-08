@@ -326,6 +326,12 @@ impl GameClient {
         self.engine.get_window().request_redraw();
     }
 
+    /// Draw arrows in a different orientation every frame.
+    ///
+    /// This helps:
+    /// - notice issues with framerate
+    /// - notice tearing (but a solid object would make it even easier to see)
+    /// - make sure debug draws and prints issued on one frame happen on the same frame
     fn test_engine_latency(&self, pos: Vec3, steps: usize) {
         let step = (self.gs.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;

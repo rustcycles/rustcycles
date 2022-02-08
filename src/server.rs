@@ -129,7 +129,7 @@ impl GameServer {
             for message in messages {
                 match message {
                     ClientMessage::Input(input) => {
-                        // LATER (server reconcilliation) handle more inputs arriving in one frame
+                        // LATER (server reconciliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;
                     }
                     ClientMessage::Chat(chat) => {

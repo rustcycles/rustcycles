@@ -1,5 +1,6 @@
 //! Data and code shared between the client and server. Most gamelogic goes here.
 
+pub(crate) mod engine;
 pub(crate) mod entities;
 pub(crate) mod messages;
 pub(crate) mod net;

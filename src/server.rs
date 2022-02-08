@@ -60,6 +60,7 @@ impl GameServer {
 
             self.gs.tick_before_physics(&mut self.engine, dt);
 
+            // There's currently no need to split this like on the client.
             self.engine.update(dt);
 
             self.sys_send_update();

@@ -247,6 +247,15 @@ fn client_main(opts: Opts) {
                     WindowEvent::MouseInput { state, button, .. } => {
                         client.mouse_input(state, button);
                     }
+                    WindowEvent::CursorMoved {
+                        position: _position,
+                        ..
+                    } => {
+                        //dbg_logd!(_position);
+                    }
+                    WindowEvent::AxisMotion { value: _value, .. } => {
+                        //dbg_logd!(_value);
+                    }
                     _ => {}
                 }
             }
@@ -265,6 +274,10 @@ fn client_main(opts: Opts) {
                         //     clock.elapsed().as_secs_f32(),
                         //     delta
                         // );
+
+                        // LATER This doesn't have enough precision,
+                        //  and neither do the other events.
+                        //dbg_logd!(delta);
 
                         client.mouse_motion(delta);
                     }

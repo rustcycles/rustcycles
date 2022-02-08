@@ -303,25 +303,23 @@ impl GameClient {
 
             engine::update_resources(&mut self.engine, dt);
 
-            self.sys_receive_updates();
-
             self.test_engine_latency(v!(-3 4 3), 2);
             self.test_engine_latency(v!(-5 4 3), 4);
+
+            self.sys_receive_updates();
 
             self.gs.tick_before_physics(&mut self.engine, dt);
 
             self.tick_before_physics(dt);
 
-            // TODO This runs physics - maybe some gamelogic should run after it?
-            // What happens if we draw physics world both before and after?
-            // Same on server.
             engine::update_physics(&mut self.engine, dt);
 
             self.tick_after_physics(dt);
 
-            self.test_engine_latency(v!(-7 4 3), 4);
-
+            // LATER This should probably happen earlier.
             self.sys_send_input();
+
+            self.test_engine_latency(v!(-7 4 3), 4);
 
             engine::update_ui(&mut self.engine, dt);
         }

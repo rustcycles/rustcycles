@@ -428,7 +428,7 @@ impl GameClient {
         }
     }
 
-    fn tick_before_physics(&mut self, dt: f32) {
+    fn tick_before_physics(&mut self, _dt: f32) {
         // Join / spec
         let ps = self.gs.players[self.lp.player_handle].ps;
         if ps == PlayerState::Observing && self.lp.input.fire1 {
@@ -436,7 +436,10 @@ impl GameClient {
         } else if ps == PlayerState::Playing && self.lp.input.fire2 {
             self.network_send(ClientMessage::Observe);
         }
+    }
 
+    fn tick_after_physics(&mut self, dt: f32) {
+        let ps = self.gs.players[self.lp.player_handle].ps;
         let scene = &mut self.engine.scenes[self.gs.scene];
 
         let player_cycle_handle = self.gs.players[self.lp.player_handle].cycle_handle.unwrap();
@@ -554,10 +557,6 @@ impl GameClient {
         ));
 
         debug::details::cleanup();
-    }
-
-    fn tick_after_physics(&mut self, _dt: f32) {
-        let scene = &mut self.engine.scenes[self.gs.scene];
     }
 
     /// Send all once-per-frame stuff to the server.

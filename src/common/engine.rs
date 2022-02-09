@@ -2,7 +2,7 @@
 //! but are more granular.
 
 use fyrox::{
-    core::{algebra::Vector2, instant},
+    core::{algebra::Vector2, instant::Instant},
     resource::texture::TextureKind,
 };
 
@@ -35,7 +35,7 @@ pub(crate) fn update_ui(engine: &mut Engine, dt: f32) {
     let inner_size = engine.get_window().inner_size();
     let window_size = Vector2::new(inner_size.width as f32, inner_size.height as f32);
 
-    let time = instant::Instant::now();
+    let time = Instant::now();
     engine.user_interface.update(window_size, dt);
-    engine.ui_time = instant::Instant::now() - time;
+    engine.ui_time = Instant::now() - time;
 }

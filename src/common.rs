@@ -105,7 +105,7 @@ impl GameState {
             // LATER Does this allow clipping into geometry? Yes.
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
-            // FIXME this is broken
+            // TODO this is broken
             //body.local_transform_mut().set_rotation(rot);
             body.local_transform_mut()
                 .set_rotation(UnitQuaternion::from_axis_angle(

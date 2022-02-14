@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <!--
+    This is something to do with mobile devices:
+    https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag
+    I don't understand it and I can't imagine somebody playing this
+    one a phone but if somebody wants to try, why not.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>RustCycles - A fast multiplayer shooter on wheels, written in Rust</title>
+
+  <link rel="icon" type="image/png" href="data/logo/logo-transparent.png" />
+
+  <!-- TODO style from Rec Wars? -->
+
+</head>
+
+<body>
+  <noscript>
+    RustCycles requires JavaScript ... yes, I know JS sucks, that's why it's actually written in Rust/WASM ;)
+  </noscript>
+  <script type="module">
+    import init from './pkg/rustcycles.js';
+    init().then(w => w.client_main());
+  </script>
+</body>
+
+</html>

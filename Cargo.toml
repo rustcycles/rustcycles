@@ -6,6 +6,17 @@ rust-version = "1.56"
 resolver = "2"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 
+[[bin]]
+# The native build
+name = "rustcycles"
+path = "src/main.rs"
+
+[lib]
+# The WASM build
+# cdylib is for wasm-pack build
+# rlib is for unit tests
+crate-type = ["cdylib", "rlib"]
+
 [profile.dev]
 # Abort on panic might be a better default:
 # https://vorner.github.io/2018/07/22/dont_panic.html
@@ -35,3 +46,5 @@ serde = "1.0.130"
 structopt = { version = "0.3.25", optional = true }
 strum = "0.23.0"
 strum_macros = "0.23.1"
+
+# FIXME wasm-bindgen-test = "0.3" ?

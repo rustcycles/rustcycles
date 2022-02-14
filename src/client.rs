@@ -70,6 +70,7 @@ impl GameClient {
             if connect_attempts % 100 == 0 {
                 dbg_logf!("connect attempts: {}", connect_attempts);
             }
+            #[cfg(not(target_arch = "wasm32"))] // TODO
             thread::sleep(Duration::from_millis(10));
         };
         stream.set_nodelay(true).unwrap();
@@ -160,6 +161,7 @@ impl GameClient {
             if init_attempts % 100 == 0 {
                 dbg_logf!("init attempts: {}", init_attempts);
             }
+            #[cfg(not(target_arch = "wasm32"))]
             thread::sleep(Duration::from_millis(10));
         };
         dbg_logf!("local_player_index is {}", lp.player_handle.index());

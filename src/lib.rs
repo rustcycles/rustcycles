@@ -1,5 +1,7 @@
-//! Client and server main for native builds.
-//! WASM builds live in lib.rs.
+//! Entry point for WASM builds.
+//! Native builds live in main.rs.
+
+#![cfg(target_arch = "wasm32")] //FIXME needed?
 
 // Keep this first so the macros are available everywhere without having to import them.
 #[macro_use]
@@ -10,171 +12,97 @@ mod common;
 mod prelude;
 mod server;
 
-use std::{env, panic, process::Command};
+use std::{
+    panic::{self, PanicInfo},
+    todo,
+};
 
 use fyrox::{
-    core::instant::Instant,
-    dpi::LogicalSize,
+    core::{
+        instant::Instant,
+        wasm_bindgen::{self, prelude::*},
+    },
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::log::{Log, MessageKind},
     window::{Fullscreen, WindowBuilder},
 };
-use strum_macros::EnumString;
-
-#[cfg(feature = "cli")]
-use structopt::StructOpt;
 
 use crate::{
     client::GameClient,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
-    server::GameServer,
 };
 
-// Master TODO list:
-// v0.1 - MVP:
-//  - [x] Arena and wheel models
-//  - [x] Rotate the camera
-//  - [x] Move the camera
-//  - [x] Render wheel at player pos
-//  - [x] Primitive networking to force client/server split
-//  - [ ] Driving and collisions
-//  - [ ] Trails
-// v0.2:
-//  - [x] Readme
-//  - [x] GH social preview (screenshot)
-//  - [ ] CI, audit, badges
-//      - [ ] All paths lowercase (or we might have issues on windows)
-//  - [ ] CI artifacts - allow downloading from GH
-//  - [ ] Trimesh colliders
-//      - [ ] Poles - there's many - check perf
-//      - [ ] Everything - is it possible to tunnel through at high speeds?
-//          - Yes - try CCD?
-//  - [ ] Use proper lights instead of just ambient light
-//  - [ ] Texture the whole arena
-//  - [ ] Finish RustCycle model
-//  - [ ] Skybox - fractal resembling stars?
-// v1.0:
-//  - [ ] Include version number in binaries, report between cl and sv during handshake
-//      - Must not increase incremental build time - worst case do it only for releases
-// All the LATERs
-//  - They mean something can be done better but marking it as a todo would be just noise when grepping.
-//    They're things I'd do if I had infinite time and wanted to make the project perfect.
-//    As the game matures, some of them might be promoted to todos.
+// FIXME what is this
+// https://docs.rs/console_error_panic_hook/0.1.6/src/console_error_panic_hook/lib.rs.html
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn error(msg: String);
 
-// LATERs:
-//  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
-//  - [x] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
-//  - [ ] If possible, lint against unwrap, print, println, dbg,
-//          todo, panic, unreachable, unimplemented, ...
+    type Error;
 
-#[derive(Debug, Default)]
-#[cfg_attr(feature = "cli", derive(StructOpt))]
-struct Opts {
-    /// Use a window instead of fullscreen (doesn't apply to server)
-    #[cfg_attr(feature = "cli", structopt(long))]
-    windowed: bool,
+    #[wasm_bindgen(constructor)]
+    fn new() -> Error;
 
-    /// Whether to run the client, server or both.
-    #[cfg_attr(feature = "cli", structopt(subcommand))]
-    endpoint: Option<Endpoint>,
+    #[wasm_bindgen(structural, method, getter)]
+    fn stack(error: &Error) -> String;
 }
 
-#[derive(Debug, EnumString)]
-#[cfg_attr(feature = "cli", derive(StructOpt))]
-enum Endpoint {
-    /// Run only the game client
-    Client,
-    /// Run only the game server
-    Server,
-}
+fn hook_impl(info: &PanicInfo) {
+    let mut msg = info.to_string();
 
-#[cfg(feature = "cli")]
-fn main() {
-    let opts = Opts::from_args();
-    run(opts);
-}
-
-#[cfg(not(feature = "cli"))]
-fn main() {
-    let mut opts = Opts::default();
-
-    // We kinda wanna use structopt because it has nice QoL features
-    // but it adds a couple hundred ms to incremental debug builds.
-    // So for dev builds we use this crude way of parsing input instead
-    // to build and therefore iterate a tiny bit faster.
+    // Add the error stack to our message.
     //
-    // If this gets too complex, might wanna consider https://github.com/RazrFalcon/pico-args.
-    let args = env::args().skip(1); // Skip path to self
-    for arg in args {
-        match arg.as_str() {
-            "client" => opts.endpoint = Some(Endpoint::Client),
-            "server" => opts.endpoint = Some(Endpoint::Server),
-            "--windowed" => opts.windowed = true,
-            other => panic!("unexpected argument: {other}"),
-        }
-    }
+    // This ensures that even if the `console` implementation doesn't
+    // include stacks for `console.error`, the stack is still available
+    // for the user. Additionally, Firefox's console tries to clean up
+    // stack traces, and ruins Rust symbols in the process
+    // (https://bugzilla.mozilla.org/show_bug.cgi?id=1519569) but since
+    // it only touches the logged message's associated stack, and not
+    // the message's contents, by including the stack in the message
+    // contents we make sure it is available to the user.
+    msg.push_str("\n\nStack:\n\n");
+    let e = Error::new();
+    let stack = e.stack();
+    msg.push_str(&stack);
 
-    run(opts);
+    // Safari's devtools, on the other hand, _do_ mess with logged
+    // messages' contents, so we attempt to break their heuristics for
+    // doing that by appending some whitespace.
+    // https://github.com/rustwasm/console_error_panic_hook/issues/7
+    msg.push_str("\n\n");
+
+    // Finally, log the panic with `console.error`!
+    error(msg);
 }
 
-fn run(opts: Opts) {
-    let prev_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic_info| {
-        dbg_logf!("panicking");
-        prev_hook(panic_info);
-    }));
-
-    match opts.endpoint {
-        None => client_server_main(opts),
-        Some(Endpoint::Client) => client_main(opts),
-        Some(Endpoint::Server) => server_main(),
-    }
-}
-
-/// Run both client and server.
+/// A panic hook for use with
+/// [`std::panic::set_hook`](https://doc.rust-lang.org/nightly/std/panic/fn.set_hook.html)
+/// that logs panics into
+/// [`console.error`](https://developer.mozilla.org/en-US/docs/Web/API/Console/error).
 ///
-/// This is currently just a convenience for quicker testing
-/// but eventually should allow running singleplayer games
-/// without most of the overhead of the client-server split.
-fn client_server_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: "cl+sv",
-            default_color: Color::opaque(255, 255, 0),
-        }
-    });
-
-    // LATER Find a way to run client and server in one process,
-    // maybe even one thread - sharing GameState woul be ideal for singleplayer.
-    //
-    // This is broken - most input gets ignored (on Kubuntu):
-    // thread::spawn(|| {
-    //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
-    //     server_main(EventLoop::new_any_thread());
-    // });
-    // thread::sleep(Duration::from_secs(1));
-    // client_main();
-
-    let path = env::args().next().unwrap();
-
-    let mut server = Command::new(&path).arg("server").spawn().unwrap();
-
-    let mut client_cmd = Command::new(&path);
-    if opts.windowed {
-        client_cmd.arg("--windowed");
-    }
-    client_cmd.arg("client");
-    let mut client = client_cmd.spawn().unwrap();
-
-    // We wanna close just the client and automatically close the server that way.
-    client.wait().unwrap();
-    dbg_logf!("Client exitted, killing server");
-    server.kill().unwrap();
+/// On non-wasm targets, prints the panic to `stderr`.
+pub fn hook(info: &PanicInfo) {
+    hook_impl(info);
 }
 
-fn client_main(opts: Opts) {
+/// Set the `console.error` panic hook the first time this is called. Subsequent
+/// invocations do nothing.
+#[inline]
+pub fn set_once() {
+    use std::sync::Once;
+    static SET_HOOK: Once = Once::new();
+    SET_HOOK.call_once(|| {
+        panic::set_hook(Box::new(hook));
+    });
+}
+
+#[wasm_bindgen]
+pub fn client_main() {
+    set_once();
+
     DEBUG_ENDPOINT.with(|endpoint| {
         *endpoint.borrow_mut() = DebugEndpoint {
             name: "cl",
@@ -188,10 +116,17 @@ fn client_main(opts: Opts) {
     // Also used in server_main().
     Log::set_verbosity(MessageKind::Warning);
 
+    // FIXME copied verbatim:
+    //  Same for server.
+    //  Need 2 game states and messages between them.
+    //      - Alternative is just dumping messages into replay file but maybe later.
+    //      - For now 2 game states much easier.
+    //      - Maybe split GameClient and ClientProgram? Then SharedProgram?
+    //      - Wanna keep stuff like input in one place though.
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
-    if !opts.windowed {
-        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
-    }
+    //if !opts.windowed {
+    //    window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
+    //}
     let event_loop = EventLoop::new();
     // LATER no vsync
     let engine = Engine::new(window_builder, &event_loop, true).unwrap();
@@ -303,7 +238,10 @@ fn client_main(opts: Opts) {
     });
 }
 
+#[wasm_bindgen]
 fn server_main() {
+    set_once();
+
     DEBUG_ENDPOINT.with(|endpoint| {
         *endpoint.borrow_mut() = DebugEndpoint {
             name: "sv",

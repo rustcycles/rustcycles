@@ -50,6 +50,21 @@ Normally, rust-analyzer runs `cargo check` on save which locks `target` so if yo
 - Reduction from 2.5 s to 2.3 s
 - Might not be worth it for now (you need to compile it yourself), maybe when the game gets larger
 
+### WASM builds
+
+Sometimes `wasm-pack` triggers a full rebuild unnecessarily so it's best to build wasm in a separate target directory:
+
+```bash
+CARGO_TARGET_DIR=target-wasm wasm-pack build --target web --dev
+```
+
+Note: I am not sure if this is a bug but the cause seems to be that using the fast compiles config causes `RUSTFLAGS` to differ between native and WASM builds so if you alternate between those, they will always rebuild everything. For debugging it, these commands might be useful:
+
+```bash
+CARGO_LOG=cargo::core::compiler::fingerprint=trace wasm-pack build --target web --dev
+CARGO_LOG=cargo::core::compiler::fingerprint=trace cargo build
+```
+
 ## LICENSE
 
 [AGPL-v3](agpl-3.0.txt) or newer

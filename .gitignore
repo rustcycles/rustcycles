@@ -18,7 +18,10 @@
 /.cargo/config.toml
 /rust-toolchain.toml
 
-# Separate target for rust-analyzer to speed up builds
+# Separate target dir for rust-analyzer to speed up builds
 /target-ra
+
+# Separate target dir for wasm-pack, otherwise it might trigger full rebuilds unnecessarily
+/target-wasm
 
 /target

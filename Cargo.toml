@@ -9,7 +9,7 @@ authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 [profile.dev]
 # Abort on panic might be a better default:
 # https://vorner.github.io/2018/07/22/dont_panic.html
-# This makes backtraces useless, see config-example.toml for a fix.
+# This makes backtraces useless, see .cargo/config-example.toml for a fix.
 panic = "abort"
 
 [profile.dev.package."*"]

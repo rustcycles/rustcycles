@@ -29,6 +29,7 @@ pub(crate) use fyrox::{
 };
 
 // This doesn't increase compile times in any measureble way.
+// Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub(crate) use inline_tweak::tweak;
 
 /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.

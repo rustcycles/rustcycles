@@ -52,4 +52,4 @@ Normally, rust-analyzer runs `cargo check` on save which locks `target` so if yo
 
 ## LICENSE
 
-[AGPL-v3](agpl-3.0.txt) or newer
+[AGPL-v3](LICENSE) or newer

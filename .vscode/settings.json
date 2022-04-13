@@ -1,6 +1,4 @@
 {
-    "rust-analyzer.diagnostics.disabled": [
-        "mismatched-arg-count"
-    ],
+    "rust-analyzer.diagnostics.disabled": [],
     "rust-analyzer.assist.importPrefix": "crate"
 }

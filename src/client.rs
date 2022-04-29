@@ -267,8 +267,9 @@ impl GameClient {
         // LATER cvars
         let mouse_sensitivity_horizontal = 0.5;
         let mouse_sensitivity_vertical = 0.5;
-        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal;
-        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical;
+        let zoom_factor = if self.lp.input.zoom { 0.25 } else { 1.0 };
+        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
+        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical * zoom_factor;
 
         // Subtract, don't add the delta X.
         // Nalgebra rotations follow the right hand rule,

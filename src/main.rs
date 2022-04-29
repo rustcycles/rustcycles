@@ -276,7 +276,7 @@ fn client_main(opts: Opts) {
                     DeviceEvent::MouseMotion { delta } => {
                         // LATER This event normally happens every 4 ms for me when moving the mouse. Print stats.
                         // Is it limited by my polling rate? Would it be helpful to teach players how to increase it?
-                        // Sometimes i get 4 events every 16 ms. Detect this.
+                        // Sometimes i get a batch of 4 events every 16 ms. Detect this.
                         // https://github.com/martin-t/rustcycles/issues/1
                         // dbg_logf!(
                         //     "{} DeviceEvent::MouseMotion {:?}",
@@ -284,9 +284,9 @@ fn client_main(opts: Opts) {
                         //     delta
                         // );
 
-                        // LATER This doesn't have enough precision,
-                        //  and neither do the other events.
-                        dbg_logd!(delta);
+                        // LATER This doesn't have enough precision, and neither do the other events.
+                        // the smallest delta is a whole pixel.
+                        // dbg_logd!(delta);
 
                         client.mouse_motion(delta);
                     }

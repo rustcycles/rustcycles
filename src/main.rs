@@ -339,9 +339,6 @@ fn server_main() {
     .unwrap();
     let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
 
-    // Render pure black just once so the window doesn't look broken.
-    server.engine.render().unwrap();
-
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.

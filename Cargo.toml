@@ -33,5 +33,5 @@ fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "58c4aae3bd0551dff
 inline_tweak = "1.0.8"
 serde = { version = "1.0.136", features = ["derive"] }
 structopt = { version = "0.3.25", optional = true }
-strum = "0.23.0"
-strum_macros = "0.23.1"
+strum = "0.24.0"
+strum_macros = "0.24.0"

@@ -7,12 +7,12 @@ mod common;
 mod prelude;
 mod server;
 
-use std::{env, panic, process::Command};
+use std::{env, panic, process::Command, sync::Arc};
 
 use fyrox::{
     core::instant::Instant,
     dpi::LogicalSize,
-    engine::Engine,
+    engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::log::{Log, MessageKind},
@@ -190,9 +190,18 @@ fn client_main(opts: Opts) {
     if !opts.windowed {
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     }
+    let serialization_context = Arc::new(SerializationContext::new());
+    let resource_manager = ResourceManager::new(serialization_context.clone());
     let event_loop = EventLoop::new();
     // LATER no vsync
-    let engine = Engine::new(window_builder, &event_loop, true).unwrap();
+    let engine = Engine::new(EngineInitParams {
+        window_builder,
+        serialization_context,
+        resource_manager,
+        events_loop: &event_loop,
+        vsync: true,
+    })
+    .unwrap();
     let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
 
     let clock = Instant::now();
@@ -316,9 +325,18 @@ fn server_main() {
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles server")
         .with_inner_size(LogicalSize::new(400, 100));
+    let serialization_context = Arc::new(SerializationContext::new());
+    let resource_manager = ResourceManager::new(serialization_context.clone());
     let event_loop = EventLoop::new();
     // LATER Does vsync have any effect here?
-    let engine = Engine::new(window_builder, &event_loop, false).unwrap();
+    let engine = Engine::new(EngineInitParams {
+        window_builder,
+        serialization_context,
+        resource_manager,
+        events_loop: &event_loop,
+        vsync: true,
+    })
+    .unwrap();
     let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
 
     // Render pure black just once so the window doesn't look broken.

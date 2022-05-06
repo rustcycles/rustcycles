@@ -309,8 +309,7 @@ impl GameClient {
 
             engine::update_resources(&mut self.engine, dt);
 
-            self.test_engine_latency(v!(-3 4 3), 2);
-            self.test_engine_latency(v!(-5 4 3), 4);
+            self.debug_engine_latency(v!(-3 4 3), 4);
 
             self.sys_receive_updates();
 
@@ -322,7 +321,7 @@ impl GameClient {
 
             self.tick_after_physics(dt);
 
-            self.test_engine_latency(v!(-7 4 3), 4);
+            self.debug_engine_latency(v!(-5 4 3), 4);
 
             engine::update_ui(&mut self.engine, dt);
         }
@@ -333,10 +332,12 @@ impl GameClient {
     /// Draw arrows in a different orientation every frame.
     ///
     /// This helps:
-    /// - notice issues with framerate
-    /// - notice tearing (but a solid object would make it even easier to see)
-    /// - make sure debug draws and prints issued on one frame happen on the same frame
-    fn test_engine_latency(&self, pos: Vec3, steps: usize) {
+    /// - Notice issues with framerate
+    /// - Notice tearing (but a solid object would make it even easier to see)
+    /// - Make sure debug draws and prints issued on one frame happen on the same frame.
+    ///   The intended usecase is to take a screenshot and compare
+    ///   the direction of the arrow to the direction as text.
+    fn debug_engine_latency(&self, pos: Vec3, steps: usize) {
         let step = (self.gs.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
         let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);

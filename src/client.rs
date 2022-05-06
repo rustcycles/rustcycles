@@ -343,7 +343,7 @@ impl GameClient {
         let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
         let dir = rot * Vec3::up();
         dbg_arrow!(pos, dir);
-        dbg_textd!(dir);
+        dbg_textd!(angle.to_degrees());
     }
 
     fn sys_receive_updates(&mut self) {

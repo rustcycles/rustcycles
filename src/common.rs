@@ -169,8 +169,8 @@ impl GameState {
 
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
-    // Some things like shooting might need the angle at the exact time
-    // so we send yaw and pitch with each input.
+    // Some things like shooting need the angle at the exact time
+    // so we send yaw and pitch with each input, not just once per frame.
     pub(crate) yaw: Deg,
     pub(crate) pitch: Deg,
     pub(crate) fire1: bool,

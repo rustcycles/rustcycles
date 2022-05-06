@@ -305,6 +305,8 @@ impl GameClient {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
+            self.sys_send_input();
+
             engine::update_resources(&mut self.engine, dt);
 
             self.test_engine_latency(v!(-3 4 3), 2);
@@ -319,9 +321,6 @@ impl GameClient {
             engine::update_physics(&mut self.engine, dt);
 
             self.tick_after_physics(dt);
-
-            // LATER This should probably happen earlier.
-            self.sys_send_input();
 
             self.test_engine_latency(v!(-7 4 3), 4);
 

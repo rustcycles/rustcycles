@@ -21,7 +21,7 @@ use crate::{
 
 /// Game server.
 ///
-/// Lets Clients connect to play. Contains the authoritate copy of the game state.
+/// Lets Clients connect to play. Contains the authoritative copy of the game state.
 pub(crate) struct GameServer {
     pub(crate) engine: Engine,
     pub(crate) gs: GameState,

@@ -213,6 +213,14 @@ impl Debug for Input {
     }
 }
 
+// Why not use an existing crate like https://crates.io/crates/angle?
+// - Not worth adding a dep for such a simple thing
+// - It shows signs of lack of attention to detail
+//   (bad readme, missing doc comments, inconsistent formatting)
+//   on the surface so it probably contains deeper issues as well.
+// - It tries to be smart and implements questionable ops such as comparisons.
+// This reasoning might change if this struct gets larger but it'll probably mean
+// only taking inspiration and bits of code from the angle crate, not adding it as a dep.
 #[derive(Debug, Clone, Copy, Default, Deserialize, Serialize)]
 pub(crate) struct Deg(pub(crate) f32);
 

@@ -64,13 +64,13 @@ macro_rules! dbg_logf {
     };
 }
 
-/// Print variables into stdout formatted as `var1: value1, var2: value2`.
+/// Print variables into stdout formatted as `[file:line] var1: value1, var2: value2`.
 #[macro_export]
 macro_rules! dbg_logd {
     ( $( $e:expr ),* ) => {
         {
             let s = $crate::__format_pairs!( $( $e ),* );
-            dbg_logf!("{}", s);
+            dbg_logf!("[{}:{}] {}", file!(), line!(), s);
         }
     };
 }
@@ -97,7 +97,7 @@ macro_rules! dbg_textf {
     };
 }
 
-/// Print variables onto the screen formatted as `var1: value1, var2: value2`.
+/// Print variables onto the screen formatted as `[file:line] var1: value1, var2: value2`.
 ///
 /// Useful for printing debug info each frame.
 #[macro_export]
@@ -105,7 +105,7 @@ macro_rules! dbg_textd {
     ( $( $e:expr ),* ) => {
         {
             let s = $crate::__format_pairs!( $( $e ),* );
-            dbg_textf!("{}", s);
+            dbg_textf!("[{}:{}] {}", file!(), line!(), s);
         }
     };
 }

@@ -32,6 +32,7 @@ pub(crate) fn update_scenes(engine: &mut Engine, dt: f32) {
     }
 }
 
+/// Draw debug text (but not debug shapes)
 pub(crate) fn update_ui(engine: &mut Engine, dt: f32) {
     let inner_size = engine.get_window().inner_size();
     let window_size = Vector2::new(inner_size.width as f32, inner_size.height as f32);

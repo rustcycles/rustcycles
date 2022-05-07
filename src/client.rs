@@ -347,6 +347,8 @@ impl GameClient {
     /// - Make sure debug draws and prints issued on one frame happen on the same frame.
     ///   The intended usecase is to take a screenshot and compare
     ///   the direction of the arrow to the direction as text.
+    ///
+    /// The rotation is clockwise when looking in the forward direction.
     fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
         let step = (self.gs.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;

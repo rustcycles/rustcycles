@@ -187,7 +187,11 @@ fn client_main(opts: Opts) {
     Log::set_verbosity(MessageKind::Warning);
 
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
-    if !opts.windowed {
+    if opts.windowed {
+        let width = 1200;
+        let height = width / 16 * 9;
+        window_builder = window_builder.with_inner_size(LogicalSize::new(width, height));
+    } else {
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     }
     let serialization_context = Arc::new(SerializationContext::new());

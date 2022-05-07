@@ -46,6 +46,19 @@ pub(crate) use crate::v;
 ///
 /// X, Y, Z is left, up, forward.
 ///
+/// Nalgebra's coordinate system is right-handed:
+/// index finger is X, middle finger is Y, thumb is Z.
+///
+/// Nalgebra's rotations also use the right-hand rule:
+/// thumb is the axis, the curl of fingers is the direction of rotation.
+///
+/// ---
+///
+/// The most common usecase is a constant vector with all coords as number literals,
+/// e.g. `v!(-42 0 420.69)`. If you need arbitrary expressions
+/// (e.g. `v!(-s.x, 0, a + b)`), you need to use commas
+/// because expressions can contain spaces so they wouldn't work as a separator.
+///
 /// # Usage
 ///
 /// ```rust
@@ -53,6 +66,11 @@ pub(crate) use crate::v;
 /// ```
 #[macro_export]
 macro_rules! v {
+    // Support for arbitrary expressions - requires commas.
+    ($x:expr, $y:expr, $z:expr) => {
+        Vec3::new($x as f32, $y as f32, $z as f32)
+    };
+    // The simple usecase - no commas.
     ($x:literal $y:literal $z:literal) => {
         Vec3::new($x as f32, $y as f32, $z as f32)
     };
@@ -66,8 +84,6 @@ pub(crate) type Vec3 = Vector3<f32>;
 /// QoL methods for nalgebra's Vector3.
 ///
 /// Should be imported along with the rest of the prelude using a glob.
-///
-/// Nalgebra's coordinate system is right-handed.
 pub(crate) trait Vec3Ext
 where
     Self: Sized,
@@ -163,5 +179,13 @@ mod tests {
     #[test]
     fn test_v() {
         assert_eq!(v!(-42 0 420.69), Vec3::new(-42.0, 0.0, 420.69));
+
+        struct S {
+            x: i32,
+        }
+        let s = S { x: 42 };
+        let a = 420.0;
+        let b = 0.69;
+        assert_eq!(v!(-s.x, 0, a + b), Vec3::new(-42.0, 0.0, 420.69));
     }
 }

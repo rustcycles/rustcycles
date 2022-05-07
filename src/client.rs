@@ -307,9 +307,17 @@ impl GameClient {
 
             self.sys_send_input();
 
-            engine::update_resources(&mut self.engine, dt);
+            for i in 0..=4 {
+                let i = i as f32;
+                let angle = std::f32::consts::FRAC_PI_2 * i;
+                let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
+                let dir = rot * Vec3::up();
+                dbg_arrow!(v!(-i, 5, 3), dir);
+            }
 
-            self.debug_engine_latency(v!(-3 4 3), 4);
+            self.debug_engine_updates(v!(-1 3 3), 4);
+            engine::update_resources(&mut self.engine, dt);
+            self.debug_engine_updates(v!(-2 3 3), 4);
 
             self.sys_receive_updates();
 
@@ -317,13 +325,15 @@ impl GameClient {
 
             self.tick_before_physics(dt);
 
-            engine::update_physics(&mut self.engine, dt);
+            self.debug_engine_updates(v!(-3 3 3), 4);
+            engine::update_scenes(&mut self.engine, dt);
+            self.debug_engine_updates(v!(-4 3 3), 4);
 
             self.tick_after_physics(dt);
 
-            self.debug_engine_latency(v!(-5 4 3), 4);
-
+            self.debug_engine_updates(v!(-5 3 3), 4);
             engine::update_ui(&mut self.engine, dt);
+            self.debug_engine_updates(v!(-6 3 3), 4);
         }
 
         self.engine.get_window().request_redraw();
@@ -337,13 +347,13 @@ impl GameClient {
     /// - Make sure debug draws and prints issued on one frame happen on the same frame.
     ///   The intended usecase is to take a screenshot and compare
     ///   the direction of the arrow to the direction as text.
-    fn debug_engine_latency(&self, pos: Vec3, steps: usize) {
+    fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
         let step = (self.gs.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
         let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
         let dir = rot * Vec3::up();
         dbg_arrow!(pos, dir);
-        dbg_textd!(angle.to_degrees());
+        dbg_textd!(self.gs.frame_number, pos, angle.to_degrees());
     }
 
     fn sys_receive_updates(&mut self) {
@@ -522,7 +532,7 @@ impl GameClient {
 
         dbg_cross!(v!(5 5 5), 0.0, CYAN);
 
-        // Debug
+        // Debug FIXME move after physics?
         scene.drawing_context.clear_lines();
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
@@ -561,7 +571,7 @@ impl GameClient {
     }
 
     fn tick_after_physics(&mut self, _dt: f32) {
-        let scene = &mut self.engine.scenes[self.gs.scene];
+        let _scene = &mut self.engine.scenes[self.gs.scene];
     }
 
     /// Send all once-per-frame stuff to the server.

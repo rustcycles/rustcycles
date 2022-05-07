@@ -14,7 +14,7 @@ pub(crate) fn update_resources(engine: &mut Engine, dt: f32) {
     engine.handle_model_events();
 }
 
-pub(crate) fn update_physics(engine: &mut Engine, dt: f32) {
+pub(crate) fn update_scenes(engine: &mut Engine, dt: f32) {
     let inner_size = engine.get_window().inner_size();
     let window_size = Vector2::new(inner_size.width as f32, inner_size.height as f32);
 

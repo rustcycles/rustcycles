@@ -22,7 +22,6 @@ use fyrox::{
 
 use crate::{
     common::{
-        engine,
         entities::{Player, PlayerState},
         messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
         net, GameState, Input,
@@ -240,7 +239,7 @@ impl GameClient {
             }
         }
 
-        self.sys_send_input();
+        self.send_input();
     }
 
     pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
@@ -254,7 +253,7 @@ impl GameClient {
             fyrox::event::MouseButton::Other(_) => {}
         }
 
-        self.sys_send_input();
+        self.send_input();
     }
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
@@ -305,35 +304,17 @@ impl GameClient {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
-            self.sys_send_input();
-
-            for i in 0..=4 {
-                let i = i as f32;
-                let angle = std::f32::consts::FRAC_PI_2 * i;
-                let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
-                let dir = rot * Vec3::up();
-                dbg_arrow!(v!(-i, 5, 3), dir);
-            }
-
-            self.debug_engine_updates(v!(-1 3 3), 4);
-            engine::update_resources(&mut self.engine, dt);
-            self.debug_engine_updates(v!(-2 3 3), 4);
-
-            self.sys_receive_updates();
+            self.network();
 
             self.gs.tick_before_physics(&mut self.engine, dt);
 
             self.tick_before_physics(dt);
 
-            self.debug_engine_updates(v!(-3 3 3), 4);
-            engine::update_scenes(&mut self.engine, dt);
-            self.debug_engine_updates(v!(-4 3 3), 4);
+            self.engine.pre_update(dt);
 
             self.tick_after_physics(dt);
 
-            self.debug_engine_updates(v!(-5 3 3), 4);
-            engine::update_ui(&mut self.engine, dt);
-            self.debug_engine_updates(v!(-6 3 3), 4);
+            self.engine.post_update(dt);
         }
 
         self.engine.get_window().request_redraw();
@@ -358,7 +339,17 @@ impl GameClient {
         dbg_textd!(self.gs.frame_number, pos, angle.to_degrees());
     }
 
-    fn sys_receive_updates(&mut self) {
+    fn send_input(&mut self) {
+        self.network_send(ClientMessage::Input(self.lp.input));
+    }
+
+    /// All once-per-frame networking.
+    fn network(&mut self) {
+        // LATER Always send key/mouse presses immediately
+        // but maybe rate-limit mouse movement updates
+        // in case some systems update mouse position at a very high rate.
+        self.send_input();
+
         let _ = net::receive(
             &mut self.stream,
             &mut self.buffer,
@@ -517,7 +508,7 @@ impl GameClient {
         // Testing
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
-            dbg_cross!(body_pos, 5.0);
+            dbg_cross!(body_pos, 3.0);
         }
 
         dbg_line!(v!(15 5 5), v!(15 5 7));
@@ -533,8 +524,21 @@ impl GameClient {
         dbg_arrow!(v!(10 10 10), v!(2 2 2), 0.0, BLUE2);
 
         dbg_cross!(v!(5 5 5), 0.0, CYAN);
+    }
 
-        // Debug FIXME move after physics?
+    fn tick_after_physics(&mut self, dt: f32) {
+        let scene = &mut self.engine.scenes[self.gs.scene];
+
+        // Testing
+        for cycle in &self.gs.cycles {
+            let body_pos = scene.graph[cycle.body_handle].global_position();
+            // Note: Drawing arrows here can reduce FPS in debug builds
+            // to single digits if also using physics.draw(). No idea why.
+            dbg_cross!(body_pos, 0.0, BLUE2);
+        }
+
+        // Debug
+        // LATER Warn when drawing text/shaped from prev frame.
         scene.drawing_context.clear_lines();
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
@@ -570,15 +574,6 @@ impl GameClient {
         ));
 
         debug::details::cleanup();
-    }
-
-    fn tick_after_physics(&mut self, _dt: f32) {
-        let _scene = &mut self.engine.scenes[self.gs.scene];
-    }
-
-    /// Send all once-per-frame stuff to the server.
-    fn sys_send_input(&mut self) {
-        self.network_send(ClientMessage::Input(self.lp.input));
     }
 
     fn network_send(&mut self, message: ClientMessage) {

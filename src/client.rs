@@ -331,6 +331,7 @@ impl GameClient {
     ///   the direction of the arrow to the direction as text.
     ///
     /// The rotation is clockwise when looking in the forward direction.
+    #[allow(dead_code)]
     fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
         let step = (self.gs.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;

@@ -294,26 +294,27 @@ impl GameClient {
     }
 
     pub(crate) fn update(&mut self, game_time_target: f32) {
-        let dt = 1.0 / 60.0;
-
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
+        let dt = 1.0 / 60.0;
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
-            self.network();
+            self.tick_begin_frame();
 
             self.gs.tick_before_physics(&mut self.engine, dt);
 
             self.tick_before_physics(dt);
 
+            // Update animations, transformations, physics, ...
             self.engine.pre_update(dt);
 
             self.tick_after_physics(dt);
 
+            // Update UI
             self.engine.post_update(dt);
         }
 
@@ -344,19 +345,21 @@ impl GameClient {
     }
 
     /// All once-per-frame networking.
-    fn network(&mut self) {
+    fn tick_begin_frame(&mut self) {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
         self.send_input();
+
+        let scene = &mut self.engine.scenes[self.gs.scene];
+
+        scene.drawing_context.clear_lines();
 
         let _ = net::receive(
             &mut self.stream,
             &mut self.buffer,
             &mut self.server_messages,
         ); // LATER Clean disconnect
-
-        let scene = &mut self.engine.scenes[self.gs.scene];
 
         for message in self.server_messages.drain(..) {
             match message {
@@ -539,7 +542,6 @@ impl GameClient {
 
         // Debug
         // LATER Warn when drawing text/shaped from prev frame.
-        scene.drawing_context.clear_lines();
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         // Keep this first so it draws below other debug stuff.

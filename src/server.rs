@@ -49,14 +49,11 @@ impl GameServer {
         // see that for more information.
 
         let dt = 1.0 / 60.0;
-        let game_time_target = game_time_target;
-
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
-            self.accept_new_connections();
-            self.sys_receive();
+            self.tick_begin_frame();
 
             self.gs.tick_before_physics(&mut self.engine, dt);
 
@@ -65,6 +62,11 @@ impl GameServer {
 
             self.sys_send_update();
         }
+    }
+
+    fn tick_begin_frame(&mut self) {
+        self.accept_new_connections();
+        self.sys_receive();
     }
 
     fn accept_new_connections(&mut self) {

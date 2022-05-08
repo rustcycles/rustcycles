@@ -533,6 +533,8 @@ impl GameClient {
     fn tick_after_physics(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
+        //scene.graph.update_hierarchical_data(); FIXME
+
         // Testing
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();

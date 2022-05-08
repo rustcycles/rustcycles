@@ -39,6 +39,12 @@ use crate::{
 //  - [x] Primitive networking to force client/server split
 //  - [ ] Driving and collisions
 //  - [ ] Trails
+// yak-shaving:
+//  - [ ] WASM local client for testing / showcases
+//      - [ ] Client and server in one process - local gameplay
+//  - [ ] What is happening when FPS drops to single digits
+//        (e.g. when using physics.draw twice in a frame)
+//      - [ ] Custom counter for FPS and durations - avg, max
 // v0.2:
 //  - [x] Readme
 //  - [x] GH social preview (screenshot)

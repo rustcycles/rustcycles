@@ -540,7 +540,9 @@ impl GameClient {
             let body_pos = scene.graph[cycle.body_handle].global_position();
             // Note: Drawing arrows here can reduce FPS in debug builds
             // to single digits if also using physics.draw(). No idea why.
-            dbg_cross!(body_pos, 0.0, BLUE2);
+            // Drawing a cross hides that *sometimes* the normal red cross
+            // from before physics also appears here.
+            dbg_line!(body_pos, body_pos + Vec3::up(), 0.0, BLUE2);
         }
 
         // Debug

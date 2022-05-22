@@ -85,11 +85,12 @@ macro_rules! dbg_textf {
     };
     ( $( $t:tt )* ) => {
         {
+            use std::fmt::Write;
             let mut s = String::new();
             $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                s.push_str(&format!("{} ", endpoint.borrow().name));
+                write!(s, "{} ", endpoint.borrow().name).expect("writing to String always succeeds");
             });
-            s.push_str(&format!( $( $t )* ));
+            write!(s, $( $t )* ).expect("writing to String always succeeds");
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {
                 texts.borrow_mut().push(s);
             });

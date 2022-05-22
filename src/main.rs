@@ -48,8 +48,8 @@ use crate::{
 // v0.2:
 //  - [x] Readme
 //  - [x] GH social preview (screenshot)
-//  - [ ] CI, audit, badges
-//      - [ ] All paths lowercase (or we might have issues on windows)
+//  - [x] CI, audit, badges
+//      - [ ] Check all paths are lowercase (or we might have issues on windows)
 //  - [ ] CI artifacts - allow downloading from GH
 //  - [ ] Trimesh colliders
 //      - [ ] Poles - there's many - check perf

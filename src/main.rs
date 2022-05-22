@@ -88,6 +88,8 @@ struct Opts {
 #[derive(Debug, EnumString)]
 #[cfg_attr(feature = "cli", derive(StructOpt))]
 enum Endpoint {
+    /// Run a local game (client and server in one process)
+    Local,
     /// Run only the game client
     Client,
     /// Run only the game server
@@ -113,6 +115,7 @@ fn main() {
     let args = env::args().skip(1); // Skip path to self
     for arg in args {
         match arg.as_str() {
+            "local" => opts.endpoint = Some(Endpoint::Local),
             "client" => opts.endpoint = Some(Endpoint::Client),
             "server" => opts.endpoint = Some(Endpoint::Server),
             "--windowed" => opts.windowed = true,
@@ -132,6 +135,7 @@ fn run(opts: Opts) {
 
     match opts.endpoint {
         None => client_server_main(opts),
+        Some(Endpoint::Local) => local_main(opts),
         Some(Endpoint::Client) => client_main(opts),
         Some(Endpoint::Server) => server_main(),
     }
@@ -143,12 +147,7 @@ fn run(opts: Opts) {
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
 fn client_server_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: "cl+sv",
-            default_color: Color::opaque(255, 255, 0),
-        }
-    });
+    init_global_state("cl+sv launcher");
 
     // LATER Find a way to run client and server in one process,
     // maybe even one thread - sharing GameState woul be ideal for singleplayer.
@@ -178,19 +177,16 @@ fn client_server_main(opts: Opts) {
     server.kill().unwrap();
 }
 
-fn client_main(opts: Opts) {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: "cl",
-            default_color: Color::RED,
-        }
-    });
+/// LATER Do we want a shared game state or just running both
+/// client and server in one thread? Update docs on Endpoint or wherever.
+fn local_main(opts: Opts) {
+    init_global_state("local");
 
-    // LATER Switch rg3d to a more standard logger
-    // or at least add a level below INFO so load times can remain as INFO
-    // and the other messages are hidden by default.
-    // Also used in server_main().
-    Log::set_verbosity(MessageKind::Warning);
+    todo!();
+}
+
+fn client_main(opts: Opts) {
+    init_global_state("cl");
 
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
     if opts.windowed {
@@ -212,8 +208,8 @@ fn client_main(opts: Opts) {
         vsync: true,
     })
     .unwrap();
-    let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
 
+    let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
@@ -321,15 +317,7 @@ fn client_main(opts: Opts) {
 }
 
 fn server_main() {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: "sv",
-            default_color: Color::GREEN,
-        }
-    });
-
-    // See note in client_main().
-    Log::set_verbosity(MessageKind::Warning);
+    init_global_state("sv");
 
     // LATER Headless - do all this without creating a window.
     let window_builder = WindowBuilder::new()
@@ -347,8 +335,8 @@ fn server_main() {
         vsync: true,
     })
     .unwrap();
-    let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
 
+    let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
@@ -377,4 +365,19 @@ fn server_main() {
             Event::LoopDestroyed => dbg_logf!("bye"),
         }
     });
+}
+
+fn init_global_state(endpoint_name: &'static str) {
+    DEBUG_ENDPOINT.with(|endpoint| {
+        *endpoint.borrow_mut() = DebugEndpoint {
+            name: endpoint_name,
+            default_color: Color::RED,
+        }
+    });
+
+    // LATER Switch rg3d to a more standard logger
+    // or at least add a level below INFO so load times can remain as INFO
+    // and the other messages are hidden by default.
+    // Also used in server_main().
+    Log::set_verbosity(MessageKind::Warning);
 }

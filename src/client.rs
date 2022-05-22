@@ -533,7 +533,7 @@ impl GameClient {
     fn tick_after_physics(&mut self, dt: f32) {
         let scene = &mut self.engine.scenes[self.gs.scene];
 
-        //scene.graph.update_hierarchical_data(); FIXME
+        //scene.graph.update_hierarchical_data(); TODO
 
         // Testing
         for cycle in &self.gs.cycles {

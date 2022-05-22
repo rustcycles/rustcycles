@@ -4,6 +4,9 @@
 </div>
 <br />
 
+[![License (AGPL3)](https://img.shields.io/github/license/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles/blob/master/LICENSE)
+[![CI](https://github.com/rustcycles/rustcycles/workflows/CI/badge.svg)](https://github.com/rustcycles/rustcycles/actions)
+[![Audit](https://github.com/rustcycles/rustcycles/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/rustcycles/rustcycles/status.svg)](https://deps.rs/repo/github/rustcycles/rustcycles)
 [![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/cXU5HzDXM5)
 [![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)

@@ -214,6 +214,8 @@ mod tests {
 
     #[test]
     fn test_soft_assert() {
+        #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
+
         // Identity function which counts how many times it's executed
         // to make sure macros only evaluate each input once.
         let mut execution_count = 0;
@@ -244,6 +246,8 @@ mod tests {
 
     #[test]
     fn test_logging_compiles() {
+        #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
+
         let x = 5;
         let y = 6;
 
@@ -287,6 +291,8 @@ mod tests {
 
     #[test]
     fn test_drawing_compiles_no_import() {
+        #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
+
         dbg_line!(v!(1 2 3), v!(4 5 6));
         dbg_line!(v!(1 2 3), v!(4 5 6), 5);
         dbg_line!(v!(1 2 3), v!(4 5 6), 5.0);

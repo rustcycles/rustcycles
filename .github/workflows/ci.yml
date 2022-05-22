@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Runs at 15:00 UTC on Fri 
+    - cron: "0 15 * * 5"
+
+env:
+  CARGO_TERM_COLOR: always
+  # Deny warns here as a catch-all and because some commands (e.g. cargo build) don't accept `--deny warnings`
+  # but also deny them on all individual cargo invocations where applicable because:
+  # 1) Some commands might not support rustflags (e.g. clippy didn't at first, cargo doc uses a different var, ...)
+  # 2) People (or me) might copy paste the commands into CI where this flag is missing without noticing.
+  RUSTFLAGS: --deny warnings
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [stable, nightly]
+        # For reference: https://github.com/actions/virtual-environments#available-environments
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          profile: minimal
+          override: true
+      - name: Install linux deps
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          sudo apt-get update # Run update first or install might start failing eventually.
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - run: rustc --version && cargo --version
+      # Use build instead of check since it needs to be built for tests anyway
+      - run: cargo build --verbose --all-features
+      - run: cargo test --verbose --all-features
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: cargo fmt --version
+      - run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install linux deps
+        run: |
+          sudo apt-get update # Run update first or install might start failing eventually
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - uses: actions/checkout@v3
+      - run: cargo clippy --version
+        # Use --all-targets to also check tests.
+        # Note that --all-features doesn't check all code when something is *disabled* by a feature.
+      - run: cargo clippy --all-targets -- --deny warnings
+      - run: cargo clippy --all-targets --all-features -- --deny warnings
+        # No fixmes allowed - they're to be fixed before committing or at least before merging to master.
+        # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).
+        # Grep returns success when found and failure when not found, `!` inverts success/failure.
+        # The `[F]` is the usualy trick to avoid matching this line itself.
+      - run: "! ( grep -r --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )"

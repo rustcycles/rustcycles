@@ -1,4 +1,4 @@
 {
     "rust-analyzer.diagnostics.disabled": [],
-    "rust-analyzer.assist.importPrefix": "crate"
+    "rust-analyzer.imports.prefix": "crate"
 }

@@ -182,32 +182,17 @@ fn client_server_main(opts: Opts) {
 fn local_main(opts: Opts) {
     init_global_state("local");
 
+    let event_loop = EventLoop::new();
+    let engine = init_engine_client(&event_loop, opts);
+
     todo!();
 }
 
 fn client_main(opts: Opts) {
     init_global_state("cl");
 
-    let mut window_builder = WindowBuilder::new().with_title("RustCycles");
-    if opts.windowed {
-        let width = 1200;
-        let height = width / 16 * 9;
-        window_builder = window_builder.with_inner_size(LogicalSize::new(width, height));
-    } else {
-        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
-    }
-    let serialization_context = Arc::new(SerializationContext::new());
-    let resource_manager = ResourceManager::new(serialization_context.clone());
     let event_loop = EventLoop::new();
-    // LATER no vsync
-    let engine = Engine::new(EngineInitParams {
-        window_builder,
-        serialization_context,
-        resource_manager,
-        events_loop: &event_loop,
-        vsync: true,
-    })
-    .unwrap();
+    let engine = init_engine_client(&event_loop, opts);
 
     let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
     let clock = Instant::now();
@@ -319,22 +304,8 @@ fn client_main(opts: Opts) {
 fn server_main() {
     init_global_state("sv");
 
-    // LATER Headless - do all this without creating a window.
-    let window_builder = WindowBuilder::new()
-        .with_title("RustCycles server")
-        .with_inner_size(LogicalSize::new(400, 100));
-    let serialization_context = Arc::new(SerializationContext::new());
-    let resource_manager = ResourceManager::new(serialization_context.clone());
     let event_loop = EventLoop::new();
-    // LATER Does vsync have any effect here?
-    let engine = Engine::new(EngineInitParams {
-        window_builder,
-        serialization_context,
-        resource_manager,
-        events_loop: &event_loop,
-        vsync: true,
-    })
-    .unwrap();
+    let engine = init_engine_server(&event_loop);
 
     let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
     let clock = Instant::now();
@@ -380,4 +351,46 @@ fn init_global_state(endpoint_name: &'static str) {
     // and the other messages are hidden by default.
     // Also used in server_main().
     Log::set_verbosity(MessageKind::Warning);
+}
+
+fn init_engine_client(event_loop: &EventLoop<()>, opts: Opts) -> Engine {
+    let mut window_builder = WindowBuilder::new().with_title("RustCycles");
+    if opts.windowed {
+        let width = 1200;
+        let height = width / 16 * 9;
+        window_builder = window_builder.with_inner_size(LogicalSize::new(width, height));
+    } else {
+        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
+    }
+    let serialization_context = Arc::new(SerializationContext::new());
+    let resource_manager = ResourceManager::new(serialization_context.clone());
+
+    // LATER no vsync
+    Engine::new(EngineInitParams {
+        window_builder,
+        serialization_context,
+        resource_manager,
+        events_loop: event_loop,
+        vsync: true,
+    })
+    .unwrap()
+}
+
+fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
+    // LATER Headless - do all this without creating a window.
+    let window_builder = WindowBuilder::new()
+        .with_title("RustCycles server")
+        .with_inner_size(LogicalSize::new(400, 100));
+    let serialization_context = Arc::new(SerializationContext::new());
+    let resource_manager = ResourceManager::new(serialization_context.clone());
+
+    // LATER Does vsync have any effect here?
+    Engine::new(EngineInitParams {
+        window_builder,
+        serialization_context,
+        resource_manager,
+        events_loop: event_loop,
+        vsync: true,
+    })
+    .unwrap()
 }

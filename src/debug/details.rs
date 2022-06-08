@@ -78,7 +78,7 @@ pub(crate) fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
     debug_shape(shape, time, color);
 }
 
-/// Helper function, prefer `dbg_line!()` instead.
+/// Helper function, prefer `dbg_arrow!()` instead.
 pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
     let shape = Shape::Arrow { begin, dir };
     debug_shape(shape, time, color);
@@ -90,7 +90,7 @@ pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
     debug_shape(shape, time, color);
 }
 
-/// Helper function, prefer `dbg_cross!()` instead.
+/// Helper function, prefer `dbg_rot!()` instead.
 pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32) {
     let shape = Shape::Rot { point, rot };
     // Color is not used

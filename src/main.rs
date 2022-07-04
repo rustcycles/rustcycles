@@ -183,7 +183,7 @@ fn local_main(opts: Opts) {
     init_global_state("local");
 
     let event_loop = EventLoop::new();
-    let engine = init_engine_client(&event_loop, opts);
+    let _engine = init_engine_client(&event_loop, opts);
 
     todo!();
 }

@@ -368,6 +368,7 @@ impl GameClient {
         for message in self.server_messages.drain(..) {
             match message {
                 ServerMessage::InitData(_) => {
+                    // LATER Make this type safe? Init part of handshake?
                     panic!("Received unexpected init")
                 }
                 ServerMessage::AddPlayer(add_player) => {

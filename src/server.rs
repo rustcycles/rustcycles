@@ -58,7 +58,10 @@ impl GameServer {
             self.gs.tick_before_physics(&mut self.engine, dt);
 
             // There's currently no need to split this like on the client.
-            self.engine.update(dt);
+            // Dummy control flow ince we don't use fyrox plugins.
+            let mut cf = fyrox::event_loop::ControlFlow::Poll;
+            self.engine.update(dt, &mut cf);
+            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
 
             self.sys_send_update();
         }

@@ -310,7 +310,10 @@ impl GameClient {
             self.tick_before_physics(dt);
 
             // Update animations, transformations, physics, ...
-            self.engine.pre_update(dt);
+            // Dummy control flow ince we don't use fyrox plugins.
+            let mut cf = fyrox::event_loop::ControlFlow::Poll;
+            self.engine.pre_update(dt, &mut cf);
+            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
 
             self.tick_after_physics(dt);
 
@@ -550,7 +553,7 @@ impl GameClient {
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         // Keep this first so it draws below other debug stuff.
-        scene.graph.physics.draw(&mut scene.drawing_context);
+        //scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();

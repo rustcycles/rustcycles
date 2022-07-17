@@ -26,8 +26,8 @@ cli = ["structopt"]
 
 [dependencies]
 bincode = "1.3.3"
-fyrox = "0.26.0"
-#fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "75772797205b1c4b8142dca15c1dbbd665309146" }
+#fyrox = "0.26.0"
+fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "b4dbc93b66528b286fd225d9b4c587d032ef98c2" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "922b623a929a079694adce1ded4006ef7d43fd02" }
 #fyrox = { path = "../fyrox" }
 inline_tweak = "1.0.8"

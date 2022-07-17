@@ -147,7 +147,7 @@ fn run(opts: Opts) {
 /// but eventually should allow running singleplayer games
 /// without most of the overhead of the client-server split.
 fn client_server_main(opts: Opts) {
-    init_global_state("cl+sv launcher");
+    init_global_state("launcher");
 
     // LATER Find a way to run client and server in one process,
     // maybe even one thread - sharing GameState woul be ideal for singleplayer.

@@ -554,7 +554,7 @@ impl GameClient {
 
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         // Keep this first so it draws below other debug stuff.
-        //scene.graph.physics.draw(&mut scene.drawing_context);
+        scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();

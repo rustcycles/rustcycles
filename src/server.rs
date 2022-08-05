@@ -253,22 +253,14 @@ impl GameServer {
         match dest {
             SendDest::One(handle) => {
                 if let Err(e) = net::send(&network_message, &mut self.clients[handle].stream) {
-                    dbg_logf!(
-                        "Error in network_send One - index {}: {:?}",
-                        handle.index(),
-                        e
-                    );
+                    dbg_logf!("Error in network_send One - index {}: {:?}", handle.index(), e);
                     disconnected.push(handle);
                 }
             }
             SendDest::All => {
                 for (handle, client) in self.clients.pair_iter_mut() {
                     if let Err(e) = net::send(&network_message, &mut client.stream) {
-                        dbg_logf!(
-                            "Error in network_send All - index {}: {:?}",
-                            handle.index(),
-                            e
-                        );
+                        dbg_logf!("Error in network_send All - index {}: {:?}", handle.index(), e);
                         disconnected.push(handle);
                     }
                 }

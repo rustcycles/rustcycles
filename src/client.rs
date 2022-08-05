@@ -350,11 +350,7 @@ impl GameClient {
 
         scene.drawing_context.clear_lines();
 
-        let _ = net::receive(
-            &mut self.stream,
-            &mut self.buffer,
-            &mut self.server_messages,
-        ); // LATER Clean disconnect
+        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_messages); // LATER Clean disconnect
 
         for message in self.server_messages.drain(..) {
             match message {

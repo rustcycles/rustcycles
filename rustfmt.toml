@@ -5,3 +5,4 @@
 # This should lead to fewer linebreaks in code like this:
 # `self.gs.players.spawn_at(...).unwrap()`.
 chain_width = 80
+fn_call_width = 80

@@ -23,11 +23,7 @@ where
     let buf = bincode::serialize(&message).expect("bincode failed to serialize message");
     let content_len = MsgLen::try_from(buf.len())
         .unwrap_or_else(|err| {
-            panic!(
-                "bincode message length ({} bytes) overflowed its type: {:?}",
-                buf.len(),
-                err
-            )
+            panic!("bincode message length ({} bytes) overflowed its type: {:?}", buf.len(), err)
         })
         .to_le_bytes();
     NetworkMessage { content_len, buf }

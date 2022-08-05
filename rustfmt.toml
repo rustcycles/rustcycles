@@ -6,3 +6,6 @@
 # `self.gs.players.spawn_at(...).unwrap()`.
 chain_width = 80
 fn_call_width = 80
+
+# This is another candidate for increase
+#single_line_if_else_max_width

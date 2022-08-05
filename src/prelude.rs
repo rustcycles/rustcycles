@@ -156,19 +156,13 @@ impl NodeExt for Node {
     }
 
     fn left_vec_normed(&self) -> Vec3 {
-        self.left_vec()
-            .try_normalize(f32::EPSILON)
-            .unwrap_or_else(Vec3::left)
+        self.left_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::left)
     }
     fn up_vec_normed(&self) -> Vec3 {
-        self.up_vec()
-            .try_normalize(f32::EPSILON)
-            .unwrap_or_else(Vec3::up)
+        self.up_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::up)
     }
     fn forward_vec_normed(&self) -> Vec3 {
-        self.forward_vec()
-            .try_normalize(f32::EPSILON)
-            .unwrap_or_else(Vec3::forward)
+        self.forward_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::forward)
     }
 }
 

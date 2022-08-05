@@ -78,34 +78,27 @@ impl GameClient {
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
-        let top = engine
-            .resource_manager
-            .request_texture("data/skybox/top.png")
-            .await
-            .ok();
+        let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
 
         let scene = &mut engine.scenes[gs.scene];
 
-        let camera = CameraBuilder::new(
-            BaseBuilder::new().with_local_transform(
-                TransformBuilder::new()
-                    .with_local_position(v!(0 1 -3))
-                    .build(),
-            ),
-        )
-        .with_skybox(
-            SkyBoxBuilder {
-                front: None,
-                back: None,
-                left: None,
-                right: None,
-                top,
-                bottom: None,
-            }
-            .build()
-            .unwrap(),
-        )
-        .build(&mut scene.graph);
+        let camera =
+            CameraBuilder::new(BaseBuilder::new().with_local_transform(
+                TransformBuilder::new().with_local_position(v!(0 1 -3)).build(),
+            ))
+            .with_skybox(
+                SkyBoxBuilder {
+                    front: None,
+                    back: None,
+                    left: None,
+                    right: None,
+                    top,
+                    bottom: None,
+                }
+                .build()
+                .unwrap(),
+            )
+            .build(&mut scene.graph);
 
         let mut buffer = VecDeque::new();
         let mut server_messages = Vec::new();
@@ -187,13 +180,11 @@ impl GameClient {
         // If you'll have some complex UI, I'd advise you to create either
         // a window-sized Border or Grid and attach all your ui elements to it,
         // instead of root canvas.
-        self.engine
-            .user_interface
-            .send_message(WidgetMessage::width(
-                self.debug_text,
-                MessageDirection::ToWidget,
-                size.width as f32,
-            ));
+        self.engine.user_interface.send_message(WidgetMessage::width(
+            self.debug_text,
+            MessageDirection::ToWidget,
+            size.width as f32,
+        ));
     }
 
     pub(crate) fn focused(&mut self, focus: bool) {
@@ -373,10 +364,7 @@ impl GameClient {
                 }
                 ServerMessage::AddPlayer(add_player) => {
                     let player = Player::new(None);
-                    self.gs
-                        .players
-                        .spawn_at(add_player.player_index, player)
-                        .unwrap();
+                    self.gs.players.spawn_at(add_player.player_index, player).unwrap();
                 }
                 ServerMessage::RemovePlayer { player_index } => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
@@ -422,10 +410,8 @@ impl GameClient {
                     for cycle_physics in update_physics.cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
-                        body.local_transform_mut()
-                            .set_position(cycle_physics.translation);
-                        body.local_transform_mut()
-                            .set_rotation(cycle_physics.rotation);
+                        body.local_transform_mut().set_position(cycle_physics.translation);
+                        body.local_transform_mut().set_rotation(cycle_physics.rotation);
                         body.set_lin_vel(cycle_physics.velocity);
                     }
 

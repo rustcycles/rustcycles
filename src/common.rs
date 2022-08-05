@@ -108,11 +108,10 @@ impl GameState {
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
             // TODO this is broken
             //body.local_transform_mut().set_rotation(rot);
-            body.local_transform_mut()
-                .set_rotation(UnitQuaternion::from_axis_angle(
-                    &Vec3::up_axis(),
-                    self.game_time,
-                ));
+            body.local_transform_mut().set_rotation(UnitQuaternion::from_axis_angle(
+                &Vec3::up_axis(),
+                self.game_time,
+            ));
         }
     }
 
@@ -139,9 +138,7 @@ impl GameState {
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()
                 .with_local_transform(
-                    TransformBuilder::new()
-                        .with_local_position(v!(-1 5 0))
-                        .build(),
+                    TransformBuilder::new().with_local_position(v!(-1 5 0)).build(),
                 )
                 .with_children(&[node_handle, collider_handle]),
         )

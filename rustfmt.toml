@@ -1,4 +1,4 @@
-# This is too much, it leads to line wrapping when using 2 editors side by side
+# This is too much, it leads to too much line wrapping when using 2 editors side by side
 # (in VSC with minimap enabled and explorer open).
 #max_width = 120
 

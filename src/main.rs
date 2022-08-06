@@ -10,7 +10,7 @@ mod server;
 use std::{env, panic, process::Command, sync::Arc};
 
 use fyrox::{
-    core::instant::Instant,
+    core::{futures::executor, instant::Instant},
     dpi::LogicalSize,
     engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
@@ -24,7 +24,7 @@ use strum_macros::EnumString;
 use structopt::StructOpt;
 
 use crate::{
-    client::GameClient,
+    client::ClientProcess,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
     server::GameServer,
@@ -183,7 +183,9 @@ fn local_main(opts: Opts) {
     init_global_state("local");
 
     let event_loop = EventLoop::new();
-    let _engine = init_engine_client(&event_loop, opts);
+    let engine = init_engine_client(&event_loop, opts);
+
+    let _client = executor::block_on(ClientProcess::new(engine));
 
     todo!();
 }
@@ -194,7 +196,7 @@ fn client_main(opts: Opts) {
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&event_loop, opts);
 
-    let mut client = fyrox::core::futures::executor::block_on(GameClient::new(engine));
+    let mut client = executor::block_on(ClientProcess::new(engine));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
@@ -307,7 +309,7 @@ fn server_main() {
     let event_loop = EventLoop::new();
     let engine = init_engine_server(&event_loop);
 
-    let mut server = fyrox::core::futures::executor::block_on(GameServer::new(engine));
+    let mut server = executor::block_on(GameServer::new(engine));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.

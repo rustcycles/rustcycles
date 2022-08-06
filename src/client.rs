@@ -33,23 +33,17 @@ use crate::{
     prelude::*,
 };
 
-/// Game client.
-///
-/// Needs to be connected to a game Server to play. Contains a local copy of the game state
-/// which might not be entirely accurate due to network lag and packet loss.
-pub(crate) struct GameClient {
+mod game;
+mod process;
+
+pub(crate) struct ClientProcess {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
-    pub(crate) gs: GameState,
-    pub(crate) lp: LocalPlayer,
-    pub(crate) camera: Handle<Node>,
-    stream: TcpStream,
-    buffer: VecDeque<u8>,
-    server_messages: Vec<ServerMessage>,
     debug_text: Handle<UiNode>,
+    cg: ClientGame,
 }
 
-impl GameClient {
+impl ClientProcess {
     pub(crate) async fn new(mut engine: Engine) -> Self {
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
@@ -57,6 +51,152 @@ impl GameClient {
                 .with_wrap(WrapMode::Letter)
                 .build(&mut engine.user_interface.build_ctx());
 
+        let cg = ClientGame::new(&mut engine, debug_text).await;
+
+        Self {
+            mouse_grabbed: false,
+            engine,
+            debug_text,
+            cg,
+        }
+    }
+
+    pub(crate) fn resized(&mut self, size: PhysicalSize<u32>) {
+        // This is also called when the window is first created.
+
+        self.engine.set_frame_size(size.into()).unwrap();
+
+        // mrDIMAS on discord:
+        // The root element of the UI is Canvas,
+        // it has infinite constraints so it does not stretch its contents.
+        // If you'll have some complex UI, I'd advise you to create either
+        // a window-sized Border or Grid and attach all your ui elements to it,
+        // instead of root canvas.
+        self.engine.user_interface.send_message(WidgetMessage::width(
+            self.debug_text,
+            MessageDirection::ToWidget,
+            size.width as f32,
+        ));
+    }
+
+    pub(crate) fn focused(&mut self, focus: bool) {
+        // Ungrab here is needed in addition to ESC,
+        // otherwise the mouse stays grabbed when alt+tabbing to other windows.
+        // However, don't automatically grab it when gaining focus,
+        // the game can get stuck in a loop (bugs like this are most common on startup)
+        // and it would never ungrab.
+        if !focus {
+            self.set_mouse_grab(false);
+        }
+
+        // LATER pause/unpause
+    }
+
+    pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
+        // Use scancodes, not virtual keys, because they don't depend on layout.
+        const ESC: ScanCode = 1;
+        const TAB: ScanCode = 15;
+        const W: ScanCode = 17;
+        const CTRL: ScanCode = 29;
+        const A: ScanCode = 30;
+        const S: ScanCode = 31;
+        const D: ScanCode = 32;
+        const SHIFT: ScanCode = 42;
+        const Z: ScanCode = 44;
+        const ALT: ScanCode = 56;
+        const BACKSLASH: ScanCode = 86;
+        let pressed = input.state == ElementState::Pressed;
+        match input.scancode {
+            ESC => self.set_mouse_grab(false),
+            W => self.cg.lp.input.forward = pressed,
+            A => self.cg.lp.input.left = pressed,
+            S => self.cg.lp.input.backward = pressed,
+            D => self.cg.lp.input.right = pressed,
+            TAB | SHIFT | CTRL | ALT | BACKSLASH | Z => {
+                // Don't print anything, it just spams stdout when switching windows.
+            }
+            c => {
+                if pressed {
+                    dbg_logf!("pressed unhandled scancode: {}", c);
+                }
+            }
+        }
+
+        self.cg.send_input(); // TODO
+    }
+
+    pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
+        self.set_mouse_grab(true);
+
+        let pressed = state == ElementState::Pressed;
+        match button {
+            fyrox::event::MouseButton::Left => self.cg.lp.input.fire1 = pressed,
+            fyrox::event::MouseButton::Right => self.cg.lp.input.fire2 = pressed,
+            fyrox::event::MouseButton::Middle => self.cg.lp.input.zoom = pressed,
+            fyrox::event::MouseButton::Other(_) => {}
+        }
+
+        self.cg.send_input(); // TODO
+    }
+
+    pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
+        if !self.mouse_grabbed {
+            // LATER (privacy) Recheck we're not handling mouse movement when minimized
+            //  (and especially not sending to server)
+            return;
+        }
+
+        // LATER cvars
+        let mouse_sensitivity_horizontal = 0.5;
+        let mouse_sensitivity_vertical = 0.5;
+        let zoom_factor = if self.cg.lp.input.zoom { 0.25 } else { 1.0 };
+        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
+        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical * zoom_factor;
+
+        // Subtract, don't add the delta X.
+        // Nalgebra rotations follow the right hand rule,
+        // thumb points in +Z, the curl of fingers shows direction.
+        self.cg.lp.input.yaw.0 -= delta_yaw; // LATER Normalize to [0, 360°) or something
+        self.cg.lp.input.pitch.0 = (self.cg.lp.input.pitch.0 + delta_pitch).clamp(-90.0, 90.0);
+    }
+
+    /// Either grab mouse and hide cursor
+    /// or ungrab mouse and show cursor.
+    pub(crate) fn set_mouse_grab(&mut self, grab: bool) {
+        // LATER Don't hide cursor in menu.
+        if grab != self.mouse_grabbed {
+            let window = self.engine.get_window();
+            let res = window.set_cursor_grab(grab);
+            match res {
+                Ok(_) | Err(ExternalError::NotSupported(_)) => {}
+                Err(_) => res.unwrap(),
+            }
+            window.set_cursor_visible(!grab);
+            self.mouse_grabbed = grab;
+        }
+    }
+
+    pub(crate) fn update(&mut self, dt: f32) {
+        self.cg.update(&mut self.engine, dt);
+    }
+}
+
+/// Game client.
+///
+/// Needs to be connected to a game Server to play. Contains a local copy of the game state
+/// which might not be entirely accurate due to network lag and packet loss.
+pub(crate) struct ClientGame {
+    debug_text: Handle<UiNode>,
+    pub(crate) gs: GameState,
+    pub(crate) lp: LocalPlayer,
+    pub(crate) camera: Handle<Node>,
+    stream: TcpStream,
+    buffer: VecDeque<u8>,
+    server_messages: Vec<ServerMessage>,
+}
+
+impl ClientGame {
+    pub(crate) async fn new(engine: &mut Engine, debug_text: Handle<UiNode>) -> Self {
         let mut connect_attempts = 0;
         let mut stream = loop {
             connect_attempts += 1;
@@ -74,7 +214,7 @@ impl GameClient {
         stream.set_nodelay(true).unwrap();
         stream.set_nonblocking(true).unwrap();
 
-        let mut gs = GameState::new(&mut engine).await;
+        let mut gs = GameState::new(engine).await;
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
@@ -157,134 +297,17 @@ impl GameClient {
         dbg_logf!("local_player_index is {}", lp.player_handle.index());
 
         Self {
-            mouse_grabbed: false,
-            engine,
+            debug_text,
             gs,
             lp,
             camera,
             stream,
             buffer,
             server_messages,
-            debug_text,
         }
     }
 
-    pub(crate) fn resized(&mut self, size: PhysicalSize<u32>) {
-        // This is also called when the window is first created.
-
-        self.engine.set_frame_size(size.into()).unwrap();
-
-        // mrDIMAS on discord:
-        // The root element of the UI is Canvas,
-        // it has infinite constraints so it does not stretch its contents.
-        // If you'll have some complex UI, I'd advise you to create either
-        // a window-sized Border or Grid and attach all your ui elements to it,
-        // instead of root canvas.
-        self.engine.user_interface.send_message(WidgetMessage::width(
-            self.debug_text,
-            MessageDirection::ToWidget,
-            size.width as f32,
-        ));
-    }
-
-    pub(crate) fn focused(&mut self, focus: bool) {
-        // Ungrab here is needed in addition to ESC,
-        // otherwise the mouse stays grabbed when alt+tabbing to other windows.
-        // However, don't automatically grab it when gaining focus,
-        // the game can get stuck in a loop (bugs like this are most common on startup)
-        // and it would never ungrab.
-        if !focus {
-            self.set_mouse_grab(false);
-        }
-
-        // LATER pause/unpause
-    }
-
-    pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
-        // Use scancodes, not virtual keys, because they don't depend on layout.
-        const ESC: ScanCode = 1;
-        const TAB: ScanCode = 15;
-        const W: ScanCode = 17;
-        const CTRL: ScanCode = 29;
-        const A: ScanCode = 30;
-        const S: ScanCode = 31;
-        const D: ScanCode = 32;
-        const SHIFT: ScanCode = 42;
-        const Z: ScanCode = 44;
-        const ALT: ScanCode = 56;
-        const BACKSLASH: ScanCode = 86;
-        let pressed = input.state == ElementState::Pressed;
-        match input.scancode {
-            ESC => self.set_mouse_grab(false),
-            W => self.lp.input.forward = pressed,
-            A => self.lp.input.left = pressed,
-            S => self.lp.input.backward = pressed,
-            D => self.lp.input.right = pressed,
-            TAB | SHIFT | CTRL | ALT | BACKSLASH | Z => {
-                // Don't print anything, it just spams stdout when switching windows.
-            }
-            c => {
-                if pressed {
-                    dbg_logf!("pressed unhandled scancode: {}", c);
-                }
-            }
-        }
-
-        self.send_input();
-    }
-
-    pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
-        self.set_mouse_grab(true);
-
-        let pressed = state == ElementState::Pressed;
-        match button {
-            fyrox::event::MouseButton::Left => self.lp.input.fire1 = pressed,
-            fyrox::event::MouseButton::Right => self.lp.input.fire2 = pressed,
-            fyrox::event::MouseButton::Middle => self.lp.input.zoom = pressed,
-            fyrox::event::MouseButton::Other(_) => {}
-        }
-
-        self.send_input();
-    }
-
-    pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
-        if !self.mouse_grabbed {
-            // LATER (privacy) Recheck we're not handling mouse movement when minimized
-            //  (and especially not sending to server)
-            return;
-        }
-
-        // LATER cvars
-        let mouse_sensitivity_horizontal = 0.5;
-        let mouse_sensitivity_vertical = 0.5;
-        let zoom_factor = if self.lp.input.zoom { 0.25 } else { 1.0 };
-        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
-        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical * zoom_factor;
-
-        // Subtract, don't add the delta X.
-        // Nalgebra rotations follow the right hand rule,
-        // thumb points in +Z, the curl of fingers shows direction.
-        self.lp.input.yaw.0 -= delta_yaw; // LATER Normalize to [0, 360°) or something
-        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + delta_pitch).clamp(-90.0, 90.0);
-    }
-
-    /// Either grab mouse and hide cursor
-    /// or ungrab mouse and show cursor.
-    pub(crate) fn set_mouse_grab(&mut self, grab: bool) {
-        // LATER Don't hide cursor in menu.
-        if grab != self.mouse_grabbed {
-            let window = self.engine.get_window();
-            let res = window.set_cursor_grab(grab);
-            match res {
-                Ok(_) | Err(ExternalError::NotSupported(_)) => {}
-                Err(_) => res.unwrap(),
-            }
-            window.set_cursor_visible(!grab);
-            self.mouse_grabbed = grab;
-        }
-    }
-
-    pub(crate) fn update(&mut self, game_time_target: f32) {
+    pub(crate) fn update(&mut self, engine: &mut Engine, game_time_target: f32) {
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -294,25 +317,25 @@ impl GameClient {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
-            self.tick_begin_frame();
+            self.tick_begin_frame(engine);
 
-            self.gs.tick_before_physics(&mut self.engine, dt);
+            self.gs.tick_before_physics(engine, dt);
 
-            self.tick_before_physics(dt);
+            self.tick_before_physics(engine, dt);
 
             // Update animations, transformations, physics, ...
-            // Dummy control flow ince we don't use fyrox plugins.
+            // Dummy control flow since we don't use fyrox plugins.
             let mut cf = fyrox::event_loop::ControlFlow::Poll;
-            self.engine.pre_update(dt, &mut cf);
+            engine.pre_update(dt, &mut cf);
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
 
-            self.tick_after_physics(dt);
+            self.tick_after_physics(engine, dt);
 
             // Update UI
-            self.engine.post_update(dt);
+            engine.post_update(dt);
         }
 
-        self.engine.get_window().request_redraw();
+        engine.get_window().request_redraw();
     }
 
     /// Draw arrows in a different orientation every frame.
@@ -340,13 +363,13 @@ impl GameClient {
     }
 
     /// All once-per-frame networking.
-    fn tick_begin_frame(&mut self) {
+    fn tick_begin_frame(&mut self, engine: &mut Engine) {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
         self.send_input();
 
-        let scene = &mut self.engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene];
 
         scene.drawing_context.clear_lines();
 
@@ -425,7 +448,7 @@ impl GameClient {
         }
     }
 
-    fn tick_before_physics(&mut self, dt: f32) {
+    fn tick_before_physics(&mut self, engine: &mut Engine, dt: f32) {
         // Join / spec
         let ps = self.gs.players[self.lp.player_handle].ps;
         if ps == PlayerState::Observing && self.lp.input.fire1 {
@@ -434,7 +457,7 @@ impl GameClient {
             self.network_send(ClientMessage::Observe);
         }
 
-        let scene = &mut self.engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene];
 
         let player_cycle_handle = self.gs.players[self.lp.player_handle].cycle_handle.unwrap();
         let player_body_handle = self.gs.cycles[player_cycle_handle].body_handle;
@@ -516,8 +539,8 @@ impl GameClient {
         dbg_cross!(v!(5 5 5), 0.0, CYAN);
     }
 
-    fn tick_after_physics(&mut self, dt: f32) {
-        let scene = &mut self.engine.scenes[self.gs.scene];
+    fn tick_after_physics(&mut self, engine: &mut Engine, dt: f32) {
+        let scene = &mut engine.scenes[self.gs.scene];
 
         //scene.graph.update_hierarchical_data(); TODO
 
@@ -550,7 +573,7 @@ impl GameClient {
         });
 
         let mut debug_string = String::new();
-        debug_string.push_str(&self.engine.renderer.get_statistics().to_string());
+        debug_string.push_str(&engine.renderer.get_statistics().to_string());
         debug_string.push_str(&scene.performance_statistics.to_string());
         debug_string.push('\n');
         debug_string.push('\n');
@@ -561,7 +584,7 @@ impl GameClient {
                 debug_string.push('\n');
             }
         });
-        self.engine.user_interface.send_message(TextMessage::text(
+        engine.user_interface.send_message(TextMessage::text(
             self.debug_text,
             MessageDirection::ToWidget,
             debug_string,
@@ -684,6 +707,8 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
 }
 
 /// State of the local player
+///
+/// LATER maybe just merge into ClientGame?
 #[derive(Debug)]
 pub(crate) struct LocalPlayer {
     pub(crate) player_handle: Handle<Player>,

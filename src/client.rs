@@ -130,10 +130,10 @@ impl ClientProcess {
 
         let pressed = state == ElementState::Pressed;
         match button {
-            fyrox::event::MouseButton::Left => self.cg.lp.input.fire1 = pressed,
-            fyrox::event::MouseButton::Right => self.cg.lp.input.fire2 = pressed,
-            fyrox::event::MouseButton::Middle => self.cg.lp.input.zoom = pressed,
-            fyrox::event::MouseButton::Other(_) => {}
+            MouseButton::Left => self.cg.lp.input.fire1 = pressed,
+            MouseButton::Right => self.cg.lp.input.fire2 = pressed,
+            MouseButton::Middle => self.cg.lp.input.zoom = pressed,
+            MouseButton::Other(_) => {}
         }
 
         self.cg.send_input(); // TODO

@@ -237,6 +237,8 @@ impl ServerGame {
         self.network_send(engine, message, SendDest::All);
     }
 
+    // LATER This only needs Engine for self.disconnect,
+    // but forces all callers to also take Engine.
     fn network_send(&mut self, engine: &mut Engine, message: ServerMessage, dest: SendDest) {
         // LATER This is incredibly ugly, plus creating the Vec is inafficient.
         //          - Save all streams in a Vec?

@@ -1,3 +1,7 @@
+//! Client-side gamelogic.
+//!
+//! Mainly receiving updates from the server and updating local state.
+
 use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Duration};
 
 use fyrox::{

@@ -1,3 +1,9 @@
+//! The process that runs a player's game client.
+//!
+//! Handles stuff like windowing, input, etc. but not game logic.
+//! When connected to a remote server, contains a game client.
+//! When playing locally, contains both a client and a server.
+
 use fyrox::{
     dpi::PhysicalSize,
     error::ExternalError,

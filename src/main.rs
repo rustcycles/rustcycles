@@ -1,3 +1,6 @@
+//! This file contains entry points and event loops for the native client and server.
+//! If you're looking for the main game loop, it's in ClientGame and ServerGame.
+
 // Keep this first so the macros are available everywhere without having to import them.
 #[macro_use]
 pub(crate) mod debug;

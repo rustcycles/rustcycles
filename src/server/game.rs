@@ -29,7 +29,7 @@ pub(crate) struct ServerGame {
 }
 
 impl ServerGame {
-    pub(crate) async fn new(engine: &mut Engine) -> Self {
+    pub(crate) async fn new(engine: &mut Engine, _local_game: bool) -> Self {
         let gs = GameState::new(engine).await;
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();

@@ -40,7 +40,11 @@ pub(crate) struct ClientGame {
 }
 
 impl ClientGame {
-    pub(crate) async fn new(engine: &mut Engine, debug_text: Handle<UiNode>) -> Self {
+    pub(crate) async fn new(
+        engine: &mut Engine,
+        _local_game: bool,
+        debug_text: Handle<UiNode>,
+    ) -> Self {
         let mut connect_attempts = 0;
         let mut stream = loop {
             connect_attempts += 1;

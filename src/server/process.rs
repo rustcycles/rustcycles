@@ -10,7 +10,7 @@ pub(crate) struct ServerProcess {
 
 impl ServerProcess {
     pub(crate) async fn new(mut engine: Engine) -> Self {
-        let sg = ServerGame::new(&mut engine).await;
+        let sg = ServerGame::new(&mut engine, false).await;
 
         Self { engine, sg }
     }

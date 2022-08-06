@@ -18,30 +18,40 @@ use fyrox::{
     },
 };
 
-use crate::{client::game::ClientGame, prelude::*};
+use crate::{client::game::ClientGame, prelude::*, server::game::ServerGame};
 
 /// The process that runs a player's game client.
 pub(crate) struct ClientProcess {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
     debug_text: Handle<UiNode>,
+    sg: Option<ServerGame>,
     cg: ClientGame,
 }
 
 impl ClientProcess {
-    pub(crate) async fn new(mut engine: Engine, _local_server: bool) -> Self {
+    pub(crate) async fn new(mut engine: Engine, local_game: bool) -> Self {
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
                 // Word wrap doesn't work if there's an extremely long word.
                 .with_wrap(WrapMode::Letter)
                 .build(&mut engine.user_interface.build_ctx());
 
-        let cg = ClientGame::new(&mut engine, debug_text).await;
+        // Init server first, otherwise the client has nothing to connect to.
+        let sg = if local_game {
+            Some(ServerGame::new(&mut engine, local_game).await)
+        } else {
+            None
+        };
+
+        // TODO Broken - blocks waiting for server to accept connection
+        let cg = ClientGame::new(&mut engine, local_game, debug_text).await;
 
         Self {
             mouse_grabbed: false,
             engine,
             debug_text,
+            sg,
             cg,
         }
     }
@@ -163,5 +173,8 @@ impl ClientProcess {
 
     pub(crate) fn update(&mut self, dt: f32) {
         self.cg.update(&mut self.engine, dt);
+        if let Some(sg) = &mut self.sg {
+            sg.update(&mut self.engine, dt)
+        }
     }
 }

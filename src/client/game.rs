@@ -25,10 +25,6 @@ use crate::{
     prelude::*,
 };
 
-/// Game client.
-///
-/// Needs to be connected to a game Server to play. Contains a local copy of the game state
-/// which might not be entirely accurate due to network lag and packet loss.
 pub(crate) struct ClientGame {
     debug_text: Handle<UiNode>,
     pub(crate) gs: GameState,

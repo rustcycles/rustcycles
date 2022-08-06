@@ -30,7 +30,7 @@ use crate::{
     client::process::ClientProcess,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
-    server::GameServer,
+    server::process::ServerProcess,
 };
 
 // Master TODO list:
@@ -305,7 +305,7 @@ fn server_main() {
     let event_loop = EventLoop::new();
     let engine = init_engine_server(&event_loop);
 
-    let mut server = executor::block_on(GameServer::new(engine));
+    let mut server = executor::block_on(ServerProcess::new(engine));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.

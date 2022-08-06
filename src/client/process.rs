@@ -20,6 +20,7 @@ use fyrox::{
 
 use crate::{client::game::ClientGame, prelude::*};
 
+/// The process that runs a player's game client.
 pub(crate) struct ClientProcess {
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,

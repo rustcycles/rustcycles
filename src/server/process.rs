@@ -1,5 +1,8 @@
+//! The process that runs a dedicated server.
+
 use crate::{prelude::*, server::game::ServerGame};
 
+/// The process that runs a dedicated server.
 pub(crate) struct ServerProcess {
     pub(crate) engine: Engine,
     sg: ServerGame,

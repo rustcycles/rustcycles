@@ -1,3 +1,5 @@
+//! Server-side gamelogic.
+
 use std::{
     collections::VecDeque,
     io::ErrorKind,
@@ -17,6 +19,9 @@ use crate::{
     prelude::*,
 };
 
+/// A dedicated game server.
+///
+/// Lets clients connect to play. Contains the authoritative copy of the game state.
 pub(crate) struct ServerGame {
     pub(crate) gs: GameState,
     listener: TcpListener,

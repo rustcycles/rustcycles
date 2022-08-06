@@ -24,7 +24,7 @@ use strum_macros::EnumString;
 use structopt::StructOpt;
 
 use crate::{
-    client::ClientProcess,
+    client::process::ClientProcess,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
     server::GameServer,
@@ -134,24 +134,24 @@ fn run(opts: Opts) {
     }));
 
     match opts.endpoint {
+        // LATER None should launch client and offer choice in menu
         None => client_server_main(opts),
-        Some(Endpoint::Local) => local_main(opts),
-        Some(Endpoint::Client) => client_main(opts),
+        Some(Endpoint::Local) => client_main(opts, true),
+        Some(Endpoint::Client) => client_main(opts, false),
         Some(Endpoint::Server) => server_main(),
     }
 }
 
 /// Run both client and server.
 ///
-/// This is currently just a convenience for quicker testing
-/// but eventually should allow running singleplayer games
-/// without most of the overhead of the client-server split.
+/// This is just a convenience for quicker testing.
+/// It spawns 2 processes to make sure the other is killed if one crashes.
+///
+/// LATER It should do that explicitly, right now it only kills the server
+/// because client quits without a server anyway.
 fn client_server_main(opts: Opts) {
     init_global_state("launcher");
 
-    // LATER Find a way to run client and server in one process,
-    // maybe even one thread - sharing GameState woul be ideal for singleplayer.
-    //
     // This is broken - most input gets ignored (on Kubuntu):
     // thread::spawn(|| {
     //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
@@ -179,24 +179,17 @@ fn client_server_main(opts: Opts) {
 
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
-fn local_main(opts: Opts) {
-    init_global_state("local");
+fn client_main(opts: Opts, local_server: bool) {
+    if local_server {
+        init_global_state("local");
+    } else {
+        init_global_state("cl");
+    }
 
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&event_loop, opts);
 
-    let _client = executor::block_on(ClientProcess::new(engine));
-
-    todo!();
-}
-
-fn client_main(opts: Opts) {
-    init_global_state("cl");
-
-    let event_loop = EventLoop::new();
-    let engine = init_engine_client(&event_loop, opts);
-
-    let mut client = executor::block_on(ClientProcess::new(engine));
+    let mut client = executor::block_on(ClientProcess::new(engine, local_server));
     let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.

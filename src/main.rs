@@ -184,7 +184,7 @@ fn client_server_main(opts: Opts) {
 /// client and server in one thread? Update docs on Endpoint or wherever.
 fn client_main(opts: Opts, local_server: bool) {
     if local_server {
-        init_global_state("local");
+        init_global_state("lo");
     } else {
         init_global_state("cl");
     }

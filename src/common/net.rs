@@ -51,15 +51,42 @@ pub(crate) fn send(
 ///
 /// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
 #[must_use]
-pub(crate) fn receive<M>(
-    stream: &mut TcpStream,
-    buffer: &mut VecDeque<u8>,
-    messages: &mut Vec<M>,
-) -> bool
+pub(crate) fn receive<M>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> (Vec<M>, bool)
 where
     M: DeserializeOwned,
 {
-    // Read all available bytes until the stream would block.
+    let closed = read(stream, buffer);
+
+    // Parse the received bytes
+    let mut messages = Vec::new();
+    loop {
+        let message = parse_one(buffer);
+        if let Some(message) = message {
+            messages.push(message);
+        } else {
+            break;
+        }
+    }
+
+    (messages, closed)
+}
+
+/// Read bytes from `stream` into `buffer`,
+/// parse messages that are complete and add them to `messages`.
+///
+/// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
+#[must_use]
+pub(crate) fn receive_one<M>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> (Option<M>, bool)
+where
+    M: DeserializeOwned,
+{
+    let closed = read(stream, buffer);
+    let msg = parse_one(buffer);
+    (msg, closed)
+}
+
+/// Read all available bytes until the stream would block.
+fn read(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> bool {
     // LATER Test networking thoroughly
     //      - lossy and slow connections
     //      - fragmented and merged packets
@@ -91,29 +118,33 @@ where
             }
         }
     }
+    closed
+}
 
-    // Parse the received bytes
-    loop {
-        if buffer.len() < HEADER_LEN {
-            break;
-        }
-
-        // There's no convenient way to make this generic over msg len 2 and 4,
-        // just keep one version commented out.
-        //let len_bytes = [buffer[0], buffer[1]];
-        //let content_len = usize::from(MsgLen::from_le_bytes(len_bytes));
-        let len_bytes = [buffer[0], buffer[1], buffer[2], buffer[3]];
-        let content_len = usize::try_from(MsgLen::from_le_bytes(len_bytes)).unwrap();
-
-        if buffer.len() < HEADER_LEN + content_len {
-            // Not enough bytes in buffer for a full frame.
-            break;
-        }
-        buffer.drain(0..HEADER_LEN);
-        let bytes: Vec<_> = buffer.drain(0..content_len).collect();
-        let message = bincode::deserialize(&bytes).unwrap();
-        messages.push(message);
+/// Parse a message from `buffer` or return None if there's not enough data.
+fn parse_one<M>(buffer: &mut VecDeque<u8>) -> Option<M>
+where
+    M: DeserializeOwned,
+{
+    if buffer.len() < HEADER_LEN {
+        return None;
     }
 
-    closed
+    // There's no convenient way to make this generic over msg len 2 and 4,
+    // just keep one version commented out.
+    //let len_bytes = [buffer[0], buffer[1]];
+    //let content_len = usize::from(MsgLen::from_le_bytes(len_bytes));
+    let len_bytes = [buffer[0], buffer[1], buffer[2], buffer[3]];
+    let content_len = usize::try_from(MsgLen::from_le_bytes(len_bytes)).unwrap();
+
+    if buffer.len() < HEADER_LEN + content_len {
+        // Not enough bytes in buffer for a full message.
+        return None;
+    }
+
+    buffer.drain(0..HEADER_LEN);
+    let bytes: Vec<_> = buffer.drain(0..content_len).collect();
+    let message = bincode::deserialize(&bytes).unwrap();
+
+    Some(message)
 }

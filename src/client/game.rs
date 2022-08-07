@@ -36,7 +36,6 @@ pub(crate) struct ClientGame {
     pub(crate) camera: Handle<Node>,
     stream: TcpStream,
     buffer: VecDeque<u8>,
-    server_messages: Vec<ServerMessage>,
 }
 
 impl ClientGame {
@@ -89,17 +88,14 @@ impl ClientGame {
             .build(&mut scene.graph);
 
         let mut buffer = VecDeque::new();
-        let mut server_messages = Vec::new();
-
         let mut init_attempts = 0;
         let lp = loop {
             init_attempts += 1;
-            let closed = net::receive(&mut stream, &mut buffer, &mut server_messages);
+            let (message, closed) = net::receive_one(&mut stream, &mut buffer);
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
-            if !server_messages.is_empty() {
-                let message = server_messages.remove(0);
+            if let Some(message) = message {
                 if let ServerMessage::InitData(InitData {
                     player_indices,
                     local_player_index,
@@ -151,7 +147,6 @@ impl ClientGame {
             camera,
             stream,
             buffer,
-            server_messages,
         }
     }
 
@@ -221,9 +216,9 @@ impl ClientGame {
 
         scene.drawing_context.clear_lines();
 
-        let _ = net::receive(&mut self.stream, &mut self.buffer, &mut self.server_messages); // LATER Clean disconnect
+        let (messages, _) = net::receive(&mut self.stream, &mut self.buffer); // LATER Clean disconnect
 
-        for message in self.server_messages.drain(..) {
+        for message in messages {
             match message {
                 ServerMessage::InitData(_) => {
                     // LATER Make this type safe? Init part of handshake?

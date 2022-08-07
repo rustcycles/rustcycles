@@ -125,8 +125,7 @@ impl ServerGame {
         let mut disconnected = Vec::new();
         let mut messages_to_all = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
-            let mut messages: Vec<ClientMessage> = Vec::new();
-            let closed = net::receive(&mut client.stream, &mut client.buffer, &mut messages);
+            let (messages, closed) = net::receive(&mut client.stream, &mut client.buffer);
             // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
             for message in messages {

@@ -1,7 +1,7 @@
 use std::{
     collections::VecDeque,
     io::{self, ErrorKind, Read, Write},
-    mem,
+    iter, mem,
     net::TcpStream,
 };
 
@@ -56,17 +56,7 @@ where
     M: DeserializeOwned,
 {
     let closed = read(stream, buffer);
-
-    let mut messages = Vec::new();
-    loop {
-        let message = parse_one(buffer);
-        if let Some(message) = message {
-            messages.push(message);
-        } else {
-            break;
-        }
-    }
-
+    let messages = iter::from_fn(|| parse_one(buffer)).collect();
     (messages, closed)
 }
 

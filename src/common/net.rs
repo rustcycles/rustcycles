@@ -46,10 +46,10 @@ pub(crate) fn send(
     Ok(())
 }
 
-/// Read bytes from `stream` into `buffer`,
-/// parse messages that are complete and add them to `messages`.
+/// Read all available bytes from `stream` into `buffer`,
+/// parse messages that are complete and return them in a vector.
 ///
-/// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
+/// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
 #[must_use]
 pub(crate) fn receive<M>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> (Vec<M>, bool)
 where
@@ -57,7 +57,6 @@ where
 {
     let closed = read(stream, buffer);
 
-    // Parse the received bytes
     let mut messages = Vec::new();
     loop {
         let message = parse_one(buffer);
@@ -71,10 +70,10 @@ where
     (messages, closed)
 }
 
-/// Read bytes from `stream` into `buffer`,
-/// parse messages that are complete and add them to `messages`.
+/// Read all available bytes from `stream` into `buffer`,
+/// parse a single message if there is enough data and return the message or None.
 ///
-/// Returns whether the connection has been closed (doesn't matter if cleanly or reading failed).
+/// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
 #[must_use]
 pub(crate) fn receive_one<M>(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> (Option<M>, bool)
 where

@@ -383,7 +383,7 @@ impl ClientGame {
         // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
         // Try engine.renderer.set_quality_settings(&QualitySettings::low()).unwrap();
         // Keep this first so it draws below other debug stuff.
-        scene.graph.physics.draw(&mut scene.drawing_context);
+        //scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();

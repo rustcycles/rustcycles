@@ -4,6 +4,14 @@
 //! When connected to a remote server, contains a game client.
 //! When playing locally, contains both a client and a server.
 
+use std::{
+    net::{SocketAddr, TcpStream},
+    str::FromStr,
+    sync::mpsc,
+    thread,
+    time::Duration,
+};
+
 use fyrox::{
     dpi::PhysicalSize,
     error::ExternalError,
@@ -18,7 +26,12 @@ use fyrox::{
     },
 };
 
-use crate::{client::game::ClientGame, prelude::*, server::game::ServerGame};
+use crate::{
+    client::game::ClientGame,
+    common::net::{LocalConnection, LocalListener, TcpConnection},
+    prelude::*,
+    server::game::ServerGame,
+};
 
 /// The process that runs a player's game client.
 pub(crate) struct ClientProcess {
@@ -37,15 +50,52 @@ impl ClientProcess {
                 .with_wrap(WrapMode::Letter)
                 .build(&mut engine.user_interface.build_ctx());
 
-        // Init server first, otherwise the client has nothing to connect to.
-        let sg = if local_game {
-            Some(ServerGame::new(&mut engine, local_game).await)
-        } else {
-            None
-        };
+        let (sg, cg) = if local_game {
+            // LATER Multithreading would be sweet, would it help perf on WASM?
 
-        // TODO Broken - blocks waiting for server to accept connection
-        let cg = ClientGame::new(&mut engine, local_game, debug_text).await;
+            let (tx1, rx1) = mpsc::channel();
+            let (tx2, rx2) = mpsc::channel();
+            let conn1 = LocalConnection::new(tx1, rx2);
+            let conn2 = LocalConnection::new(tx2, rx1);
+
+            // Init server first, otherwise the client has nothing to connect to.
+            let listener = LocalListener::new(conn1);
+            let mut sg = ServerGame::new(&mut engine, Box::new(listener)).await;
+
+            // Make the server accept the local connection
+            // and push init data into it so the client can read it during creation.
+            // Otherwise the client would remain stuck.
+            // Yes, this is really ugly.
+            sg.accept_new_connections(&mut engine);
+
+            let cg = ClientGame::new(&mut engine, debug_text, Box::new(conn2)).await;
+
+            (Some(sg), cg)
+        } else {
+            let addr = SocketAddr::from_str("127.0.0.1:26000").unwrap();
+
+            let mut connect_attempts = 0;
+            let stream = loop {
+                connect_attempts += 1;
+                // LATER Don't block the main thread - no sleep in async
+                // LATER Limit the number of attempts.
+                if let Ok(stream) = TcpStream::connect(addr) {
+                    dbg_logf!("connect attempts: {}", connect_attempts);
+                    break stream;
+                }
+                if connect_attempts % 100 == 0 {
+                    dbg_logf!("connect attempts: {}", connect_attempts);
+                }
+                thread::sleep(Duration::from_millis(10));
+            };
+            stream.set_nodelay(true).unwrap();
+            stream.set_nonblocking(true).unwrap();
+
+            let conn = TcpConnection::new(stream, addr);
+            let cg = ClientGame::new(&mut engine, debug_text, Box::new(conn)).await;
+
+            (None, cg)
+        };
 
         Self {
             mouse_grabbed: false,

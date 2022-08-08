@@ -2,7 +2,7 @@
 //!
 //! Mainly receiving updates from the server and updating local state.
 
-use std::{collections::VecDeque, io::ErrorKind, net::TcpStream, thread, time::Duration};
+use std::{io::ErrorKind, thread, time::Duration};
 
 use fyrox::{
     gui::{message::MessageDirection, text::TextMessage, UiNode},
@@ -16,7 +16,8 @@ use crate::{
     common::{
         entities::{Player, PlayerState},
         messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
-        net, GameState, Input,
+        net::{self, Connection},
+        GameState, Input,
     },
     debug::{
         self,
@@ -34,33 +35,15 @@ pub(crate) struct ClientGame {
     pub(crate) gs: GameState,
     pub(crate) lp: LocalPlayer,
     pub(crate) camera: Handle<Node>,
-    stream: TcpStream,
-    buffer: VecDeque<u8>,
+    connection: Box<dyn Connection>,
 }
 
 impl ClientGame {
     pub(crate) async fn new(
         engine: &mut Engine,
-        _local_game: bool,
         debug_text: Handle<UiNode>,
+        mut connection: Box<dyn Connection>,
     ) -> Self {
-        let mut connect_attempts = 0;
-        let mut stream = loop {
-            connect_attempts += 1;
-            // LATER Don't block the main thread - no sleep in async
-            // LATER Limit the number of attempts.
-            if let Ok(stream) = TcpStream::connect("127.0.0.1:26000") {
-                dbg_logf!("connect attempts: {}", connect_attempts);
-                break stream;
-            }
-            if connect_attempts % 100 == 0 {
-                dbg_logf!("connect attempts: {}", connect_attempts);
-            }
-            thread::sleep(Duration::from_millis(10));
-        };
-        stream.set_nodelay(true).unwrap();
-        stream.set_nonblocking(true).unwrap();
-
         let mut gs = GameState::new(engine).await;
 
         // LATER Load everything in parallel (i.e. with GameState)
@@ -87,11 +70,10 @@ impl ClientGame {
             )
             .build(&mut scene.graph);
 
-        let mut buffer = VecDeque::new();
         let mut init_attempts = 0;
         let lp = loop {
             init_attempts += 1;
-            let (message, closed) = net::receive_one(&mut stream, &mut buffer);
+            let (message, closed) = connection.receive_one_sm();
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
@@ -145,8 +127,7 @@ impl ClientGame {
             gs,
             lp,
             camera,
-            stream,
-            buffer,
+            connection,
         }
     }
 
@@ -216,8 +197,7 @@ impl ClientGame {
 
         scene.drawing_context.clear_lines();
 
-        let (messages, _) = net::receive(&mut self.stream, &mut self.buffer); // LATER Clean disconnect
-
+        let (messages, _) = self.connection.receive_sm();
         for message in messages {
             match message {
                 ServerMessage::InitData(_) => {
@@ -438,7 +418,7 @@ impl ClientGame {
 
     fn network_send(&mut self, message: ClientMessage) {
         let network_message = net::serialize(message);
-        let res = net::send(&network_message, &mut self.stream);
+        let res = self.connection.send(&network_message);
         if let Err(ref e) = res {
             if e.kind() == ErrorKind::ConnectionReset {
                 dbg_logf!("Server disconnected, exitting");

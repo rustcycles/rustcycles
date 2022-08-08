@@ -1,10 +1,6 @@
 //! Server-side gamelogic.
 
-use std::{
-    collections::VecDeque,
-    io::ErrorKind,
-    net::{SocketAddr, TcpListener, TcpStream},
-};
+use std::io::ErrorKind;
 
 use crate::{
     common::{
@@ -13,7 +9,8 @@ use crate::{
             AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage,
             UpdatePhysics,
         },
-        net, GameState,
+        net::{self, Connection, Listener},
+        GameState,
     },
     debug::details::{DEBUG_SHAPES, DEBUG_TEXTS},
     prelude::*,
@@ -24,16 +21,13 @@ use crate::{
 /// Lets clients connect to play. Contains the authoritative copy of the game state.
 pub(crate) struct ServerGame {
     pub(crate) gs: GameState,
-    listener: TcpListener,
+    listener: Box<dyn Listener>,
     clients: Pool<RemoteClient>,
 }
 
 impl ServerGame {
-    pub(crate) async fn new(engine: &mut Engine, _local_game: bool) -> Self {
+    pub(crate) async fn new(engine: &mut Engine, listener: Box<dyn Listener>) -> Self {
         let gs = GameState::new(engine).await;
-
-        let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
-        listener.set_nonblocking(true).unwrap();
 
         Self {
             gs,
@@ -70,17 +64,11 @@ impl ServerGame {
         self.sys_receive(engine);
     }
 
-    fn accept_new_connections(&mut self, engine: &mut Engine) {
+    pub(crate) fn accept_new_connections(&mut self, engine: &mut Engine) {
         loop {
             match self.listener.accept() {
-                Ok((stream, addr)) => {
-                    // LATER Measure if nodelay actually makes a difference,
-                    // or better yet, replace TCP with something better.
-                    // Same on the client.
-                    // Also how does it interact with flushing the stram after each write?
-                    stream.set_nodelay(true).unwrap();
-                    stream.set_nonblocking(true).unwrap();
-                    dbg_logf!("accept {}", addr);
+                Ok(conn) => {
+                    dbg_logf!("accept {}", conn.addr());
 
                     // Add player
                     // This is sent to all clients except the new one.
@@ -94,8 +82,9 @@ impl ServerGame {
                     self.network_send(engine, message, SendDest::All);
 
                     // Create client
-                    // This is after adding the player so that we can sent the new client its own player index.
-                    let client = RemoteClient::new(stream, addr, player_handle);
+                    // This is after adding the player so that we can send the new client
+                    // its own player index.
+                    let client = RemoteClient::new(conn, player_handle);
                     let client_handle = self.clients.spawn(client);
                     self.send_init(engine, client_handle);
 
@@ -125,7 +114,7 @@ impl ServerGame {
         let mut disconnected = Vec::new();
         let mut messages_to_all = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
-            let (messages, closed) = net::receive(&mut client.stream, &mut client.buffer);
+            let (messages, closed) = client.connection.receive_cm();
             // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
             for message in messages {
@@ -251,14 +240,14 @@ impl ServerGame {
         let network_message = net::serialize(message);
         match dest {
             SendDest::One(handle) => {
-                if let Err(e) = net::send(&network_message, &mut self.clients[handle].stream) {
+                if let Err(e) = self.clients[handle].connection.send(&network_message) {
                     dbg_logf!("Error in network_send One - index {}: {:?}", handle.index(), e);
                     disconnected.push(handle);
                 }
             }
             SendDest::All => {
                 for (handle, client) in self.clients.pair_iter_mut() {
-                    if let Err(e) = net::send(&network_message, &mut client.stream) {
+                    if let Err(e) = client.connection.send(&network_message) {
                         dbg_logf!("Error in network_send All - index {}: {:?}", handle.index(), e);
                         disconnected.push(handle);
                     }
@@ -277,19 +266,14 @@ enum SendDest {
 }
 
 struct RemoteClient {
-    stream: TcpStream,
-    buffer: VecDeque<u8>,
-    #[allow(dead_code)]
-    addr: SocketAddr,
+    connection: Box<dyn Connection>,
     player_handle: Handle<Player>,
 }
 
 impl RemoteClient {
-    fn new(stream: TcpStream, addr: SocketAddr, player_handle: Handle<Player>) -> Self {
+    fn new(connection: Box<dyn Connection>, player_handle: Handle<Player>) -> Self {
         Self {
-            stream,
-            buffer: VecDeque::new(),
-            addr,
+            connection,
             player_handle,
         }
     }

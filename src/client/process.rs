@@ -24,6 +24,7 @@ use fyrox::{
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
+    window::CursorGrabMode,
 };
 
 use crate::{
@@ -211,7 +212,7 @@ impl ClientProcess {
         // LATER Don't hide cursor in menu.
         if grab != self.mouse_grabbed {
             let window = self.engine.get_window();
-            let res = window.set_cursor_grab(grab);
+            let res = window.set_cursor_grab(CursorGrabMode::Confined);
             match res {
                 Ok(_) | Err(ExternalError::NotSupported(_)) => {}
                 Err(_) => res.unwrap(),

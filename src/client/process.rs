@@ -52,7 +52,7 @@ impl ClientProcess {
                 .build(&mut engine.user_interface.build_ctx());
 
         let (sg, cg) = if local_game {
-            // LATER Multithreading would be sweet, would it help perf on WASM?
+            // LATER Multithreading would be sweet but we can't use threads in WASM.
 
             let (tx1, rx1) = mpsc::channel();
             let (tx2, rx2) = mpsc::channel();
@@ -64,7 +64,7 @@ impl ClientProcess {
             let mut sg = ServerGame::new(&mut engine, Box::new(listener)).await;
 
             // Make the server accept the local connection
-            // and push init data into it so the client can read it during creation.
+            // and send init data into it so the client can read it during creation.
             // Otherwise the client would remain stuck.
             // Yes, this is really ugly.
             sg.accept_new_connections(&mut engine);
@@ -78,7 +78,7 @@ impl ClientProcess {
             let mut connect_attempts = 0;
             let stream = loop {
                 connect_attempts += 1;
-                // LATER Don't block the main thread - no sleep in async
+                // LATER Don't block the main thread - async?
                 // LATER Limit the number of attempts.
                 if let Ok(stream) = TcpStream::connect(addr) {
                     dbg_logf!("connect attempts: {}", connect_attempts);

@@ -337,10 +337,16 @@ fn server_main() {
 }
 
 fn init_global_state(endpoint_name: &'static str) {
+    let color = match endpoint_name {
+        "sv" => Color::GREEN,
+        "cl" => Color::RED,
+        _ => Color::WHITE,
+    };
+
     DEBUG_ENDPOINT.with(|endpoint| {
         *endpoint.borrow_mut() = DebugEndpoint {
             name: endpoint_name,
-            default_color: Color::RED,
+            default_color: color,
         }
     });
 

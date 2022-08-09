@@ -55,7 +55,11 @@ impl ServerGame {
             engine.update(dt, &mut cf);
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
 
+            // `sys_send_update` sends debug shapes and text to client.
+            // Any debug calls after it will show up next frame.
+            self.gs.debug_engine_updates(v!(-5 5 3), 4);
             self.sys_send_update(engine);
+            self.gs.debug_engine_updates(v!(-6 5 3), 4);
         }
     }
 

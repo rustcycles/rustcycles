@@ -159,6 +159,26 @@ impl GameState {
 
         cycle_handle
     }
+
+    /// Draw arrows in a different orientation every frame.
+    ///
+    /// This helps:
+    /// - Notice issues with framerate
+    /// - Notice tearing (but a solid object would make it even easier to see)
+    /// - Make sure debug draws and prints issued on one frame happen on the same frame.
+    ///   The intended usecase is to take a screenshot and compare
+    ///   the direction of the arrow to the direction as text.
+    ///
+    /// The rotation is clockwise when looking in the forward direction.
+    #[allow(dead_code)]
+    pub(crate) fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
+        let step = (self.frame_number % steps) as f32;
+        let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
+        let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
+        let dir = rot * Vec3::up();
+        dbg_arrow!(pos, dir);
+        dbg_textd!(self.frame_number, pos, angle.to_degrees());
+    }
 }
 
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]

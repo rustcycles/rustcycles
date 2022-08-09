@@ -153,7 +153,11 @@ impl ClientGame {
             engine.pre_update(dt, &mut cf);
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
 
+            // `tick_after_physics` tells the engine to draw debug shapes and text.
+            // Any debug calls after it will show up next frame.
+            self.debug_engine_updates(v!(-5 3 3), 4);
             self.tick_after_physics(engine, dt);
+            self.debug_engine_updates(v!(-6 3 3), 4);
 
             // Update UI
             engine.post_update(dt);

@@ -81,8 +81,8 @@ impl ServerGame {
                         name: "Player".to_owned(), // LATER from client
                         player_index: player_handle.index(),
                     };
-                    let message = ServerMessage::AddPlayer(add_player);
-                    self.network_send(engine, message, SendDest::All);
+                    let msg = ServerMessage::AddPlayer(add_player);
+                    self.network_send(engine, msg, SendDest::All);
 
                     // Create client
                     // This is after adding the player so that we can send the new client
@@ -100,8 +100,8 @@ impl ServerGame {
                         player_index: player_handle.index(),
                         cycle_index: cycle_handle.index(),
                     };
-                    let message = ServerMessage::SpawnCycle(player_cycle);
-                    self.network_send(engine, message, SendDest::All);
+                    let msg = ServerMessage::SpawnCycle(player_cycle);
+                    self.network_send(engine, msg, SendDest::All);
                 }
                 Err(err) => match err.kind() {
                     ErrorKind::WouldBlock => {
@@ -115,13 +115,13 @@ impl ServerGame {
 
     fn sys_receive(&mut self, engine: &mut Engine) {
         let mut disconnected = Vec::new();
-        let mut messages_to_all = Vec::new();
+        let mut msgs_to_all = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
-            let (messages, closed) = client.connection.receive_cm();
+            let (msgs, closed) = client.connection.receive_cm();
             // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
-            for message in messages {
-                match message {
+            for msg in msgs {
+                match msg {
                     ClientMessage::Input(input) => {
                         // LATER (server reconciliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;
@@ -135,14 +135,14 @@ impl ServerGame {
                         let player_index = client.player_handle.index();
                         dbg_logf!("player {} is now playing", player_index);
                         let msg = ServerMessage::Join { player_index };
-                        messages_to_all.push(msg);
+                        msgs_to_all.push(msg);
                     }
                     ClientMessage::Observe => {
                         self.gs.players[client.player_handle].ps = PlayerState::Observing;
                         let player_index = client.player_handle.index();
                         dbg_logf!("player {} is now observing", player_index);
                         let msg = ServerMessage::Observe { player_index };
-                        messages_to_all.push(msg);
+                        msgs_to_all.push(msg);
                     }
                 }
             }
@@ -153,8 +153,8 @@ impl ServerGame {
         for client_handle in disconnected {
             self.disconnect(engine, client_handle);
         }
-        for message in messages_to_all {
-            self.network_send(engine, message, SendDest::All);
+        for msg in msgs_to_all {
+            self.network_send(engine, msg, SendDest::All);
         }
     }
 
@@ -162,10 +162,10 @@ impl ServerGame {
         let scene = &mut engine.scenes[self.gs.scene];
         let client = self.clients.free(client_handle);
         self.gs.free_player(scene, client.player_handle);
-        let message = ServerMessage::RemovePlayer {
+        let msg = ServerMessage::RemovePlayer {
             player_index: client.player_handle.index(),
         };
-        self.network_send(engine, message, SendDest::All);
+        self.network_send(engine, msg, SendDest::All);
     }
 
     fn send_init(&mut self, engine: &mut Engine, client_handle: Handle<RemoteClient>) {
@@ -190,8 +190,8 @@ impl ServerGame {
             player_cycles,
             player_projectiles: Vec::new(), // LATER
         };
-        let message = ServerMessage::Init(init);
-        self.network_send(engine, message, SendDest::One(client_handle));
+        let msg = ServerMessage::Init(init);
+        self.network_send(engine, msg, SendDest::One(client_handle));
     }
 
     fn sys_send_update(&mut self, engine: &mut Engine) {
@@ -225,32 +225,32 @@ impl ServerGame {
             ret
         });
 
-        let message = ServerMessage::Update {
+        let msg = ServerMessage::Update {
             update_physics,
             debug_texts,
             debug_shapes,
         };
-        self.network_send(engine, message, SendDest::All);
+        self.network_send(engine, msg, SendDest::All);
     }
 
     // LATER This only needs Engine for self.disconnect,
     // but forces all callers to also take Engine.
-    fn network_send(&mut self, engine: &mut Engine, message: ServerMessage, dest: SendDest) {
+    fn network_send(&mut self, engine: &mut Engine, msg: ServerMessage, dest: SendDest) {
         // LATER This is incredibly ugly, plus creating the Vec is inafficient.
         //          - Save all streams in a Vec?
         //          - Inline this fn and remove SendDest?
         let mut disconnected = Vec::new();
-        let network_message = net::serialize(message);
+        let network_msg = net::serialize(msg);
         match dest {
             SendDest::One(handle) => {
-                if let Err(e) = self.clients[handle].connection.send(&network_message) {
+                if let Err(e) = self.clients[handle].connection.send(&network_msg) {
                     dbg_logf!("Error in network_send One - index {}: {:?}", handle.index(), e);
                     disconnected.push(handle);
                 }
             }
             SendDest::All => {
                 for (handle, client) in self.clients.pair_iter_mut() {
-                    if let Err(e) = client.connection.send(&network_message) {
+                    if let Err(e) = client.connection.send(&network_msg) {
                         dbg_logf!("Error in network_send All - index {}: {:?}", handle.index(), e);
                         disconnected.push(handle);
                     }

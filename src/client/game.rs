@@ -73,17 +73,17 @@ impl ClientGame {
         let mut init_attempts = 0;
         let lp = loop {
             init_attempts += 1;
-            let (message, closed) = connection.receive_one_sm();
+            let (msg, closed) = connection.receive_one_sm();
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
-            if let Some(message) = message {
+            if let Some(msg) = msg {
                 if let ServerMessage::Init(Init {
                     player_indices,
                     local_player_index,
                     player_cycles,
                     player_projectiles,
-                }) = message
+                }) = msg
                 {
                     for player_index in player_indices {
                         let player = Player::new(None);
@@ -181,9 +181,9 @@ impl ClientGame {
 
         scene.drawing_context.clear_lines();
 
-        let (messages, _) = self.connection.receive_sm();
-        for message in messages {
-            match message {
+        let (msgs, _) = self.connection.receive_sm();
+        for msg in msgs {
+            match msg {
                 ServerMessage::Init(_) => {
                     // LATER Make this type safe? Init part of handshake?
                     panic!("Received unexpected init")
@@ -400,9 +400,9 @@ impl ClientGame {
         debug::details::cleanup();
     }
 
-    fn network_send(&mut self, message: ClientMessage) {
-        let network_message = net::serialize(message);
-        let res = self.connection.send(&network_message);
+    fn network_send(&mut self, msg: ClientMessage) {
+        let network_msg = net::serialize(msg);
+        let res = self.connection.send(&network_msg);
         if let Err(ref e) = res {
             if e.kind() == ErrorKind::ConnectionReset {
                 dbg_logf!("Server disconnected, exitting");

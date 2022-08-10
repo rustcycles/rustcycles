@@ -73,7 +73,7 @@ pub(crate) struct NetworkMessage {
 /// ```
 /// but generic methods are not object safe so we wouldn't be able to use dynamic dispatch.
 pub(crate) trait Connection {
-    fn send(&mut self, network_message: &NetworkMessage) -> Result<(), io::Error>;
+    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error>;
 
     // `#[must_use]` only does something in the trait definition,
     // no need to repeat it in the impls:
@@ -150,8 +150,8 @@ impl LocalConnection {
 }
 
 impl Connection for LocalConnection {
-    fn send(&mut self, network_message: &NetworkMessage) -> Result<(), io::Error> {
-        self.sender.send(network_message.clone()).unwrap();
+    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error> {
+        self.sender.send(network_msg.clone()).unwrap();
         Ok(())
     }
 
@@ -200,8 +200,8 @@ impl TcpConnection {
         M: DeserializeOwned,
     {
         let closed = read(&mut self.stream, &mut self.buffer);
-        let messages = iter::from_fn(|| parse_one(&mut self.buffer)).collect();
-        (messages, closed)
+        let msgs = iter::from_fn(|| parse_one(&mut self.buffer)).collect();
+        (msgs, closed)
     }
 
     /// Read all available bytes from `stream` into `buffer`,
@@ -219,15 +219,15 @@ impl TcpConnection {
 }
 
 impl Connection for TcpConnection {
-    fn send(&mut self, network_message: &NetworkMessage) -> Result<(), io::Error> {
+    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error> {
         // LATER Measure network usage.
         // LATER Try to minimize network usage.
         //       General purpose compression could help a bit,
         //       but using what we know about the data should give much better results.
 
         // Prefix data by length so it's easy to parse on the other side.
-        self.stream.write_all(&network_message.content_len)?;
-        self.stream.write_all(&network_message.buf)?;
+        self.stream.write_all(&network_msg.content_len)?;
+        self.stream.write_all(&network_msg.buf)?;
         self.stream.flush()?; // LATER No idea if necessary or how it interacts with set_nodelay
 
         Ok(())
@@ -254,11 +254,11 @@ impl Connection for TcpConnection {
     }
 }
 
-pub(crate) fn serialize<M>(message: M) -> NetworkMessage
+pub(crate) fn serialize<M>(msg: M) -> NetworkMessage
 where
     M: Serialize,
 {
-    let buf = bincode::serialize(&message).expect("bincode failed to serialize message");
+    let buf = bincode::serialize(&msg).expect("bincode failed to serialize message");
     let content_len = MsgLen::try_from(buf.len())
         .unwrap_or_else(|err| {
             panic!("bincode message length ({} bytes) overflowed its type: {:?}", buf.len(), err)
@@ -322,7 +322,7 @@ where
 
     buffer.drain(0..HEADER_LEN);
     let bytes: Vec<_> = buffer.drain(0..content_len).collect();
-    let message = bincode::deserialize(&bytes).unwrap();
+    let msg = bincode::deserialize(&bytes).unwrap();
 
-    Some(message)
+    Some(msg)
 }

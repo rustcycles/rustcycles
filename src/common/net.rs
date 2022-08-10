@@ -11,7 +11,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use crate::common::messages::{ClientMessage, ServerMessage};
 
 pub(crate) trait Listener {
-    fn accept(&mut self) -> io::Result<Box<dyn Connection>>;
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;
 }
 
 pub(crate) struct LocalListener {
@@ -27,7 +27,7 @@ impl LocalListener {
 }
 
 impl Listener for LocalListener {
-    fn accept(&mut self) -> io::Result<Box<dyn Connection>> {
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>> {
         let conn = self.connection.take();
         match conn {
             Some(conn) => Ok(Box::new(conn)),
@@ -39,8 +39,8 @@ impl Listener for LocalListener {
 // Note we use the TcpListener from std here, not a custom type,
 // no point adding an extra type.
 impl Listener for TcpListener {
-    fn accept(&mut self) -> io::Result<Box<dyn Connection>> {
-        let (stream, addr) = TcpListener::accept(self)?;
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>> {
+        let (stream, addr) = self.accept()?;
 
         // LATER Measure if nodelay actually makes a difference,
         // or better yet, replace TCP with something better.

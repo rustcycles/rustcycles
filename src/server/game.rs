@@ -69,7 +69,7 @@ impl ServerGame {
 
     pub(crate) fn accept_new_connections(&mut self, engine: &mut Engine) {
         loop {
-            match self.listener.accept() {
+            match self.listener.accept_conn() {
                 Ok(conn) => {
                     dbg_logf!("accept {}", conn.addr());
 

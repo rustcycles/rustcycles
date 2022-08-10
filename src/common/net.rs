@@ -273,7 +273,6 @@ fn read(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> bool {
     //      - lossy and slow connections
     //      - fragmented and merged packets
     // LATER(security) Test large amounts of data
-    let mut closed = false;
     loop {
         // No particular reason for the buffer size, except BufReader uses the same.
         let mut buf = [0; 8192];
@@ -283,24 +282,21 @@ fn read(stream: &mut TcpStream, buffer: &mut VecDeque<u8>) -> bool {
                 // The connection has been closed, don't get stuck in this loop.
                 // This can happen for example when the server crashes.
                 dbg_logf!("Connection closed when reading");
-                closed = true;
-                break;
+                return true;
             }
             Ok(n) => {
                 buffer.extend(&buf[0..n]);
             }
             Err(e) if e.kind() == ErrorKind::Interrupted => {}
             Err(e) if e.kind() == ErrorKind::WouldBlock => {
-                break;
+                return false;
             }
             Err(e) => {
                 dbg_logf!("Connection closed when reading - error: {}", e);
-                closed = true;
-                break;
+                return true;
             }
         }
     }
-    closed
 }
 
 /// Parse a message from `buffer` or return None if there's not enough data.

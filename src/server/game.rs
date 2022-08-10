@@ -6,8 +6,7 @@ use crate::{
     common::{
         entities::{Player, PlayerState},
         messages::{
-            AddPlayer, ClientMessage, CyclePhysics, InitData, PlayerCycle, ServerMessage,
-            UpdatePhysics,
+            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, ServerMessage, UpdatePhysics,
         },
         net::{self, Connection, Listener},
         GameState,
@@ -185,13 +184,13 @@ impl ServerGame {
             player_cycles.push(init_player);
         }
 
-        let init_data = InitData {
+        let init = Init {
             player_indices,
             local_player_index,
             player_cycles,
             player_projectiles: Vec::new(), // LATER
         };
-        let message = ServerMessage::InitData(init_data);
+        let message = ServerMessage::Init(init);
         self.network_send(engine, message, SendDest::One(client_handle));
     }
 

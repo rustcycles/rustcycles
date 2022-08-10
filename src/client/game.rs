@@ -15,7 +15,7 @@ use fyrox::{
 use crate::{
     common::{
         entities::{Player, PlayerState},
-        messages::{ClientMessage, InitData, PlayerCycle, PlayerProjectile, ServerMessage},
+        messages::{ClientMessage, Init, PlayerCycle, PlayerProjectile, ServerMessage},
         net::{self, Connection},
         GameState, Input,
     },
@@ -78,7 +78,7 @@ impl ClientGame {
                 panic!("connection closed before init"); // LATER Don't crash
             }
             if let Some(message) = message {
-                if let ServerMessage::InitData(InitData {
+                if let ServerMessage::Init(Init {
                     player_indices,
                     local_player_index,
                     player_cycles,
@@ -184,7 +184,7 @@ impl ClientGame {
         let (messages, _) = self.connection.receive_sm();
         for message in messages {
             match message {
-                ServerMessage::InitData(_) => {
+                ServerMessage::Init(_) => {
                     // LATER Make this type safe? Init part of handshake?
                     panic!("Received unexpected init")
                 }

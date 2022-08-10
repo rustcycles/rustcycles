@@ -22,7 +22,7 @@ pub(crate) enum ServerMessage {
     /// This is intentionally separate from messages such as AddPlayer or SpawnCycle
     /// because eventually those might trigger additional effects
     /// such as info messages, sounds, particles, etc.
-    InitData(InitData),
+    Init(Init),
     /// Add a new player to the game.
     AddPlayer(AddPlayer),
     /// Remove the player and all data associated with him, for example when he disconnects.
@@ -49,7 +49,7 @@ pub(crate) enum ServerMessage {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct InitData {
+pub(crate) struct Init {
     pub(crate) player_indices: Vec<u32>,
     pub(crate) local_player_index: u32,
     pub(crate) player_cycles: Vec<PlayerCycle>,

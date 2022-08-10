@@ -14,7 +14,7 @@ use std::{env, panic, process::Command, sync::Arc};
 
 use fyrox::{
     core::{futures::executor, instant::Instant},
-    dpi::LogicalSize,
+    dpi::{LogicalSize, PhysicalSize},
     engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -360,9 +360,11 @@ fn init_global_state(endpoint_name: &'static str) {
 fn init_engine_client(event_loop: &EventLoop<()>, opts: Opts) -> Engine {
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
     if opts.windowed {
-        let width = 1200;
+        let width = 600;
         let height = width / 16 * 9;
-        window_builder = window_builder.with_inner_size(LogicalSize::new(width, height));
+        // Currently using PhysicalSize because my Thinkpad scales logical size by 1.5
+        // and it can't handle a large window at any reasonable FPS.
+        window_builder = window_builder.with_inner_size(PhysicalSize::new(width, height));
     } else {
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     }

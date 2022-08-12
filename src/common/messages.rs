@@ -41,11 +41,7 @@ pub(crate) enum ServerMessage {
     /// Remove the cycle from game state, for example when the player switches to observer mode.
     DespawnCycle { cycle_index: u32 },
     /// Update the translations, rotations, velocities, etc. of everything.
-    Update {
-        update_physics: UpdatePhysics,
-        debug_texts: Vec<String>,
-        debug_shapes: Vec<DebugShape>,
-    },
+    Update(Update),
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -80,8 +76,10 @@ pub(crate) struct PlayerProjectile {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct UpdatePhysics {
+pub(crate) struct Update {
     pub(crate) cycle_physics: Vec<CyclePhysics>,
+    pub(crate) debug_texts: Vec<String>,
+    pub(crate) debug_shapes: Vec<DebugShape>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

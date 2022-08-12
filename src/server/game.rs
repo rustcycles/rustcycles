@@ -6,7 +6,7 @@ use crate::{
     common::{
         entities::{Player, PlayerState},
         messages::{
-            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, ServerMessage, UpdatePhysics,
+            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, ServerMessage, Update,
         },
         net::{self, Connection, Listener},
         GameState,
@@ -207,7 +207,6 @@ impl ServerGame {
             };
             cycle_physics.push(update);
         }
-        let update_physics = UpdatePhysics { cycle_physics };
 
         // Send debug items, then clear everything on the server
         // so it doesn't get sent again next frame.
@@ -225,11 +224,11 @@ impl ServerGame {
             ret
         });
 
-        let msg = ServerMessage::Update {
-            update_physics,
+        let msg = ServerMessage::Update(Update {
+            cycle_physics,
             debug_texts,
             debug_shapes,
-        };
+        });
         self.network_send(engine, msg, SendDest::All);
     }
 

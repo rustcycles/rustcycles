@@ -15,7 +15,9 @@ use fyrox::{
 use crate::{
     common::{
         entities::{Player, PlayerState},
-        messages::{ClientMessage, Init, PlayerCycle, PlayerProjectile, ServerMessage},
+        messages::{
+            AddPlayer, ClientMessage, Init, PlayerCycle, PlayerProjectile, ServerMessage, Update,
+        },
         net::{self, Connection},
         GameState, Input,
     },
@@ -188,9 +190,10 @@ impl ClientGame {
                     // LATER Make this type safe? Init part of handshake?
                     panic!("Received unexpected init")
                 }
-                ServerMessage::AddPlayer(add_player) => {
+                ServerMessage::AddPlayer(AddPlayer { player_index, name }) => {
                     let player = Player::new(None);
-                    self.gs.players.spawn_at(add_player.player_index, player).unwrap();
+                    self.gs.players.spawn_at(player_index, player).unwrap();
+                    dbg_logd!("player {} added", name);
                 }
                 ServerMessage::RemovePlayer { player_index } => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
@@ -228,12 +231,12 @@ impl ClientGame {
                     dbg_logd!(cycle_index);
                     todo!("despawn cycle");
                 }
-                ServerMessage::Update {
-                    update_physics,
+                ServerMessage::Update(Update {
+                    cycle_physics,
                     debug_texts,
                     debug_shapes,
-                } => {
-                    for cycle_physics in update_physics.cycle_physics {
+                }) => {
+                    for cycle_physics in cycle_physics {
                         let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
                         let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
                         body.local_transform_mut().set_position(cycle_physics.translation);

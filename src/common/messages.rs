@@ -77,9 +77,16 @@ pub(crate) struct PlayerProjectile {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct Update {
+    pub(crate) player_inputs: Vec<PlayerInput>,
     pub(crate) cycle_physics: Vec<CyclePhysics>,
     pub(crate) debug_texts: Vec<String>,
     pub(crate) debug_shapes: Vec<DebugShape>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct PlayerInput {
+    pub(crate) player_index: u32,
+    pub(crate) input: Input,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

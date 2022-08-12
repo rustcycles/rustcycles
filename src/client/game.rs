@@ -16,7 +16,8 @@ use crate::{
     common::{
         entities::{Player, PlayerState},
         messages::{
-            AddPlayer, ClientMessage, Init, PlayerCycle, PlayerProjectile, ServerMessage, Update,
+            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, PlayerInput,
+            PlayerProjectile, ServerMessage, Update,
         },
         net::{self, Connection},
         GameState, Input,
@@ -232,16 +233,31 @@ impl ClientGame {
                     todo!("despawn cycle");
                 }
                 ServerMessage::Update(Update {
+                    player_inputs,
                     cycle_physics,
                     debug_texts,
                     debug_shapes,
                 }) => {
-                    for cycle_physics in cycle_physics {
-                        let cycle = self.gs.cycles.at_mut(cycle_physics.cycle_index).unwrap();
+                    for PlayerInput {
+                        player_index,
+                        input,
+                    } in player_inputs
+                    {
+                        self.gs.players.at_mut(player_index).unwrap().input = input;
+                    }
+
+                    for CyclePhysics {
+                        cycle_index,
+                        translation,
+                        rotation,
+                        velocity,
+                    } in cycle_physics
+                    {
+                        let cycle = self.gs.cycles.at_mut(cycle_index).unwrap();
                         let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
-                        body.local_transform_mut().set_position(cycle_physics.translation);
-                        body.local_transform_mut().set_rotation(cycle_physics.rotation);
-                        body.set_lin_vel(cycle_physics.velocity);
+                        body.local_transform_mut().set_position(translation);
+                        body.local_transform_mut().set_rotation(rotation);
+                        body.set_lin_vel(velocity);
                     }
 
                     DEBUG_TEXTS.with(|texts| {

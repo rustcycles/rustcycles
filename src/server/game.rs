@@ -6,7 +6,8 @@ use crate::{
     common::{
         entities::{Player, PlayerState},
         messages::{
-            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, ServerMessage, Update,
+            AddPlayer, ClientMessage, CyclePhysics, Init, PlayerCycle, PlayerInput, ServerMessage,
+            Update,
         },
         net::{self, Connection, Listener},
         GameState,
@@ -196,16 +197,26 @@ impl ServerGame {
 
     fn sys_send_update(&mut self, engine: &mut Engine) {
         let scene = &engine.scenes[self.gs.scene];
+
+        let mut player_inputs = Vec::new();
+        for (player_handle, player) in self.gs.players.pair_iter() {
+            let pi = PlayerInput {
+                player_index: player_handle.index(),
+                input: player.input,
+            };
+            player_inputs.push(pi);
+        }
+
         let mut cycle_physics = Vec::new();
         for (cycle_handle, cycle) in self.gs.cycles.pair_iter() {
             let body = scene.graph[cycle.body_handle].as_rigid_body();
-            let update = CyclePhysics {
+            let cp = CyclePhysics {
                 cycle_index: cycle_handle.index(),
                 translation: **body.local_transform().position(),
                 rotation: **body.local_transform().rotation(),
                 velocity: body.lin_vel(),
             };
-            cycle_physics.push(update);
+            cycle_physics.push(cp);
         }
 
         // Send debug items, then clear everything on the server
@@ -225,6 +236,7 @@ impl ServerGame {
         });
 
         let msg = ServerMessage::Update(Update {
+            player_inputs,
             cycle_physics,
             debug_texts,
             debug_shapes,

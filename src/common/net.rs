@@ -15,20 +15,20 @@ pub(crate) trait Listener {
 }
 
 pub(crate) struct LocalListener {
-    connection: Option<LocalConnection>,
+    conn: Option<LocalConnection>,
 }
 
 impl LocalListener {
-    pub(crate) fn new(connection: LocalConnection) -> Self {
+    pub(crate) fn new(conn: LocalConnection) -> Self {
         Self {
-            connection: Some(connection),
+            conn: Some(conn),
         }
     }
 }
 
 impl Listener for LocalListener {
     fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>> {
-        let conn = self.connection.take();
+        let conn = self.conn.take();
         match conn {
             Some(conn) => Ok(Box::new(conn)),
             None => Err(io::Error::new(ErrorKind::WouldBlock, "dummy")),

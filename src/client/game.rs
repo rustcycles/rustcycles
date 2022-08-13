@@ -38,14 +38,14 @@ pub(crate) struct ClientGame {
     pub(crate) gs: GameState,
     pub(crate) lp: LocalPlayer,
     pub(crate) camera: Handle<Node>,
-    connection: Box<dyn Connection>,
+    conn: Box<dyn Connection>,
 }
 
 impl ClientGame {
     pub(crate) async fn new(
         engine: &mut Engine,
         debug_text: Handle<UiNode>,
-        mut connection: Box<dyn Connection>,
+        mut conn: Box<dyn Connection>,
     ) -> Self {
         let mut gs = GameState::new(engine).await;
 
@@ -76,7 +76,7 @@ impl ClientGame {
         let mut init_attempts = 0;
         let lp = loop {
             init_attempts += 1;
-            let (msg, closed) = connection.receive_one_sm();
+            let (msg, closed) = conn.receive_one_sm();
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
@@ -130,7 +130,7 @@ impl ClientGame {
             gs,
             lp,
             camera,
-            connection,
+            conn,
         }
     }
 
@@ -184,7 +184,7 @@ impl ClientGame {
 
         scene.drawing_context.clear_lines();
 
-        let (msgs, _) = self.connection.receive_sm();
+        let (msgs, _) = self.conn.receive_sm();
         for msg in msgs {
             match msg {
                 ServerMessage::Init(_) => {
@@ -421,7 +421,7 @@ impl ClientGame {
 
     fn network_send(&mut self, msg: ClientMessage) {
         let network_msg = net::serialize(msg);
-        let res = self.connection.send(&network_msg);
+        let res = self.conn.send(&network_msg);
         if let Err(ref e) = res {
             if e.kind() == ErrorKind::ConnectionReset {
                 dbg_logf!("Server disconnected, exitting");

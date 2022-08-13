@@ -118,7 +118,7 @@ impl ServerGame {
         let mut disconnected = Vec::new();
         let mut msgs_to_all = Vec::new();
         for (client_handle, client) in self.clients.pair_iter_mut() {
-            let (msgs, closed) = client.connection.receive_cm();
+            let (msgs, closed) = client.conn.receive_cm();
             // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
             for msg in msgs {
@@ -254,14 +254,14 @@ impl ServerGame {
         let network_msg = net::serialize(msg);
         match dest {
             SendDest::One(handle) => {
-                if let Err(e) = self.clients[handle].connection.send(&network_msg) {
+                if let Err(e) = self.clients[handle].conn.send(&network_msg) {
                     dbg_logf!("Error in network_send One - index {}: {:?}", handle.index(), e);
                     disconnected.push(handle);
                 }
             }
             SendDest::All => {
                 for (handle, client) in self.clients.pair_iter_mut() {
-                    if let Err(e) = client.connection.send(&network_msg) {
+                    if let Err(e) = client.conn.send(&network_msg) {
                         dbg_logf!("Error in network_send All - index {}: {:?}", handle.index(), e);
                         disconnected.push(handle);
                     }
@@ -280,14 +280,14 @@ enum SendDest {
 }
 
 struct RemoteClient {
-    connection: Box<dyn Connection>,
+    conn: Box<dyn Connection>,
     player_handle: Handle<Player>,
 }
 
 impl RemoteClient {
-    fn new(connection: Box<dyn Connection>, player_handle: Handle<Player>) -> Self {
+    fn new(conn: Box<dyn Connection>, player_handle: Handle<Player>) -> Self {
         Self {
-            connection,
+            conn,
             player_handle,
         }
     }

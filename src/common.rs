@@ -75,7 +75,6 @@ impl GameState {
 
             let playing = player.ps == PlayerState::Playing;
             let input = player.input;
-            dbg_logd!(input);
             let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing {

@@ -43,6 +43,22 @@ use crate::{
 //  - repro in dylib-test - try addin winit
 //  - (prefer-dynamic project is useless)
 
+// findings:
+//  - bevy: cr --example hello_world --no-default-features --features bevy/dynamic
+//      - caused by fyrox_ui, it's deps are not enough
+//      - stops happening if i uncomment bevy stuff from hello_world.rs
+//      - all errors mention --allow-shlib-undefined
+//          - ld.lld: error: /home/martin/dev/rust/bevy/target/debug/deps/libbevy_dylib.so: undefined reference to core::option::Option$LT$T$GT$::unwrap_or_default::h4f830cba36c92969 [--no-allow-shlib-undefined]
+//      - "-Clink-arg=--for-linker=--allow-shlib-undefined" causes fail at runtime
+//          - target/debug/examples/hello_world: symbol lookup error: /home/martin/dev/rust/bevy/target/debug/deps/libbevy_dylib.so: undefined symbol: _ZN4core6option15Option$LT$T$GT$17unwrap_or_default17h4f830cba36c92969E
+
+//  - rustcycles errors are different:
+//  = note: ld.lld: error: undefined symbol: _$LT$T$u20$as$u20$core..convert..Into$LT$U$GT$$GT$::into::he8e76ec8aec57da8
+//          >>> referenced by window.rs:248 (/home/martin/.cargo/registry/src/github.com-1ecc6299db9ec823/winit-0.27.1/src/window.rs:248)
+//          >>>               /home/martin/dev/rust/rustcycles-compile-time-test-dylib/target/debug/deps/rustcycles-6c1f86099679404e.232pkvskerqm63a8.rcgu.o:(winit::window::WindowBuilder::with_title::h7e02bd683da02bab)
+
+// FIXME ask in bevy discord
+
 // Master TODO list:
 // v0.1 - MVP:
 //  - [x] Arena and wheel models

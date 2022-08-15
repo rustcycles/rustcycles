@@ -20,9 +20,7 @@ pub(crate) struct LocalListener {
 
 impl LocalListener {
     pub(crate) fn new(conn: LocalConnection) -> Self {
-        Self {
-            conn: Some(conn),
-        }
+        Self { conn: Some(conn) }
     }
 }
 

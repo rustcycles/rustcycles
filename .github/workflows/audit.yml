@@ -30,4 +30,5 @@ jobs:
       # RUSTSEC-2020-0097: xcb - Soundness issue with base::Error
       # RUSTSEC-2022-0048: xml-rs is Unmaintained
       # For more info: https://github.com/FyroxEngine/Fyrox/issues/208
-      - run: cargo audit --deny warnings --ignore RUSTSEC-2020-0016 --ignore RUSTSEC-2020-0097 --ignore RUSTSEC-2022-0048
+      # RUSTSEC-2021-0139 - ansi_term is Unmaintained - https://github.com/ogham/rust-ansi-term/issues/72
+      - run: cargo audit --deny warnings --ignore RUSTSEC-2020-0016 --ignore RUSTSEC-2020-0097 --ignore RUSTSEC-2022-0048 --ignore RUSTSEC-2021-0139

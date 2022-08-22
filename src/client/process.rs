@@ -212,11 +212,11 @@ impl ClientProcess {
         // LATER cvars
         let mouse_sensitivity_horizontal = 0.5;
         let mouse_sensitivity_vertical = 0.5;
-        let zoom_factor = if self.cg.lp.input.zoom { 0.25 } else { 1.0 };
+        let zoom_factor = if self.cg.lp.input.zoom { 4.0 } else { 1.0 };
 
         // Subtract, don't add the delta - nalgebra rotations are counterclockwise.
-        let delta_yaw = -delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
-        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical * zoom_factor;
+        let delta_yaw = -delta.0 as f32 * mouse_sensitivity_horizontal / zoom_factor;
+        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical / zoom_factor;
 
         self.cg.lp.delta_yaw += delta_yaw;
         self.cg.lp.delta_pitch += delta_pitch;

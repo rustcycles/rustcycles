@@ -4,7 +4,7 @@ pub(crate) mod entities;
 pub(crate) mod messages;
 pub(crate) mod net;
 
-use std::fmt::{self, Debug, Formatter};
+use std::fmt::{self, Debug, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 
@@ -21,9 +21,14 @@ pub(crate) struct GameState {
     /// LATER d_speed, pause, configurable dt (don't forget integration_parameters.dt)
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
     pub(crate) game_time: f32,
+
+    /// The previous gamelogic frame's time in seconds.
+    pub(crate) game_time_prev: f32,
+
     /// Currently this is not synced between client and server,
     /// it's just a debugging aid (e.g. run something on odd/even frames).
     pub(crate) frame_number: usize,
+
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
     pub(crate) players: Pool<Player>,
@@ -33,6 +38,7 @@ pub(crate) struct GameState {
 impl GameState {
     pub(crate) async fn new(engine: &mut Engine) -> Self {
         let mut scene = Scene::new();
+
         // This is needed because the default 1 causes the wheel to randomly stutter/stop
         // when passing between poles - they use a single trimesh collider.
         // 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
@@ -59,6 +65,9 @@ impl GameState {
 
         Self {
             game_time: 0.0,
+            // We wanna avoid having to specialcase divisions by zero in the first frame.
+            // It would usually be 0.0 / 0.0 anyway so now it's 0.0 / -1.0.
+            game_time_prev: -1.0,
             frame_number: 0,
             scene,
             cycle_model,
@@ -177,12 +186,29 @@ impl GameState {
     }
 }
 
+// LATER Would be nice to send as little as possible since this is networked.
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
-    // Some things like shooting need the angle at the exact time
-    // so we send yaw and pitch with each input, not just once per frame.
+    /// LATER This should probably never be networked, since cl and sv have different time.
+    pub(crate) real_time: f32,
+
+    /// LATER specify whether this is the current or prev or next frame,
+    /// it might get messy depending on when input vs timekeeping is done
+    /// and when it's sent.
+    pub(crate) game_time: f32,
+
+    /// Counterclockwise: 0 is directly forward, negative is left, positive right.
+    ///
+    /// Nalgebra rotations follow the right hand rule,
+    /// thumb points in +Y (up), the curl of fingers shows direction.
+    ///
+    /// Some things like shooting need the angle at the exact time
+    /// so we send yaw and pitch with each input, not just once per frame.
     pub(crate) yaw: Deg,
+    pub(crate) yaw_speed: Deg,
     pub(crate) pitch: Deg,
+    pub(crate) pitch_speed: Deg,
+
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
     pub(crate) zoom: bool,
@@ -196,7 +222,11 @@ pub(crate) struct Input {
 impl Debug for Input {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         // Only output the pressed buttons so it's more readable.
-        write!(f, "Input {{ yaw {}° pitch {}° ", self.yaw.0, self.pitch.0)?;
+        write!(
+            f,
+            "Input {{ time {} yaw {} {}/s pitch {} {}/s ",
+            self.game_time, self.yaw, self.yaw_speed, self.pitch, self.pitch_speed,
+        )?;
         if self.fire1 {
             write!(f, "fire1 ")?;
         }
@@ -237,5 +267,11 @@ pub(crate) struct Deg(pub(crate) f32);
 impl Deg {
     pub(crate) fn to_radians(self) -> f32 {
         self.0.to_radians()
+    }
+}
+
+impl Display for Deg {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}°", self.0)
     }
 }

@@ -141,6 +141,7 @@ impl ClientGame {
 
         let dt = 1.0 / 60.0;
         while self.gs.game_time + dt < game_time_target {
+            self.gs.game_time_prev = self.gs.game_time;
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
@@ -178,6 +179,19 @@ impl ClientGame {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
+        self.lp.input_prev = self.lp.input;
+
+        self.lp.input.yaw.0 += self.lp.delta_yaw; // LATER Normalize to [0, 360°) or something
+        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + self.lp.delta_pitch).clamp(-90.0, 90.0);
+
+        let delta_time = self.gs.game_time - self.gs.game_time_prev;
+        soft_assert!(delta_time > 0.0);
+        self.lp.input.yaw_speed.0 = self.lp.delta_yaw / delta_time;
+        self.lp.input.pitch_speed.0 = self.lp.delta_pitch / delta_time;
+
+        self.lp.delta_yaw = 0.0;
+        self.lp.delta_pitch = 0.0;
+
         self.send_input();
 
         let scene = &mut engine.scenes[self.gs.scene];
@@ -538,14 +552,21 @@ fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
 #[derive(Debug)]
 pub(crate) struct LocalPlayer {
     pub(crate) player_handle: Handle<Player>,
+    pub(crate) delta_yaw: f32,
+    pub(crate) delta_pitch: f32,
     pub(crate) input: Input,
+    pub(crate) input_prev: Input,
 }
 
 impl LocalPlayer {
     pub(crate) fn new(player_handle: Handle<Player>) -> Self {
         Self {
             player_handle,
+            delta_yaw: 0.0,
+            delta_pitch: 0.0,
+            // LATER real_time should not be 0 if it's not the first match in the same process?
             input: Input::default(),
+            input_prev: Input::default(),
         }
     }
 }

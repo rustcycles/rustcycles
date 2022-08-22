@@ -13,7 +13,7 @@ mod server;
 use std::{env, panic, process::Command, sync::Arc};
 
 use fyrox::{
-    core::{futures::executor, instant::Instant},
+    core::{futures::executor},
     dpi::{LogicalSize, PhysicalSize},
     engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
@@ -220,7 +220,6 @@ fn client_main(opts: Opts, local_server: bool) {
     let engine = init_engine_client(&event_loop, opts);
 
     let mut client = executor::block_on(ClientProcess::new(engine, local_server));
-    let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
@@ -246,7 +245,7 @@ fn client_main(opts: Opts, local_server: bool) {
                         // LATER might be useful for console/chat?
                     }
                     WindowEvent::Focused(focus) => {
-                        //dbg_logf!("{} focus {:?}", clock.elapsed().as_secs_f32(), focus);
+                        //dbg_logf!("{} focus {:?}", client.real_time(), focus);
 
                         client.focused(focus);
                     }
@@ -255,7 +254,7 @@ fn client_main(opts: Opts, local_server: bool) {
                         // there can be more `state: Pressed` events before a `state: Released`.
                         // dbg_logf!(
                         //     "{} keyboard input {:?}",
-                        //     clock.elapsed().as_secs_f32(),
+                        //     client.real_time(),
                         //     input
                         // );
 
@@ -264,7 +263,7 @@ fn client_main(opts: Opts, local_server: bool) {
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         dbg_logf!(
                             "{} mouse wheel {:?} {:?}",
-                            clock.elapsed().as_secs_f32(),
+                            client.real_time(),
                             delta,
                             phase
                         );
@@ -296,7 +295,7 @@ fn client_main(opts: Opts, local_server: bool) {
                         // https://github.com/martin-t/rustcycles/issues/1
                         // dbg_logf!(
                         //     "{} DeviceEvent::MouseMotion {:?}",
-                        //     clock.elapsed().as_secs_f32(),
+                        //     client.real_time(),
                         //     delta
                         // );
 
@@ -314,7 +313,7 @@ fn client_main(opts: Opts, local_server: bool) {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
-                client.update(clock.elapsed().as_secs_f32());
+                client.update();
                 while let Some(_ui_message) = client.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {
@@ -333,7 +332,6 @@ fn server_main() {
     let engine = init_engine_server(&event_loop);
 
     let mut server = executor::block_on(ServerProcess::new(engine));
-    let clock = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
@@ -353,7 +351,7 @@ fn server_main() {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
-                server.update(clock.elapsed().as_secs_f32());
+                server.update();
                 while let Some(_ui_message) = server.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {}

@@ -2,10 +2,13 @@
 
 use std::net::TcpListener;
 
+use fyrox::core::instant::Instant;
+
 use crate::{prelude::*, server::game::ServerGame};
 
 /// The process that runs a dedicated server.
 pub(crate) struct ServerProcess {
+    pub(crate) clock: Instant,
     pub(crate) engine: Engine,
     sg: ServerGame,
 }
@@ -17,10 +20,19 @@ impl ServerProcess {
 
         let sg = ServerGame::new(&mut engine, Box::new(listener)).await;
 
-        Self { engine, sg }
+        Self {
+            clock: Instant::now(),
+            engine,
+            sg,
+        }
     }
 
-    pub(crate) fn update(&mut self, game_time_target: f32) {
-        self.sg.update(&mut self.engine, game_time_target);
+    pub(crate) fn update(&mut self) {
+        let target = self.real_time();
+        self.sg.update(&mut self.engine, target);
+    }
+
+    pub(crate) fn real_time(&self) -> f32 {
+        self.clock.elapsed().as_secs_f32()
     }
 }

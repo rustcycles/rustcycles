@@ -42,6 +42,7 @@ impl ServerGame {
 
         let dt = 1.0 / 60.0;
         while self.gs.game_time + dt < game_time_target {
+            self.gs.game_time_prev = self.gs.game_time;
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 

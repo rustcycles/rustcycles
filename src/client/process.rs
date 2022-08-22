@@ -13,6 +13,7 @@ use std::{
 };
 
 use fyrox::{
+    core::instant::Instant,
     dpi::PhysicalSize,
     error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton, ScanCode},
@@ -36,6 +37,7 @@ use crate::{
 
 /// The process that runs a player's game client.
 pub(crate) struct ClientProcess {
+    pub(crate) clock: Instant,
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
     debug_text: Handle<UiNode>,
@@ -99,6 +101,7 @@ impl ClientProcess {
         };
 
         Self {
+            clock: Instant::now(),
             mouse_grabbed: false,
             engine,
             debug_text,
@@ -168,6 +171,8 @@ impl ClientProcess {
             }
         }
 
+        self.cg.lp.input.real_time = self.real_time();
+        self.cg.lp.input.game_time = self.cg.gs.game_time;
         self.cg.send_input();
     }
 
@@ -182,6 +187,8 @@ impl ClientProcess {
             MouseButton::Other(_) => {}
         }
 
+        self.cg.lp.input.real_time = self.real_time();
+        self.cg.lp.input.game_time = self.cg.gs.game_time;
         self.cg.send_input();
     }
 
@@ -192,18 +199,27 @@ impl ClientProcess {
             return;
         }
 
+        // Events don't come at a constant rate, they often seem to bunch up.
+        // We don't know the time when they were generated, only when we handle them here.
+        // So there's no point trying to calculate things like mouse speed
+        // based on real time from last event. Instead, save the cumulative delta
+        // and update angles/speeds once per frame.
+        //
+        // LATER Might be because the main thread is blocked running game logic.
+        //  Update this comment after separating things to threads.
+        let real_time = self.real_time();
+
         // LATER cvars
         let mouse_sensitivity_horizontal = 0.5;
         let mouse_sensitivity_vertical = 0.5;
         let zoom_factor = if self.cg.lp.input.zoom { 0.25 } else { 1.0 };
-        let delta_yaw = delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
+
+        // Subtract, don't add the delta - nalgebra rotations are counterclockwise.
+        let delta_yaw = -delta.0 as f32 * mouse_sensitivity_horizontal * zoom_factor;
         let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical * zoom_factor;
 
-        // Subtract, don't add the delta X.
-        // Nalgebra rotations follow the right hand rule,
-        // thumb points in +Z, the curl of fingers shows direction.
-        self.cg.lp.input.yaw.0 -= delta_yaw; // LATER Normalize to [0, 360°) or something
-        self.cg.lp.input.pitch.0 = (self.cg.lp.input.pitch.0 + delta_pitch).clamp(-90.0, 90.0);
+        self.cg.lp.delta_yaw += delta_yaw;
+        self.cg.lp.delta_pitch += delta_pitch;
     }
 
     /// Either grab mouse and hide cursor
@@ -222,10 +238,16 @@ impl ClientProcess {
         }
     }
 
-    pub(crate) fn update(&mut self, dt: f32) {
-        self.cg.update(&mut self.engine, dt);
+    pub(crate) fn update(&mut self) {
+        let target = self.real_time();
+        self.cg.update(&mut self.engine, target);
+        let target = self.real_time(); // Borrowck dance
         if let Some(sg) = &mut self.sg {
-            sg.update(&mut self.engine, dt)
+            sg.update(&mut self.engine, target)
         }
+    }
+
+    pub(crate) fn real_time(&self) -> f32 {
+        self.clock.elapsed().as_secs_f32()
     }
 }

@@ -35,11 +35,10 @@ use crate::{
 
 // TODO dylib:
 //
-//  - find which dep does it (pened on them direvtly) - winit?
-//  - debug it
-//		- https://old.reddit.com/r/rust/comments/4fd5ng/how_to_use_the_std_library_as_a_dynamically/
-//		- https://stackoverflow.com/questions/38799192/how-to-debug-error-symbol-lookup-error-undefined-symbol
-//  - empty fyrox project - try addin winit
+//  - https://old.reddit.com/r/rust/comments/4fd5ng/how_to_use_the_std_library_as_a_dynamically/
+//  - https://stackoverflow.com/questions/38799192/how-to-debug-error-symbol-lookup-error-undefined-symbol
+//
+//  - empty fyrox project - try adding winit
 //  - bevy with fyrox - also fails - missing rayon hashbrown, many drops
 //  - repro in dylib-test - try addin winit
 //  - (prefer-dynamic project is useless)

@@ -1,4 +1,4 @@
-//! A bunch of QoL macros, traits and functions
+//! A bunch of QoL consts, macros, traits and functions
 //! to make gamedev in Rust faster and saner.
 //!
 //! Should be imported in most files via
@@ -83,6 +83,34 @@ macro_rules! v {
 ///
 /// X, Y, Z is left, up, forward.
 pub(crate) type Vec3 = Vector3<f32>;
+
+// These take less typing than using an extension trait - e.g. `Vec3::up()`.
+
+/// The column vector with a 1 as its first (X) component, and zero elsewhere.
+pub(crate) const LEFT: Vec3 = Vec3::new(1.0, 0.0, 0.0);
+/// The column vector with a 1 as its second (Y) component, and zero elsewhere.
+pub(crate) const UP: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+/// The column vector with a 1 as its third (Z) component, and zero elsewhere.
+pub(crate) const FORWARD: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+/// The column vector with a -1 as its first (X) component, and zero elsewhere.
+pub(crate) const RIGHT: Vec3 = Vec3::new(-1.0, 0.0, 0.0);
+/// The column vector with a -1 as its second (Y) component, and zero elsewhere.
+pub(crate) const DOWN: Vec3 = Vec3::new(0.0, -1.0, 0.0);
+/// The column vector with a -1 as its third (Z) component, and zero elsewhere.
+pub(crate) const BACK: Vec3 = Vec3::new(0.0, 0.0, -1.0);
+
+/// The unit column vector with a 1 as its first (X) component, and zero elsewhere.
+pub(crate) const LEFT_AXIS: Unit<Vec3> = Unit::new_unchecked(LEFT);
+/// The unit column vector with a 1 as its second (Y) component, and zero elsewhere.
+pub(crate) const UP_AXIS: Unit<Vec3> = Unit::new_unchecked(UP);
+/// The unit column vector with a 1 as its third (Z) component, and zero elsewhere.
+pub(crate) const FORWARD_AXIS: Unit<Vec3> = Unit::new_unchecked(FORWARD);
+/// The unit column vector with a -1 as its first (X) component, and zero elsewhere.
+pub(crate) const RIGHT_AXIS: Unit<Vec3> = Unit::new_unchecked(RIGHT);
+/// The unit column vector with a -1 as its second (Y) component, and zero elsewhere.
+pub(crate) const DOWN_AXIS: Unit<Vec3> = Unit::new_unchecked(DOWN);
+/// The unit column vector with a -1 as its third (Z) component, and zero elsewhere.
+pub(crate) const BACK_AXIS: Unit<Vec3> = Unit::new_unchecked(BACK);
 
 /// QoL methods for nalgebra's Vector3.
 ///

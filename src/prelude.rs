@@ -4,7 +4,10 @@
 //! Should be imported in most files via
 //! `use crate::prelude::*`.
 
+// The whole point of this mod is to provide a bunch of stuff
+// that may or may not be used but should be *available*.
 #![allow(unused_imports)]
+#![allow(dead_code)]
 
 use fyrox::core::algebra::Vector3;
 

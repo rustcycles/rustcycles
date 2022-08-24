@@ -7,7 +7,7 @@
 use std::cell::RefCell;
 
 use fxhash::FxHashMap;
-use fyrox::core::algebra::Vector3;
+use fyrox::{core::algebra::Vector3, scene::debug::Line};
 use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
@@ -133,9 +133,8 @@ impl DebugShape {
     }
 }
 
-#[allow(clippy::type_complexity)]
 #[derive(Debug)]
-pub(crate) struct Lines(pub(crate) FxHashMap<(Vector3<u32>, Vector3<u32>), (Vec3, Vec3, Color)>);
+pub(crate) struct Lines(pub(crate) FxHashMap<(Vector3<u32>, Vector3<u32>), Line>);
 
 impl Lines {
     pub(crate) fn new() -> Self {
@@ -150,8 +149,8 @@ impl Lines {
 
         self.0
             .entry((bits_begin, bits_end))
-            .and_modify(|(_, _, c)| *c += color)
-            .or_insert((begin, end, color));
+            .and_modify(|line| line.color += color)
+            .or_insert(Line { begin, end, color });
     }
 }
 

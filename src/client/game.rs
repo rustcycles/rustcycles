@@ -6,10 +6,7 @@ use std::{io::ErrorKind, thread, time::Duration};
 
 use fyrox::{
     gui::{message::MessageDirection, text::TextMessage, UiNode},
-    scene::{
-        camera::{CameraBuilder, Projection, SkyBoxBuilder},
-        debug::Line,
-    },
+    scene::camera::{CameraBuilder, Projection, SkyBoxBuilder},
 };
 
 use crate::{
@@ -428,8 +425,8 @@ impl ClientGame {
                 // LATER }
                 shape.time -= dt;
             }
-            for &(begin, end, color) in lines.0.values() {
-                scene.drawing_context.add_line(Line { begin, end, color });
+            for (_, line) in lines.0 {
+                scene.drawing_context.add_line(line);
             }
         });
 

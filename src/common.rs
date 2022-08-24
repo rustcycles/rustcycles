@@ -216,6 +216,8 @@ pub(crate) struct Input {
     pub(crate) backward: bool,
     pub(crate) left: bool,
     pub(crate) right: bool,
+    pub(crate) up: bool,
+    pub(crate) down: bool,
     // ^ when adding fields, also add them to Debug
 }
 
@@ -247,6 +249,12 @@ impl Debug for Input {
         }
         if self.right {
             write!(f, "right ")?;
+        }
+        if self.up {
+            write!(f, "up ")?;
+        }
+        if self.down {
+            write!(f, "down ")?;
         }
         write!(f, "}}")?;
         Ok(())

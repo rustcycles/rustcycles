@@ -321,6 +321,7 @@ impl ClientGame {
         if ps == PlayerState::Observing {
             let forward = camera.forward_vec_normed();
             let left = camera.left_vec_normed();
+            let up = camera.up_vec_normed();
             let camera_speed = 10.0;
             if self.lp.input.forward {
                 camera_pos += forward * dt * camera_speed;
@@ -333,6 +334,12 @@ impl ClientGame {
             }
             if self.lp.input.right {
                 camera_pos += -left * dt * camera_speed;
+            }
+            if self.lp.input.up {
+                camera_pos += up * dt * camera_speed;
+            }
+            if self.lp.input.down {
+                camera_pos += -up * dt * camera_speed;
             }
         } else if ps == PlayerState::Playing {
             // LATER cvars

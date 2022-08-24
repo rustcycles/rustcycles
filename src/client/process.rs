@@ -143,6 +143,11 @@ impl ClientProcess {
 
     pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
         // Use scancodes, not virtual keys, because they don't depend on layout.
+        // https://github.com/rust-windowing/winit/issues/732:
+        //  From my testing on Windows and Linux the letter/punctuation keys, number keys,
+        //  function keys, and escape, space, shift, enter, tab, backspace, and caps keys
+        //  are all identical across both platforms, but various other keys
+        //  (such as arrow keys) weren't consistent.
         const ESC: ScanCode = 1;
         const TAB: ScanCode = 15;
         const W: ScanCode = 17;
@@ -153,6 +158,7 @@ impl ClientProcess {
         const SHIFT: ScanCode = 42;
         const Z: ScanCode = 44;
         const ALT: ScanCode = 56;
+        const SPACE: ScanCode = 57;
         const BACKSLASH: ScanCode = 86;
         let pressed = input.state == ElementState::Pressed;
         match input.scancode {
@@ -161,7 +167,9 @@ impl ClientProcess {
             A => self.cg.lp.input.left = pressed,
             S => self.cg.lp.input.backward = pressed,
             D => self.cg.lp.input.right = pressed,
-            TAB | SHIFT | CTRL | ALT | BACKSLASH | Z => {
+            SPACE => self.cg.lp.input.up = pressed,
+            SHIFT => self.cg.lp.input.down = pressed,
+            TAB | CTRL | ALT | BACKSLASH | Z => {
                 // Don't print anything, it just spams stdout when switching windows.
             }
             c => {

@@ -177,35 +177,6 @@ macro_rules! dbg_rot {
     };
 }
 
-/// These only exist for convenience when debugging,
-/// normal code should use `Color::YOUR_COLOR_HERE` in full.
-/// Also this doesn't follow any standard color naming scheme
-/// and can change at any time.
-pub(crate) mod colors {
-    use fyrox::core::color::Color;
-
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const WHITE: Color = Color::WHITE;
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const BLACK: Color = Color::BLACK;
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const RED: Color = Color::RED;
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const GREEN: Color = Color::GREEN;
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const BLUE: Color = Color::BLUE;
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    ///
-    /// A blue you can actually see
-    pub(crate) const BLUE2: Color = Color::opaque(0, 100, 255);
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const YELLOW: Color = Color::opaque(255, 255, 0);
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const MAGENTA: Color = Color::opaque(255, 0, 255);
-    /// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-    pub(crate) const CYAN: Color = Color::opaque(0, 255, 255);
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unit_cmp)] // https://github.com/rust-lang/rust-clippy/issues/4661

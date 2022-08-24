@@ -35,9 +35,6 @@ pub(crate) use fyrox::{
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub(crate) use inline_tweak::tweak;
 
-/// For debugging only, use `Color::YOUR_COLOR_HERE` in normal code.
-pub(crate) use crate::debug::colors::*;
-
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root
 // so we import it here to make it part of prelude.
@@ -181,6 +178,25 @@ impl NodeExt for Node {
         self.look_vector()
     }
 }
+
+// Associated consts can't be imported (or even glob-imported)
+// so we have to redefine them here.
+pub(crate) const WHITE: Color = Color::WHITE;
+pub(crate) const BLACK: Color = Color::BLACK;
+pub(crate) const RED: Color = Color::RED;
+pub(crate) const GREEN: Color = Color::GREEN;
+/// A hard to see dark blue, prefer BLUE2 instead.
+pub(crate) const BLUE: Color = Color::BLUE;
+pub(crate) const TRANSPARENT: Color = Color::TRANSPARENT;
+pub(crate) const ORANGE: Color = Color::ORANGE;
+
+// And a couple more custom ones.
+// This doesn't follow any standard color naming scheme.
+/// A blue you can actually see
+pub(crate) const BLUE2: Color = Color::opaque(0, 100, 255);
+pub(crate) const YELLOW: Color = Color::opaque(255, 255, 0);
+pub(crate) const MAGENTA: Color = Color::opaque(255, 0, 255);
+pub(crate) const CYAN: Color = Color::opaque(0, 255, 255);
 
 #[cfg(test)]
 mod tests {

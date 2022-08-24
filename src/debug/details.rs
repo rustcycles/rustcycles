@@ -133,6 +133,7 @@ impl DebugShape {
     }
 }
 
+#[allow(clippy::type_complexity)]
 #[derive(Debug)]
 pub(crate) struct Lines(pub(crate) FxHashMap<(Vector3<u32>, Vector3<u32>), (Vec3, Vec3, Color)>);
 

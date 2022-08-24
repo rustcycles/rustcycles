@@ -113,50 +113,6 @@ pub(crate) const DOWN_AXIS: Unit<Vec3> = Unit::new_unchecked(DOWN);
 /// The unit column vector with a -1 as its third (Z) component, and zero elsewhere.
 pub(crate) const BACK_AXIS: Unit<Vec3> = Unit::new_unchecked(BACK);
 
-/// QoL methods for nalgebra's Vector3.
-///
-/// Should be imported along with the rest of the prelude using a glob.
-pub(crate) trait Vec3Ext
-where
-    Self: Sized,
-{
-    /// The column vector with a 1 as its first (X) component, and zero elsewhere.
-    fn left() -> Self;
-    /// The column vector with a 1 as its second (Y) component, and zero elsewhere.
-    fn up() -> Self;
-    /// The column vector with a 1 as its third (Z) component, and zero elsewhere.
-    fn forward() -> Self;
-
-    /// The unit column vector with a 1 as its first (X) component, and zero elsewhere.
-    fn left_axis() -> Unit<Self>;
-    /// The unit column vector with a 1 as its second (Y) component, and zero elsewhere.
-    fn up_axis() -> Unit<Self>;
-    /// The unit column vector with a 1 as its third (Z) component, and zero elsewhere.
-    fn forward_axis() -> Unit<Self>;
-}
-
-impl Vec3Ext for Vec3 {
-    fn left() -> Self {
-        Self::x()
-    }
-    fn up() -> Self {
-        Self::y()
-    }
-    fn forward() -> Self {
-        Self::z()
-    }
-
-    fn left_axis() -> Unit<Self> {
-        Self::x_axis()
-    }
-    fn up_axis() -> Unit<Self> {
-        Self::y_axis()
-    }
-    fn forward_axis() -> Unit<Self> {
-        Self::z_axis()
-    }
-}
-
 /// QoL methods for fyrox's Node.
 ///
 /// Should be imported along with the rest of the prelude using a glob.

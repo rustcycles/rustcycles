@@ -8,7 +8,7 @@ use fyrox::{
     gui::{message::MessageDirection, text::TextMessage, UiNode},
     scene::{
         camera::{CameraBuilder, Projection, SkyBoxBuilder},
-        debug::{Line, SceneDrawingContext},
+        debug::Line,
     },
 };
 
@@ -24,7 +24,7 @@ use crate::{
     },
     debug::{
         self,
-        details::{DebugShape, Lines, Shape, DEBUG_SHAPES, DEBUG_TEXTS},
+        details::{Lines, DEBUG_SHAPES, DEBUG_TEXTS},
     },
     prelude::*,
 };

@@ -207,7 +207,6 @@ impl ClientProcess {
         //
         // LATER Might be because the main thread is blocked running game logic.
         //  Update this comment after separating things to threads.
-        let real_time = self.real_time();
 
         // LATER cvars
         let mouse_sensitivity_horizontal = 0.5;

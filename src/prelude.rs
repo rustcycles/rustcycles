@@ -84,7 +84,8 @@ macro_rules! v {
 /// X, Y, Z is left, up, forward.
 pub(crate) type Vec3 = Vector3<f32>;
 
-// These take less typing than using an extension trait - e.g. `Vec3::up()`.
+// Consts take less typing than using an extension trait - e.g. `Vec3::up()`
+// even though it's less explicit we're talking about 3D vectors.
 
 /// The column vector with a 1 as its first (X) component, and zero elsewhere.
 pub(crate) const LEFT: Vec3 = Vec3::new(1.0, 0.0, 0.0);
@@ -187,13 +188,13 @@ impl NodeExt for Node {
     }
 
     fn left_vec_normed(&self) -> Vec3 {
-        self.left_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::left)
+        self.left_vec().try_normalize(f32::EPSILON).unwrap_or(LEFT)
     }
     fn up_vec_normed(&self) -> Vec3 {
-        self.up_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::up)
+        self.up_vec().try_normalize(f32::EPSILON).unwrap_or(UP)
     }
     fn forward_vec_normed(&self) -> Vec3 {
-        self.forward_vec().try_normalize(f32::EPSILON).unwrap_or_else(Vec3::forward)
+        self.forward_vec().try_normalize(f32::EPSILON).unwrap_or(FORWARD)
     }
 }
 

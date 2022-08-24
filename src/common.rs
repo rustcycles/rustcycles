@@ -84,7 +84,7 @@ impl GameState {
 
             let playing = player.ps == PlayerState::Playing;
             let input = player.input;
-            let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
+            let rot = UnitQuaternion::from_axis_angle(&UP_AXIS, input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing {
                 let forward = rot * FORWARD;
@@ -179,7 +179,7 @@ impl GameState {
     pub(crate) fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
         let step = (self.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
-        let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
+        let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);
         dbg_textd!(self.frame_number, pos, angle.to_degrees());

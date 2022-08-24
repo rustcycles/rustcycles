@@ -304,10 +304,10 @@ impl ClientGame {
 
         // Camera turning
         let yaw_angle = self.lp.input.yaw.0.to_radians();
-        let yaw = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), yaw_angle);
+        let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
 
         let pitch_angle = self.lp.input.pitch.0.to_radians();
-        let pitch_axis = yaw * Vec3::left_axis();
+        let pitch_axis = yaw * LEFT_AXIS;
         let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
 
         let cam_rot = pitch * yaw;

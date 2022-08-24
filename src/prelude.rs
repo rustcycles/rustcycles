@@ -124,12 +124,50 @@ pub(crate) trait NodeExt {
     /// The "look" vector of the global transform basis, might not be normalized.
     fn forward_vec(&self) -> Vec3;
 
+    /// The negative "side" vector of the global transform basis, might not be normalized.
+    fn right_vec(&self) -> Vec3 {
+        -self.left_vec()
+    }
+
+    /// The negative "up" vector of the global transform basis, might not be normalized.
+    fn down_vec(&self) -> Vec3 {
+        -self.up_vec()
+    }
+
+    /// The negative "look" vector of the global transform basis, might not be normalized.
+    fn back_vec(&self) -> Vec3 {
+        -self.forward_vec()
+    }
+
     /// The normalized "side" vector of the global transform basis.
-    fn left_vec_normed(&self) -> Vec3;
+    fn left_vec_normed(&self) -> Vec3 {
+        self.left_vec().try_normalize(f32::EPSILON).unwrap_or(LEFT)
+    }
+
     /// The normalized "up" vector of the global transform basis.
-    fn up_vec_normed(&self) -> Vec3;
+    fn up_vec_normed(&self) -> Vec3 {
+        self.up_vec().try_normalize(f32::EPSILON).unwrap_or(UP)
+    }
+
     /// The normalized "look" vector of the global transform basis.
-    fn forward_vec_normed(&self) -> Vec3;
+    fn forward_vec_normed(&self) -> Vec3 {
+        self.forward_vec().try_normalize(f32::EPSILON).unwrap_or(FORWARD)
+    }
+
+    /// The normalized negative "side" vector of the global transform basis.
+    fn right_vec_normed(&self) -> Vec3 {
+        -self.left_vec_normed()
+    }
+
+    /// The normalized negative "up" vector of the global transform basis.
+    fn down_vec_normed(&self) -> Vec3 {
+        -self.up_vec_normed()
+    }
+
+    /// The normalized negative "look" vector of the global transform basis.
+    fn back_vec_normed(&self) -> Vec3 {
+        -self.forward_vec_normed()
+    }
 }
 
 impl NodeExt for Node {
@@ -141,16 +179,6 @@ impl NodeExt for Node {
     }
     fn forward_vec(&self) -> Vec3 {
         self.look_vector()
-    }
-
-    fn left_vec_normed(&self) -> Vec3 {
-        self.left_vec().try_normalize(f32::EPSILON).unwrap_or(LEFT)
-    }
-    fn up_vec_normed(&self) -> Vec3 {
-        self.up_vec().try_normalize(f32::EPSILON).unwrap_or(UP)
-    }
-    fn forward_vec_normed(&self) -> Vec3 {
-        self.forward_vec().try_normalize(f32::EPSILON).unwrap_or(FORWARD)
     }
 }
 

@@ -2205,6 +2205,7 @@ name = "rustcycles"
 version = "0.0.0"
 dependencies = [
  "bincode",
+ "fxhash",
  "fyrox",
  "inline_tweak",
  "serde",

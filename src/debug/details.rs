@@ -6,6 +6,8 @@
 
 use std::cell::RefCell;
 
+use fxhash::FxHashMap;
+use fyrox::core::algebra::Vector3;
 use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
@@ -33,6 +35,16 @@ macro_rules! __format_pairs {
 
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
+pub(crate) struct DebugShape {
+    pub(crate) shape: Shape,
+    /// Time left (decreases every frame)
+    pub(crate) time: f32,
+    #[serde(with = "ColorDef")]
+    pub(crate) color: Color,
+}
+
+/// Helper struct, use one of the `dbg_*!()` macros.
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) enum Shape {
     Line {
         begin: Vec3,
@@ -51,16 +63,6 @@ pub(crate) enum Shape {
     },
 }
 
-/// Helper struct, use one of the `dbg_*!()` macros.
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct DebugShape {
-    pub(crate) shape: Shape,
-    /// Time left (decreases every frame)
-    pub(crate) time: f32,
-    #[serde(with = "ColorDef")]
-    pub(crate) color: Color,
-}
-
 /// Fyrox's Color doesn't impl serde traits
 /// so we do this: https://serde.rs/remote-derive.html
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -70,6 +72,86 @@ pub struct ColorDef {
     pub g: u8,
     pub b: u8,
     pub a: u8,
+}
+
+impl DebugShape {
+    pub(crate) fn to_lines(&self, lines: &mut Lines) {
+        match self.shape {
+            Shape::Line { begin, end } => {
+                lines.insert(begin, end, self.color);
+            }
+            Shape::Arrow { begin, dir } => {
+                let end = begin + dir;
+                lines.insert(begin, end, self.color);
+
+                // When the arrow is horizontal, we want two of the side lines
+                // to be above and below the arrow body and the other two to the sides.
+                // When it's not horizontal, we want it to appear pitched up/down,
+                // no weird rotations around the axis.
+
+                // Make sure dir and up are not colinear.
+                let up = if dir.x < f32::EPSILON && dir.z < f32::EPSILON {
+                    Vec3::forward()
+                } else {
+                    Vec3::up()
+                };
+
+                let rot = UnitQuaternion::face_towards(&dir, &up);
+                let len = dir.magnitude();
+                let left = rot * Vec3::left() * len;
+                let up = rot * Vec3::up() * len;
+                lines.insert(end, end + (-dir + left) * 0.25, self.color);
+                lines.insert(end, end + (-dir - left) * 0.25, self.color);
+                lines.insert(end, end + (-dir + up) * 0.25, self.color);
+                lines.insert(end, end + (-dir - up) * 0.25, self.color);
+            }
+            Shape::Cross { point } => {
+                let half_len = 0.5; // LATER cvar
+                let dir1 = v!(1 1 1) * half_len;
+                let dir2 = v!(-1 1 1) * half_len;
+                let dir3 = v!(1 1 -1) * half_len;
+                let dir4 = v!(-1 1 -1) * half_len;
+                lines.insert(point - dir1, point + dir1, self.color);
+                lines.insert(point - dir2, point + dir2, self.color);
+                lines.insert(point - dir3, point + dir3, self.color);
+                lines.insert(point - dir4, point + dir4, self.color);
+
+                let from_origin = false; // LATER cvar
+                if from_origin {
+                    // This is sometimes useful if we have trouble finding the cross.
+                    lines.insert(Vec3::zeros(), point, self.color);
+                }
+            }
+            Shape::Rot { point, rot } => {
+                // Oringally, this used SceneDrawingContext::draw_transform
+                // but this way we can use BLUE2 instead of the hard to see BLUE.
+                lines.insert(point, point + rot * Vec3::left(), RED);
+                lines.insert(point, point + rot * Vec3::up(), GREEN);
+                lines.insert(point, point + rot * Vec3::forward(), BLUE2);
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct Lines(pub(crate) FxHashMap<(Vector3<u32>, Vector3<u32>), (Vec3, Vec3, Color)>);
+
+impl Lines {
+    pub(crate) fn new() -> Self {
+        Self(FxHashMap::default())
+    }
+
+    /// Insert the line into the hashmap, merging colors if a line already exists
+    /// in the exact same place.
+    fn insert(&mut self, begin: Vec3, end: Vec3, color: Color) {
+        let bits_begin = begin.map(|v| v.to_bits());
+        let bits_end = end.map(|v| v.to_bits());
+
+        self.0
+            .entry((bits_begin, bits_end))
+            .and_modify(|(_, _, c)| *c += color)
+            .or_insert((begin, end, color));
+    }
 }
 
 /// Helper function, prefer `dbg_line!()` instead.

@@ -24,7 +24,7 @@ use crate::{
     },
     debug::{
         self,
-        details::{DebugShape, Shape, DEBUG_SHAPES, DEBUG_TEXTS},
+        details::{DebugShape, Lines, Shape, DEBUG_SHAPES, DEBUG_TEXTS},
     },
     prelude::*,
 };
@@ -364,19 +364,30 @@ impl ClientGame {
             dbg_cross!(body_pos, 3.0);
         }
 
-        dbg_line!(v!(15 5 5), v!(15 5 7));
+        // Examples of all the debug shapes
 
-        dbg_arrow!(v!(10 5 5), v!(0 0 2)); // Forward
-        dbg_arrow!(v!(10 5 5), v!(0 0 -1)); // Back
-        dbg_arrow!(v!(10 5 5), v!(-1 0 0)); // Left
-        dbg_arrow!(v!(10 5 5), v!(1 0 0)); // Right
-        dbg_arrow!(v!(10 5 5), v!(0 1 0)); // Up
-        dbg_arrow!(v!(10 5 5), v!(0 -1 0)); // Down
+        dbg_line!(v!(25 5 5), v!(25 5 7));
 
-        dbg_arrow!(v!(10 10 5), v!(1 1 1), 0.0, BLUE);
-        dbg_arrow!(v!(10 10 10), v!(2 2 2), 0.0, BLUE2);
+        dbg_arrow!(v!(20 5 5), v!(0 0 2)); // Forward
+        dbg_arrow!(v!(20 5 5), v!(0 0 -1)); // Back
+        dbg_arrow!(v!(20 5 5), v!(-1 0 0)); // Left
+        dbg_arrow!(v!(20 5 5), v!(1 0 0)); // Right
+        dbg_arrow!(v!(20 5 5), v!(0 1 0)); // Up
+        dbg_arrow!(v!(20 5 5), v!(0 -1 0)); // Down
 
-        dbg_cross!(v!(5 5 5), 0.0, CYAN);
+        dbg_arrow!(v!(20 10 5), v!(1 1 1), 0.0, BLUE);
+        dbg_arrow!(v!(20 10 6), v!(2 2 2), 0.0, BLUE2);
+
+        dbg_cross!(v!(15 5 5), 0.0, CYAN);
+
+        dbg_rot!(v!(10 5 5), UnitQuaternion::default());
+
+        dbg_arrow!(v!(15 10 5), v!(0 0 2), 0.0, GREEN);
+        dbg_arrow!(v!(15 10 5), v!(0 0.01 2), 0.0, RED);
+        dbg_arrow!(v!(15 11 5), v!(0 0 2), 0.0, RED);
+        dbg_arrow!(v!(15 11 5), v!(0 0.01 2), 0.0, GREEN);
+        dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, RED);
+        dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, GREEN);
     }
 
     fn tick_after_physics(&mut self, engine: &mut Engine, dt: f32) {
@@ -403,12 +414,22 @@ impl ClientGame {
         //scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
+            // Sometimes debug shapes overlap and only the last one gets drawn.
+            // This is especially common when both client and server wanna draw.
+            // So instead, we convert everything to lines,
+            // merge colors if they overlap and only then draw it.
+            // This way if cl and sv shapes overlap, they end up yellow (red + green).
+            // LATER would be more efficient to merge whole shapes, not individual lines.
             let mut shapes = shapes.borrow_mut();
+            let mut lines = Lines::new();
             for shape in shapes.iter_mut() {
                 // LATER if cvars.d_draw && cvars.d_draw_crosses {
-                draw_shape(&mut scene.drawing_context, shape);
+                shape.to_lines(&mut lines);
                 // LATER }
                 shape.time -= dt;
+            }
+            for &(begin, end, color) in lines.0.values() {
+                scene.drawing_context.add_line(Line { begin, end, color });
             }
         });
 
@@ -443,106 +464,6 @@ impl ClientGame {
             }
         }
         res.unwrap();
-    }
-}
-
-fn draw_shape(drawing_context: &mut SceneDrawingContext, shape: &DebugShape) {
-    match shape.shape {
-        Shape::Line { begin, end } => {
-            drawing_context.add_line(Line {
-                begin,
-                end,
-                color: shape.color,
-            });
-        }
-        Shape::Arrow { begin, dir } => {
-            let end = begin + dir;
-            drawing_context.add_line(Line {
-                begin,
-                end,
-                color: shape.color,
-            });
-
-            // When the arrow is horizontal, we want two of the side lines
-            // to be above and below the arrow body and the other two to the sides.
-            // When it's not horizontal, we want it to appear pitched up/down,
-            // no weird rotations around the axis.
-
-            // Make sure dir and up are not colinear.
-            let up = if dir.x < f32::EPSILON && dir.z < f32::EPSILON {
-                Vec3::forward()
-            } else {
-                Vec3::up()
-            };
-
-            let rot = UnitQuaternion::face_towards(&dir, &up);
-            let len = dir.magnitude();
-            let left = rot * Vec3::left() * len;
-            let up = rot * Vec3::up() * len;
-            drawing_context.add_line(Line {
-                begin: end,
-                end: end + (-dir + left) * 0.25,
-                color: shape.color,
-            });
-            drawing_context.add_line(Line {
-                begin: end,
-                end: end + (-dir - left) * 0.25,
-                color: shape.color,
-            });
-            drawing_context.add_line(Line {
-                begin: end,
-                end: end + (-dir + up) * 0.25,
-                color: shape.color,
-            });
-            drawing_context.add_line(Line {
-                begin: end,
-                end: end + (-dir - up) * 0.25,
-                color: shape.color,
-            });
-        }
-        Shape::Cross { point } => {
-            let half_len = 0.5; // LATER cvar
-            let dir = v!(1 1 1) * half_len;
-            drawing_context.add_line(Line {
-                begin: point - dir,
-                end: point + dir,
-                color: shape.color,
-            });
-
-            let dir = v!(-1 1 1) * half_len;
-            drawing_context.add_line(Line {
-                begin: point - dir,
-                end: point + dir,
-                color: shape.color,
-            });
-
-            let dir = v!(1 1 -1) * half_len;
-            drawing_context.add_line(Line {
-                begin: point - dir,
-                end: point + dir,
-                color: shape.color,
-            });
-
-            let dir = v!(-1 1 -1) * half_len;
-            drawing_context.add_line(Line {
-                begin: point - dir,
-                end: point + dir,
-                color: shape.color,
-            });
-
-            let from_origin = false; // LATER cvar
-            if from_origin {
-                drawing_context.add_line(Line {
-                    begin: Vec3::zeros(),
-                    end: point,
-                    color: shape.color,
-                });
-            }
-        }
-        Shape::Rot { point, rot } => {
-            let matrix = rot.to_homogeneous().append_translation(&point);
-            drawing_context.draw_transform(matrix);
-        }
     }
 }
 

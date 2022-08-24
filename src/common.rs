@@ -87,8 +87,8 @@ impl GameState {
             let rot = UnitQuaternion::from_axis_angle(&Vec3::up_axis(), input.yaw.to_radians());
             let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing {
-                let forward = rot * Vec3::forward();
-                let left = rot * Vec3::left();
+                let forward = rot * FORWARD;
+                let left = rot * LEFT;
 
                 let mut wheel_accel = Vec3::zeros();
                 if input.forward {
@@ -108,7 +108,7 @@ impl GameState {
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
             }
-            let dir = rot * Vec3::forward();
+            let dir = rot * FORWARD;
             dbg_arrow!(v!(0 3 0), dir.normalize(), 0.5);
 
             // LATER Does this allow clipping into geometry? Yes.
@@ -180,7 +180,7 @@ impl GameState {
         let step = (self.frame_number % steps) as f32;
         let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
         let rot = UnitQuaternion::from_axis_angle(&Vec3::forward_axis(), angle);
-        let dir = rot * Vec3::up();
+        let dir = rot * UP;
         dbg_arrow!(pos, dir);
         dbg_textd!(self.frame_number, pos, angle.to_degrees());
     }

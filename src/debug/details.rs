@@ -91,15 +91,15 @@ impl DebugShape {
 
                 // Make sure dir and up are not colinear.
                 let up = if dir.x < f32::EPSILON && dir.z < f32::EPSILON {
-                    Vec3::forward()
+                    FORWARD
                 } else {
-                    Vec3::up()
+                    UP
                 };
 
                 let rot = UnitQuaternion::face_towards(&dir, &up);
                 let len = dir.magnitude();
-                let left = rot * Vec3::left() * len;
-                let up = rot * Vec3::up() * len;
+                let left = rot * LEFT * len;
+                let up = rot * UP * len;
                 lines.insert(end, end + (-dir + left) * 0.25, self.color);
                 lines.insert(end, end + (-dir - left) * 0.25, self.color);
                 lines.insert(end, end + (-dir + up) * 0.25, self.color);
@@ -125,9 +125,9 @@ impl DebugShape {
             Shape::Rot { point, rot } => {
                 // Oringally, this used SceneDrawingContext::draw_transform
                 // but this way we can use BLUE2 instead of the hard to see BLUE.
-                lines.insert(point, point + rot * Vec3::left(), RED);
-                lines.insert(point, point + rot * Vec3::up(), GREEN);
-                lines.insert(point, point + rot * Vec3::forward(), BLUE2);
+                lines.insert(point, point + rot * LEFT, RED);
+                lines.insert(point, point + rot * UP, GREEN);
+                lines.insert(point, point + rot * FORWARD, BLUE2);
             }
         }
     }

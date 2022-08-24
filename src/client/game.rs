@@ -314,7 +314,7 @@ impl ClientGame {
         camera.local_transform_mut().set_rotation(cam_rot);
 
         dbg_rot!(v!(0 7 0), cam_rot);
-        dbg_arrow!(v!(0 5 0), cam_rot * Vec3::forward());
+        dbg_arrow!(v!(0 5 0), cam_rot * FORWARD);
 
         // Camera movement
         let mut camera_pos = **camera.local_transform().position();
@@ -336,8 +336,8 @@ impl ClientGame {
             }
         } else if ps == PlayerState::Playing {
             // LATER cvars
-            let back = -(cam_rot * Vec3::forward() * 2.0);
-            let up = Vec3::up() * 0.5;
+            let back = -(cam_rot * FORWARD * 2.0);
+            let up = UP * 0.5;
             camera_pos = player_cycle_pos + back + up;
         }
         camera.local_transform_mut().set_position(camera_pos);
@@ -399,7 +399,7 @@ impl ClientGame {
             // to single digits if also using physics.draw(). No idea why.
             // Drawing a cross hides that *sometimes* the normal red cross
             // from before physics also appears here.
-            dbg_line!(body_pos, body_pos + Vec3::up(), 0.0, BLUE2);
+            dbg_line!(body_pos, body_pos + UP, 0.0, BLUE2);
         }
 
         // Debug

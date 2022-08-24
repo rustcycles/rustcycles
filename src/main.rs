@@ -362,9 +362,10 @@ fn server_main() {
 
 fn init_global_state(endpoint_name: &'static str) {
     let color = match endpoint_name {
-        "sv" => Color::GREEN,
-        "cl" => Color::RED,
-        _ => Color::WHITE,
+        "sv" => GREEN,
+        "cl" => RED,
+        "lo" => BLUE2,
+        _ => WHITE,
     };
 
     DEBUG_ENDPOINT.with(|endpoint| {

@@ -13,7 +13,7 @@ mod server;
 use std::{env, panic, process::Command, sync::Arc};
 
 use fyrox::{
-    core::{futures::executor},
+    core::futures::executor,
     dpi::{LogicalSize, PhysicalSize},
     engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
@@ -260,12 +260,7 @@ fn client_main(opts: Opts, local_server: bool) {
                         client.keyboard_input(input);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
-                        dbg_logf!(
-                            "{} mouse wheel {:?} {:?}",
-                            client.real_time(),
-                            delta,
-                            phase
-                        );
+                        dbg_logf!("{} mouse wheel {:?} {:?}", client.real_time(), delta, phase);
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
                         client.mouse_input(state, button);

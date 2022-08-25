@@ -43,14 +43,18 @@ macro_rules! soft_assert {
         soft_assert!($cond, stringify!($cond))
     };
     ($cond:expr, $($arg:tt)+) => {
-        // This lint is sometimes triggered when using asserts with float comparisons.
-        // Nothing we can do about it AFAICT.
-        // If there's a NAN, the assert will unfortunately pass.
-        #[allow(clippy::neg_cmp_op_on_partial_ord)]
-        if !$cond {
-            // LATER Proper logging
-            // LATER client vs server
-            dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+        {
+            // Using a temporary variable to avoid triggering clippy::neg_cmp_op_on_partial_ord.
+            // Can't use `#[allow(...)]` here because attributes on expressions are unstable.
+            // (The `if` can become an expression depending on how the macro is used.)
+            // NANs are handled correctly - any comparison with them returns `false`
+            // which turns into `true` here and prints the message.
+            let tmp = $cond;
+            if !tmp {
+                // LATER Proper logging
+                // LATER client vs server
+                dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+            }
         }
     };
 }

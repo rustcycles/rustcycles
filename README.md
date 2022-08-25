@@ -57,6 +57,10 @@ Explanation: Normally, rust-analyzer runs `cargo check` on save which locks `tar
 - Reduction from 2.5 s to 2.3 s
 - Might not be worth it for now (you need to compile it yourself), maybe when the game gets larger
 
+### Check formatting on commit (optional)
+
+Enable extra checks before every commit: copy/symlink `pre-commit-example` to `pre-commit` and run `git config core.hooksPath git-hooks`. It gets checked on CI anyway, this just catches issues faster.
+
 ## LICENSE
 
 [AGPL-v3](LICENSE) or newer

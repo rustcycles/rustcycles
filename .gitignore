@@ -14,6 +14,8 @@
 # rusty-editor
 /profiling.log
 
+/git-hooks/pre-commit
+
 # Configs for faster builds - see readme / example configs
 /.cargo/config.toml
 /rust-toolchain.toml

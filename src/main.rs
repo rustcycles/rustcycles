@@ -223,7 +223,7 @@ fn client_server_main(opts: Opts) {
     }
 
     // Testing compile times:
-    //  - clean VSC config
+    //  - clean VSC config: code --new-window --user-data-dir ~/.config-code-clean .
     //  - shared target dir
     //      - creates target/plugin
     //      - manually running clippy doesn't check deps - seems like the work is shared (if check command is clippy)

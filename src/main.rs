@@ -7,6 +7,7 @@ pub(crate) mod debug;
 
 mod client;
 mod common;
+mod cvars;
 mod prelude;
 mod server;
 
@@ -28,6 +29,7 @@ use structopt::StructOpt;
 
 use crate::{
     client::process::ClientProcess,
+    cvars::Cvars,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
     server::process::ServerProcess,
@@ -112,6 +114,12 @@ struct Opts {
     /// Whether to run the client, server or both.
     #[cfg_attr(feature = "cli", structopt(subcommand))]
     endpoint: Option<Endpoint>,
+
+    // LATER Fix examples
+    /// Set cvar values - use key value pairs (separated by space).
+    /// Example: g_armor 150 hud_names false
+    #[cfg_attr(feature = "cli", structopt())]
+    cvars: Vec<String>,
 }
 
 #[derive(Debug, EnumString)]
@@ -141,6 +149,7 @@ fn main() {
     // to build and therefore iterate a tiny bit faster.
     //
     // If this gets too complex, might wanna consider https://github.com/RazrFalcon/pico-args.
+    // TODO This is broken if a cvar name/value is the same as endpoint.
     let args = env::args().skip(1); // Skip path to self
     for arg in args {
         match arg.as_str() {
@@ -148,7 +157,7 @@ fn main() {
             "client" => opts.endpoint = Some(Endpoint::Client),
             "server" => opts.endpoint = Some(Endpoint::Server),
             "--windowed" => opts.windowed = true,
-            other => panic!("unexpected argument: {other}"),
+            _ => opts.cvars.push(arg),
         }
     }
 
@@ -162,11 +171,19 @@ fn run(opts: Opts) {
         prev_hook(panic_info);
     }));
 
+    let mut cvars = Cvars::default();
+    let mut cvars_iter = opts.cvars.iter();
+    while let Some(cvar_name) = cvars_iter.next() {
+        let str_value = cvars_iter.next().unwrap();
+        cvars.set_str(cvar_name, str_value).unwrap();
+        dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
+    }
+
     match opts.endpoint {
         // LATER None should launch client and offer choice in menu
         None => client_server_main(opts),
-        Some(Endpoint::Local) => client_main(opts, true),
-        Some(Endpoint::Client) => client_main(opts, false),
+        Some(Endpoint::Local) => client_main(opts, cvars, true),
+        Some(Endpoint::Client) => client_main(opts, cvars, false),
         Some(Endpoint::Server) => server_main(),
     }
 }
@@ -191,13 +208,21 @@ fn client_server_main(opts: Opts) {
 
     let path = env::args().next().unwrap();
 
-    let mut server = Command::new(&path).arg("server").spawn().unwrap();
+    let mut server_cmd = Command::new(&path);
+    server_cmd.arg("server");
 
     let mut client_cmd = Command::new(&path);
     if opts.windowed {
         client_cmd.arg("--windowed");
     }
     client_cmd.arg("client");
+
+    for cvar in &opts.cvars {
+        server_cmd.arg(cvar);
+        client_cmd.arg(cvar);
+    }
+
+    let mut server = server_cmd.spawn().unwrap();
     let mut client = client_cmd.spawn().unwrap();
 
     // We wanna close just the client and automatically close the server that way.
@@ -208,7 +233,7 @@ fn client_server_main(opts: Opts) {
 
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
-fn client_main(opts: Opts, local_server: bool) {
+fn client_main(opts: Opts, cvars: Cvars, local_server: bool) {
     if local_server {
         init_global_state("lo");
     } else {
@@ -218,7 +243,7 @@ fn client_main(opts: Opts, local_server: bool) {
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&event_loop, opts);
 
-    let mut client = executor::block_on(ClientProcess::new(engine, local_server));
+    let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;

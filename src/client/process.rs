@@ -31,12 +31,14 @@ use fyrox::{
 use crate::{
     client::game::ClientGame,
     common::net::{LocalConnection, LocalListener, TcpConnection},
+    cvars::Cvars,
     prelude::*,
     server::game::ServerGame,
 };
 
 /// The process that runs a player's game client.
 pub(crate) struct ClientProcess {
+    cvars: Cvars,
     pub(crate) clock: Instant,
     pub(crate) mouse_grabbed: bool,
     pub(crate) engine: Engine,
@@ -46,7 +48,7 @@ pub(crate) struct ClientProcess {
 }
 
 impl ClientProcess {
-    pub(crate) async fn new(mut engine: Engine, local_game: bool) -> Self {
+    pub(crate) async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
                 // Word wrap doesn't work if there's an extremely long word.
@@ -101,6 +103,7 @@ impl ClientProcess {
         };
 
         Self {
+            cvars,
             clock: Instant::now(),
             mouse_grabbed: false,
             engine,
@@ -247,7 +250,7 @@ impl ClientProcess {
 
     pub(crate) fn update(&mut self) {
         let target = self.real_time();
-        self.cg.update(&mut self.engine, target);
+        self.cg.update(&self.cvars, &mut self.engine, target);
         let target = self.real_time(); // Borrowck dance
         if let Some(sg) = &mut self.sg {
             sg.update(&mut self.engine, target)

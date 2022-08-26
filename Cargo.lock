@@ -518,6 +518,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 
 [[package]]
+name = "cvars"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f38e0641d1103148828aef276ca249d50a905812a7e70f54cc62ccf877a6a53"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "darling"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2205,6 +2215,7 @@ name = "rustcycles"
 version = "0.0.0"
 dependencies = [
  "bincode",
+ "cvars",
  "fxhash",
  "fyrox",
  "inline_tweak",

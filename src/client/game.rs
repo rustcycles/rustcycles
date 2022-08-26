@@ -19,6 +19,7 @@ use crate::{
         net::{self, Connection},
         GameState, Input,
     },
+    cvars::Cvars,
     debug::{
         self,
         details::{Lines, DEBUG_SHAPES, DEBUG_TEXTS},
@@ -131,7 +132,7 @@ impl ClientGame {
         }
     }
 
-    pub(crate) fn update(&mut self, engine: &mut Engine, game_time_target: f32) {
+    pub(crate) fn update(&mut self, cvars: &Cvars, engine: &mut Engine, game_time_target: f32) {
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -157,7 +158,7 @@ impl ClientGame {
             // `tick_after_physics` tells the engine to draw debug shapes and text.
             // Any debug calls after it will show up next frame.
             self.gs.debug_engine_updates(v!(-5 3 3), 4);
-            self.tick_after_physics(engine, dt);
+            self.tick_after_physics(cvars, engine, dt);
             self.gs.debug_engine_updates(v!(-6 3 3), 4);
 
             // Update UI
@@ -394,7 +395,7 @@ impl ClientGame {
         dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, GREEN);
     }
 
-    fn tick_after_physics(&mut self, engine: &mut Engine, dt: f32) {
+    fn tick_after_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.gs.scene];
 
         //scene.graph.update_hierarchical_data(); TODO
@@ -427,9 +428,9 @@ impl ClientGame {
             let mut shapes = shapes.borrow_mut();
             let mut lines = Lines::new();
             for shape in shapes.iter_mut() {
-                // LATER if cvars.d_draw && cvars.d_draw_crosses {
-                shape.to_lines(&mut lines);
-                // LATER }
+                if cvars.d_draw {
+                    shape.to_lines(&mut lines);
+                }
                 shape.time -= dt;
             }
             for (_, line) in lines.0 {

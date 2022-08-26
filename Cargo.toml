@@ -3,14 +3,13 @@ name = "rustcycles"
 version = "0.0.0"
 edition = "2021"
 rust-version = "1.56"
-resolver = "2"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 
 [profile.dev]
 # Abort on panic might be a better default:
 # https://vorner.github.io/2018/07/22/dont_panic.html
 # This makes backtraces useless, see .cargo/config-example.toml for a fix.
-panic = "abort"
+#panic = "abort"
 
 [profile.dev.package."*"]
 # Optimize deps but not this crate itself (tip from macroquad).
@@ -19,19 +18,23 @@ panic = "abort"
 opt-level = 3
 
 [profile.release]
-panic = "abort"
+#panic = "abort"
 
 [features]
 cli = ["structopt"]
 
 [dependencies]
 bincode = "1.3.3"
-fyrox = "0.27.1"
+#fyrox = "0.27.1"
 #fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "644af44252d5c3703a031f12742242b7be05caa3" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "922b623a929a079694adce1ded4006ef7d43fd02" }
 #fyrox = { path = "../fyrox" }
+fyrox = { package = "fyrox_dylib", path = "fyrox_dylib" }
 inline_tweak = "1.0.8"
 serde = { version = "1.0.143", features = ["derive"] }
 structopt = { version = "0.3.25", optional = true }
 strum = "0.24.0"
 strum_macros = "0.24.3"
+
+[workspace]
+members = ["fyrox_dylib"]

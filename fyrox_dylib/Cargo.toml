@@ -1,0 +1,12 @@
+[package]
+name = "fyrox_dylib"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.56"
+authors = ["Martin Taibr <taibr.martin@gmail.com>"]
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies]
+fyrox = "0.27.1"

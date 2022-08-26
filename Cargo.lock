@@ -1024,6 +1024,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "fyrox_dylib"
+version = "0.0.0"
+dependencies = [
+ "fyrox",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2196,7 +2203,7 @@ name = "rustcycles"
 version = "0.0.0"
 dependencies = [
  "bincode",
- "fyrox",
+ "fyrox_dylib",
  "inline_tweak",
  "serde",
  "structopt",

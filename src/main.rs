@@ -222,6 +222,26 @@ fn client_server_main(opts: Opts) {
         client_cmd.arg(cvar);
     }
 
+    // Testing compile times:
+    //  - clean VSC config
+    //  - shared target dir
+    //      - creates target/plugin
+    //      - manually running clippy doesn't check deps - seems like the work is shared (if check command is clippy)
+    // Run check on save enabled:
+    //  - check - small impact (not noticeable but measurable)
+    //  - clippy - locks target, noticeable slowdown
+    //  - build - seems to be able to effectively replace manual build while still showing diagnostics in editor
+    //      - first use rebuilds everything
+    // Run check on save disabled - no diagnostics but faster builds
+    //
+    // date ; time moldr cr ; date
+    // Could use a better command for measuring exact time.
+
+    //let x = 0.1 + 0.2;
+    //x = "a";
+
+    //std::process::exit(0);
+
     let mut server = server_cmd.spawn().unwrap();
     let mut client = client_cmd.spawn().unwrap();
 

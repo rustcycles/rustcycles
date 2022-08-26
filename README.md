@@ -32,7 +32,7 @@ After that, just use `cargo run`.
 
 ### Fast compiles (optional)
 
-You can make the game compile significantly faster (around 2 seconds) and iterate quicker:
+You can make the game compile _significantly_ faster and iterate quicker:
 
 #### Use nightly, lld and -Zshare-generics
 

@@ -49,7 +49,7 @@ Add this to your VSCode config (or something similar for your editor):
 }
 ```
 
-Explanation: Normally, rust-analyzer runs `cargo check` on save which locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build at the expense of slightly more disk space (but not double since most files don't seem to be shared between cargo and RA). Alternatively, you could disable saving when losing focus, disable running check on save or use the terminal inside VSCode to build RustCycles.
+Explanation: Normally, if rust-analyzer runs `cargo clippy` on save, it locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build at the expense of slightly more disk space (but not double since most files don't seem to be shared between cargo and RA). Alternatively, you could disable saving when losing focus, disable running check on save or use the terminal inside VSCode to build RustCycles.
 
 #### On linux, use the `mold` linker
 

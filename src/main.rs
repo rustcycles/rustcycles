@@ -227,7 +227,7 @@ fn client_server_main(opts: Opts) {
 
     // We wanna close just the client and automatically close the server that way.
     client.wait().unwrap();
-    dbg_logf!("Client exitted, killing server");
+    dbg_logf!("Client exited, killing server");
     server.kill().unwrap();
 }
 

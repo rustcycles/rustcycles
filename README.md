@@ -41,7 +41,7 @@ You can make the game compile _significantly_ faster and iterate quicker:
 
 #### Prevent rust-analyzer from locking the `target` directory
 
-Add this to your VSCode config (or something similar for your editor):
+If you're using RA with `clippy` instead of `check`, add this to your VSCode config (or something similar for your editor):
 
 ```json
 "rust-analyzer.server.extraEnv": {

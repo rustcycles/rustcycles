@@ -27,6 +27,7 @@ pub struct Cvars {
 
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
+    pub d_draw_arrows_frame: bool,
     /// This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
     pub d_draw_physics: bool,
 
@@ -38,6 +39,7 @@ impl Default for Cvars {
         Self {
             d_dbg: false,
             d_draw: true,
+            d_draw_arrows_frame: true,
             d_draw_physics: false,
             r_quality: 0,
         }

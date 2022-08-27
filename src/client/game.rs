@@ -400,6 +400,14 @@ impl ClientGame {
 
         //scene.graph.update_hierarchical_data(); TODO
 
+        // Debug
+        // LATER Warn when drawing text/shapes from prev frame.
+
+        // Keep this first so it draws below other debug stuff.
+        if cvars.d_draw && cvars.d_draw_physics {
+            scene.graph.physics.draw(&mut scene.drawing_context);
+        }
+
         // Testing
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
@@ -409,14 +417,6 @@ impl ClientGame {
             // from before physics also appears here.
             dbg_line!(body_pos, body_pos + UP, 0.0, BLUE2);
         }
-
-        // Debug
-        // LATER Warn when drawing text/shaped from prev frame.
-
-        // This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
-        // Try engine.renderer.set_quality_settings(&QualitySettings::low()).unwrap();
-        // Keep this first so it draws below other debug stuff.
-        //scene.graph.physics.draw(&mut scene.drawing_context);
 
         DEBUG_SHAPES.with(|shapes| {
             // Sometimes debug shapes overlap and only the last one gets drawn.

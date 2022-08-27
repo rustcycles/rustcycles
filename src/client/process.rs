@@ -25,6 +25,7 @@ use fyrox::{
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
+    renderer::QualitySettings,
     window::CursorGrabMode,
 };
 
@@ -49,6 +50,17 @@ pub(crate) struct ClientProcess {
 
 impl ClientProcess {
     pub(crate) async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
+        let quality = match cvars.r_quality {
+            0 => QualitySettings::low(),
+            1 => QualitySettings::medium(),
+            2 => QualitySettings::high(),
+            _ => {
+                dbg_logf!("Invalid r_quality value: {}", cvars.r_quality);
+                QualitySettings::low()
+            }
+        };
+        engine.renderer.set_quality_settings(&quality).unwrap();
+
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
                 // Word wrap doesn't work if there's an extremely long word.

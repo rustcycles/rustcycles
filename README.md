@@ -45,7 +45,7 @@ Add this to your VSCode config (or something similar for your editor):
 
 ```json
 "rust-analyzer.server.extraEnv": {
-    "CARGO_TARGET_DIR": "target-ra"
+    "CARGO_TARGET_DIR": "target/ra"
 }
 ```
 

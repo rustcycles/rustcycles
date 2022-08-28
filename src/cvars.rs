@@ -28,7 +28,7 @@ pub struct Cvars {
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_arrows_frame: bool,
-    /// This ruins perf in debug builds: https://github.com/rg3dengine/rg3d/issues/237
+    /// This ruins perf in debug builds: https://github.com/FyroxEngine/Fyrox/issues/237
     pub d_draw_physics: bool,
 
     pub r_quality: i32,

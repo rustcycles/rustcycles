@@ -369,7 +369,7 @@ fn init_global_state(endpoint_name: &'static str) {
         }
     });
 
-    // LATER Switch rg3d to a more standard logger
+    // LATER Switch fyrox to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
     // and the other messages are hidden by default.
     // Also used in server_main().

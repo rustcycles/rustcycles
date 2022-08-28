@@ -17,6 +17,7 @@ panic = "abort"
 # This seems to slightly improve performance (e.g. loading a model goes from 1.4 s to 0.2 s)
 # and shouldn't meaningfully increase incremental compile times because deps only change rarely.
 opt-level = 3
+codegen-units = 1
 
 [profile.release]
 panic = "abort"

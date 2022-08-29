@@ -24,6 +24,16 @@ debug = false
 [profile.release]
 panic = "abort"
 
+# https://doc.rust-lang.org/cargo/reference/profiles.html#build-dependencies
+# No effect so far because we don't use and build deps yet.
+[profile.dev.build-override]
+opt-level = 3
+codegen-units = 1
+
+[profile.release.build-override]
+opt-level = 3
+codegen-units = 1
+
 [features]
 cli = ["structopt"]
 

@@ -403,7 +403,9 @@ impl ClientGame {
     fn tick_after_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.gs.scene];
 
-        //scene.graph.update_hierarchical_data(); TODO
+        if cvars.d_dbg {
+            scene.graph.update_hierarchical_data();
+        }
 
         // Debug
         // LATER Warn when drawing text/shapes from prev frame.

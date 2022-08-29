@@ -18,6 +18,7 @@ panic = "abort"
 # and shouldn't meaningfully increase incremental compile times because deps only change rarely.
 opt-level = 3
 codegen-units = 1
+debug = false
 
 [profile.release]
 panic = "abort"

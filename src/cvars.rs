@@ -40,7 +40,7 @@ impl Default for Cvars {
             d_dbg: false,
             d_draw: true,
             d_draw_arrows_frame: true,
-            d_draw_physics: false,
+            d_draw_physics: true,
             r_quality: 0,
         }
     }

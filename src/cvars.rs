@@ -27,7 +27,7 @@ pub struct Cvars {
 
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
-    pub d_draw_arrows_frame: bool,
+    pub d_draw_frame_timings: bool,
     /// This ruins perf in debug builds: https://github.com/FyroxEngine/Fyrox/issues/237
     pub d_draw_physics: bool,
     pub d_draw_text: bool,
@@ -40,7 +40,7 @@ impl Default for Cvars {
         Self {
             d_dbg: false,
             d_draw: true,
-            d_draw_arrows_frame: true,
+            d_draw_frame_timings: true,
             d_draw_physics: true,
             d_draw_text: true,
             r_quality: 0,

@@ -385,6 +385,7 @@ fn init_engine_client(event_loop: &EventLoop<()>, opts: Opts) -> Engine {
         // and it can't handle a large window at any reasonable FPS.
         window_builder = window_builder.with_inner_size(PhysicalSize::new(width, height));
     } else {
+        // Borderless is preferred on macOS.
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     }
     let serialization_context = Arc::new(SerializationContext::new());

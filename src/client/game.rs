@@ -457,11 +457,19 @@ impl ClientGame {
                 debug_string.push('\n');
             }
         });
-        engine.user_interface.send_message(TextMessage::text(
-            self.debug_text,
-            MessageDirection::ToWidget,
-            debug_string,
-        ));
+        if cvars.d_draw_text {
+            engine.user_interface.send_message(TextMessage::text(
+                self.debug_text,
+                MessageDirection::ToWidget,
+                debug_string,
+            ));
+        } else {
+            engine.user_interface.send_message(TextMessage::text(
+                self.debug_text,
+                MessageDirection::ToWidget,
+                String::new(),
+            ));
+        }
 
         debug::details::cleanup();
     }

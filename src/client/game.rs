@@ -446,30 +446,26 @@ impl ClientGame {
         });
 
         let mut debug_string = String::new();
-        debug_string.push_str(&engine.renderer.get_statistics().to_string());
-        debug_string.push_str(&scene.performance_statistics.to_string());
-        debug_string.push('\n');
-        debug_string.push('\n');
-        DEBUG_TEXTS.with(|texts| {
-            let texts = texts.borrow();
-            for text in texts.iter() {
-                debug_string.push_str(text);
-                debug_string.push('\n');
-            }
-        });
         if cvars.d_draw_text {
-            engine.user_interface.send_message(TextMessage::text(
-                self.debug_text,
-                MessageDirection::ToWidget,
-                debug_string,
-            ));
-        } else {
-            engine.user_interface.send_message(TextMessage::text(
-                self.debug_text,
-                MessageDirection::ToWidget,
-                String::new(),
-            ));
+            debug_string.push_str(&engine.renderer.get_statistics().to_string());
+            debug_string.push_str(&scene.performance_statistics.to_string());
+            debug_string.push('\n');
+            debug_string.push('\n');
+            DEBUG_TEXTS.with(|texts| {
+                let texts = texts.borrow();
+                for text in texts.iter() {
+                    debug_string.push_str(text);
+                    debug_string.push('\n');
+                }
+            });
         }
+
+        // We send an empty string to clear the previous text if printing is disabled.
+        engine.user_interface.send_message(TextMessage::text(
+            self.debug_text,
+            MessageDirection::ToWidget,
+            debug_string,
+        ));
 
         debug::details::cleanup();
     }

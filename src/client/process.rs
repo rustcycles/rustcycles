@@ -232,7 +232,7 @@ impl ClientProcess {
             SPACE => self.cg.lp.input.up = pressed,
             SHIFT => self.cg.lp.input.down = pressed,
 
-            // Don't print anything, it just spams stdout.
+            // Don't print anything for these, it just spams stdout.
             ESC | TAB | CTRL | ALT | BACKSLASH | Z => {}
             F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | F9 | F10 | F11 | F12 => {}
 

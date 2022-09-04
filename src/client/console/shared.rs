@@ -138,7 +138,6 @@ impl Console {
     }
 
     fn push_history_line(&mut self, text: String, is_input: bool) {
-        dbg!(&text); // FIXME
         let hist_line = HistoryLine::new(text, is_input);
         self.history.push(hist_line);
     }

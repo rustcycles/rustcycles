@@ -126,12 +126,6 @@ impl FyroxConsole {
                     let text = node.query_component::<TextBox>().unwrap().text();
                     dbg!(text);
 
-                    // self.console.execute(text, cvars);
-
-                    //self.console.execute("help".to_owned(), cvars); // FIXME
-
-                    //self.console.process_input_text(cvars);
-
                     //self.enter(_engine, _cvars);
                 }
 

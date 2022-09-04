@@ -3,19 +3,19 @@
 # This is just an example - slow stuff is commented out.
 # Rustfmt is fast enough to run on every commit.
 # The others take too long which makes them too annoying.
+# See .github/workflows/* for explanations.
 
-# Exit on error
-set -e
-# Error on unset variables
-set -u
-# Don't ignore errors in pipelines
-set -o pipefail
+
+# Sanity
+set -e # Exit on error
+set -u # Error on unset variables
+set -o pipefail # Don't ignore errors in pipelines
 
 
 cargo fmt -- --check
 
-# Use --all-targets to also check tests.
-# Technically --all-features doesn't check all code when something is *disabled* by a feature.
+! ( grep -r --color=auto --exclude-dir=.git --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )
+
 #cargo clippy --all-targets --all-features -- --deny warnings
 
 #cargo audit --deny warnings

@@ -84,10 +84,6 @@ use crate::{
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "cli", derive(StructOpt))]
 struct Opts {
-    /// Use a window instead of fullscreen (doesn't apply to server)
-    #[cfg_attr(feature = "cli", structopt(long))]
-    windowed: bool,
-
     /// Whether to run the client, server or both.
     #[cfg_attr(feature = "cli", structopt(subcommand))]
     endpoint: Option<Endpoint>,
@@ -133,7 +129,6 @@ fn main() {
             "local" => opts.endpoint = Some(Endpoint::Local),
             "client" => opts.endpoint = Some(Endpoint::Client),
             "server" => opts.endpoint = Some(Endpoint::Server),
-            "--windowed" => opts.windowed = true,
             _ => opts.cvars.push(arg),
         }
     }
@@ -159,8 +154,8 @@ fn run(opts: Opts) {
     match opts.endpoint {
         // LATER None should launch client and offer choice in menu
         None => client_server_main(opts),
-        Some(Endpoint::Local) => client_main(opts, cvars, true),
-        Some(Endpoint::Client) => client_main(opts, cvars, false),
+        Some(Endpoint::Local) => client_main(cvars, true),
+        Some(Endpoint::Client) => client_main(cvars, false),
         Some(Endpoint::Server) => server_main(),
     }
 }
@@ -186,12 +181,9 @@ fn client_server_main(opts: Opts) {
     let path = env::args().next().unwrap();
 
     let mut server_cmd = Command::new(&path);
-    server_cmd.arg("server");
-
     let mut client_cmd = Command::new(&path);
-    if opts.windowed {
-        client_cmd.arg("--windowed");
-    }
+
+    server_cmd.arg("server");
     client_cmd.arg("client");
 
     for cvar in &opts.cvars {
@@ -212,7 +204,7 @@ fn client_server_main(opts: Opts) {
 
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
-fn client_main(opts: Opts, cvars: Cvars, local_server: bool) {
+fn client_main(cvars: Cvars, local_server: bool) {
     if local_server {
         init_global_state("lo");
     } else {
@@ -220,7 +212,7 @@ fn client_main(opts: Opts, cvars: Cvars, local_server: bool) {
     }
 
     let event_loop = EventLoop::new();
-    let engine = init_engine_client(&event_loop, opts);
+    let engine = init_engine_client(&event_loop, &cvars);
 
     let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
     event_loop.run(move |event, _, control_flow| {
@@ -393,17 +385,17 @@ fn init_global_state(endpoint_name: &'static str) {
     Log::set_verbosity(MessageKind::Warning);
 }
 
-fn init_engine_client(event_loop: &EventLoop<()>, opts: Opts) -> Engine {
+fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
-    if opts.windowed {
+    if cvars.cl_fullscreen {
+        // Borderless is preferred on macOS.
+        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
+    } else {
         let width = 600;
         let height = width / 16 * 9;
         // Currently using PhysicalSize because my Thinkpad scales logical size by 1.5
         // and it can't handle a large window at any reasonable FPS.
         window_builder = window_builder.with_inner_size(PhysicalSize::new(width, height));
-    } else {
-        // Borderless is preferred on macOS.
-        window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     }
     let serialization_context = Arc::new(SerializationContext::new());
     let resource_manager = ResourceManager::new(serialization_context.clone());

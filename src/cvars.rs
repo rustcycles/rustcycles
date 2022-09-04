@@ -21,6 +21,8 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
+    pub cl_fullscreen: bool,
+
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
     pub d_dbg: bool,
@@ -40,12 +42,17 @@ pub struct Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
+            cl_fullscreen: true,
+
             d_dbg: false,
+
             d_draw: true,
             d_draw_frame_timings: true,
             d_draw_physics: true,
             d_draw_text: true,
+
             d_ui_messages: false,
+
             r_quality: 0,
         }
     }

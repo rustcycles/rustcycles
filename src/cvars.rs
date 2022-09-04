@@ -32,6 +32,8 @@ pub struct Cvars {
     pub d_draw_physics: bool,
     pub d_draw_text: bool,
 
+    pub d_ui_messages: bool,
+
     pub r_quality: i32,
 }
 
@@ -43,6 +45,7 @@ impl Default for Cvars {
             d_draw_frame_timings: true,
             d_draw_physics: true,
             d_draw_text: true,
+            d_ui_messages: false,
             r_quality: 0,
         }
     }

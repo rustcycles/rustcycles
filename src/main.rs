@@ -19,7 +19,10 @@ use fyrox::{
     engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    utils::log::{Log, MessageKind},
+    utils::{
+        log::{Log, MessageKind},
+        translate_event,
+    },
     window::{Fullscreen, WindowBuilder},
 };
 use strum_macros::EnumString;
@@ -234,6 +237,10 @@ fn client_main(opts: Opts, cvars: Cvars, local_server: bool) {
         match event {
             Event::NewEvents(_) => {}
             Event::WindowEvent { event, .. } => {
+                if let Some(os_event) = translate_event(&event) {
+                    client.engine.user_interface.process_os_event(&os_event);
+                }
+
                 match event {
                     WindowEvent::Resized(size) => {
                         client.resized(size);
@@ -308,8 +315,10 @@ fn client_main(opts: Opts, cvars: Cvars, local_server: bool) {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
+                while let Some(ui_message) = client.engine.user_interface.poll_message() {
+                    client.ui_message(ui_message);
+                }
                 client.update();
-                while let Some(_ui_message) = client.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
@@ -335,12 +344,18 @@ fn server_main() {
         #[allow(clippy::single_match)]
         match event {
             Event::NewEvents(_) => {}
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
+            Event::WindowEvent { event, .. } => {
+                if let Some(os_event) = translate_event(&event) {
+                    server.engine.user_interface.process_os_event(&os_event);
                 }
-                _ => {}
-            },
+
+                match event {
+                    WindowEvent::CloseRequested => {
+                        *control_flow = ControlFlow::Exit;
+                    }
+                    _ => {}
+                }
+            }
             Event::DeviceEvent { .. } => {}
             Event::UserEvent(_) => {}
             Event::Suspended => {}

@@ -20,9 +20,8 @@ use fyrox::{
     gui::{
         brush::Brush,
         formatted_text::WrapMode,
-        message::{KeyCode, MessageDirection, UiMessage},
+        message::{MessageDirection, UiMessage},
         text::TextBuilder,
-        text_box::TextBoxMessage,
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },

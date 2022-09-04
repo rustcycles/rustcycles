@@ -17,6 +17,7 @@ pub struct Console {
 
 impl Console {
     pub fn new() -> Self {
+        #[allow(unused_mut)]
         let mut con = Console {
             prompt: String::new(),
             prompt_saved: String::new(),

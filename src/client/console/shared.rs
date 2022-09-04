@@ -1,6 +1,8 @@
 #![allow(unreachable_pub)] // TODO
 
-/// Engine-independant console.
+/// Engine-independant parts of the in-game console.
+///
+/// Parsing and executing commands, history, eventually tab completion, ...
 #[derive(Debug, Clone, Default)]
 pub struct Console {
     // TODO remove pubs?

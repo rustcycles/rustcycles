@@ -67,4 +67,4 @@ jobs:
         # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).
         # Grep returns success when found and failure when not found, `!` inverts success/failure.
         # The `[F]` is the usualy trick to avoid matching this line itself.
-      - run: "! ( grep -r --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )"
+      - run: "! ( grep --recursive --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )"

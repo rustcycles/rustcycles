@@ -204,6 +204,8 @@ impl ClientProcess {
                 } else if self.shift_pressed {
                     self.console.open(&mut self.engine);
                     self.set_mouse_grab(false);
+                } else {
+                    self.set_mouse_grab(false);
                 }
             }
             BACKTICK if pressed => {

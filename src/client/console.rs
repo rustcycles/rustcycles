@@ -143,9 +143,9 @@ impl FyroxConsole {
         if let Some(TextBoxMessage::Text(text)) = ui_message.data() {
             self.update_prompt(text);
         }
-        // LATER Would be nice to react to KeyDown but something's broken for now
-        // and the first command prints an empty line.
-        if let Some(WidgetMessage::KeyUp(KeyCode::Return)) = ui_message.data() {
+        if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) =
+            ui_message.data()
+        {
             self.enter(engine, cvars);
         }
     }

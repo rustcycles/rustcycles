@@ -147,8 +147,21 @@ fn run(opts: Opts) {
     let mut cvars_iter = opts.cvars.iter();
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
-        cvars.set_str(cvar_name, str_value).unwrap();
-        dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
+        let res = cvars.set_str(cvar_name, str_value);
+        match res.as_ref() {
+            Ok(_) => {
+                // Intentionally getting the new value from cvars, not just printing the input
+                // so the user can check it was parsed correctly.
+                dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
+            }
+            e @ Err(msg) => {
+                if cvars.d_panic_unknown_cvar {
+                    e.unwrap();
+                } else {
+                    dbg_logf!("Failed to set cvar {} to {}: {}", cvar_name, str_value, msg);
+                }
+            }
+        }
     }
 
     match opts.endpoint {

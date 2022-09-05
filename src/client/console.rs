@@ -15,7 +15,7 @@ use fyrox::{
         message::{KeyCode, MessageDirection, UiMessage},
         stack_panel::StackPanelBuilder,
         text::{TextBuilder, TextMessage},
-        text_box::{TextBox, TextBoxBuilder, TextBoxMessage, TextCommitMode},
+        text_box::{TextBoxBuilder, TextBoxMessage, TextCommitMode},
         widget::{WidgetBuilder, WidgetMessage},
         Orientation, UiNode,
     },
@@ -25,8 +25,6 @@ use shared::*;
 
 use crate::{cvars::Cvars, prelude::*};
 
-const ENTER: ScanCode = 28;
-const KP_ENTER: ScanCode = 96;
 const UP_ARROW: ScanCode = 103;
 const PG_UP: ScanCode = 104;
 const DOWN_ARROW: ScanCode = 108;
@@ -121,13 +119,6 @@ impl FyroxConsole {
                 DOWN_ARROW => self.console.history_forward(),
                 PG_UP => self.console.history_scroll_up(10),
                 PG_DOWN => self.console.history_scroll_down(10),
-                ENTER | KP_ENTER => {
-                    let node = _engine.user_interface.node(self.prompt_text_box);
-                    let text = node.query_component::<TextBox>().unwrap().text();
-                    dbg!(text);
-
-                    //self.enter(_engine, _cvars);
-                }
 
                 _ => (),
             }
@@ -140,6 +131,15 @@ impl FyroxConsole {
         cvars: &mut Cvars,
         ui_message: UiMessage,
     ) {
+        // We could just listen for KeyboardInput and get the text from the prompt via
+        // ```
+        // let node = engine.user_interface.node(self.prompt_text_box);
+        // let text = node.query_component::<TextBox>().unwrap().text();
+        // ```
+        // But this is the intended way to use the UI, even if it's more verbose.
+        // At least it should reduce issues with the prompt reacting to some keys
+        // but not others given KeyboardInput doesn't require focus.
+
         if let Some(TextBoxMessage::Text(text)) = ui_message.data() {
             self.update_prompt(text);
         }

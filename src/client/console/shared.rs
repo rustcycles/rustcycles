@@ -107,6 +107,7 @@ impl Console {
 
     /// Parse what the user typed and get or set a cvar
     fn process_line(&mut self, cvars: &mut impl CvarAccess) -> Result<(), String> {
+        // Splitting on whitespace also in effect trims leading and trailing whitespace.
         let mut parts = self.prompt.split_whitespace();
 
         let cvar_name = match parts.next() {

@@ -22,6 +22,8 @@ pub struct Cvars {
     //  |
     //  v
     pub cl_fullscreen: bool,
+    pub cl_window_height: i32,
+    pub cl_window_width: i32,
 
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
@@ -43,6 +45,8 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             cl_fullscreen: true,
+            cl_window_height: 540,
+            cl_window_width: 960,
 
             d_dbg: false,
 

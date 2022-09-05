@@ -391,10 +391,9 @@ fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
         // Borderless is preferred on macOS.
         window_builder = window_builder.with_fullscreen(Some(Fullscreen::Borderless(None)));
     } else {
-        let width = 600;
-        let height = width / 16 * 9;
-        // Currently using PhysicalSize because my Thinkpad scales logical size by 1.5
-        // and it can't handle a large window at any reasonable FPS.
+        let width = cvars.cl_window_width;
+        let height = cvars.cl_window_height;
+        // Using PhysicalSize seems more ... logical, if we let users configure it in pixels.
         window_builder = window_builder.with_inner_size(PhysicalSize::new(width, height));
     }
     let serialization_context = Arc::new(SerializationContext::new());

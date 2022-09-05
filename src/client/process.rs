@@ -15,7 +15,6 @@ use std::{
 use fyrox::{
     core::instant::Instant,
     dpi::PhysicalSize,
-    error::ExternalError,
     event::{ElementState, KeyboardInput, MouseButton},
     gui::{
         brush::Brush,
@@ -285,30 +284,32 @@ impl ClientProcess {
     /// or ungrab mouse and show cursor.
     fn set_mouse_grab(&mut self, grab: bool) {
         // LATER Don't hide cursor in menu.
-        if grab != self.mouse_grabbed {
-            let window = self.engine.get_window();
-            if grab {
-                #[cfg(target_os = "macos")]
-                let mode = CursorGrabMode::Locked;
 
-                #[cfg(not(target_os = "macos"))]
-                let mode = CursorGrabMode::Confined;
+        // Don't exit early if grab == self.mouse_grabbed here.
+        // It's possible to get into weird states (e.g. when opening KDE's Klipper tool by a shortcut)
+        // where self.mouse_grabbed is incorrect and we'd need to press ESC and then click to regrab.
 
-                let res = window.set_cursor_grab(mode);
-                match res {
-                    Ok(_) => {}
-                    Err(ExternalError::NotSupported(_)) => {
-                        dbg_logf!("Failed to grab mouse: mode {:?} NotSupported", mode);
-                    }
-                    Err(_) => res.unwrap(),
-                }
-            } else {
-                window.set_cursor_grab(CursorGrabMode::None).unwrap();
+        let window = self.engine.get_window();
+        if grab {
+            #[cfg(target_os = "macos")]
+            let mode = CursorGrabMode::Locked;
+
+            #[cfg(not(target_os = "macos"))]
+            let mode = CursorGrabMode::Confined;
+
+            let res = window.set_cursor_grab(mode);
+            if let Err(e) = res {
+                // This happens when opening KDE's Klipper using Ctrl+Alt+V while mouse is *not* grabbed.
+                // It seems that we first lose focus, then gain it, then lose it again.
+                // I don't know why and I don't care, not my bug, just ignore it.
+                dbg_logf!("Failed to grab mouse (mode {:?}): {}", mode, e);
             }
-
-            window.set_cursor_visible(!grab);
-            self.mouse_grabbed = grab;
+        } else {
+            window.set_cursor_grab(CursorGrabMode::None).unwrap();
         }
+
+        window.set_cursor_visible(!grab);
+        self.mouse_grabbed = grab;
     }
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {

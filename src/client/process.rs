@@ -280,11 +280,25 @@ impl ClientProcess {
         // LATER Don't hide cursor in menu.
         if grab != self.mouse_grabbed {
             let window = self.engine.get_window();
-            let res = window.set_cursor_grab(CursorGrabMode::Confined);
-            match res {
-                Ok(_) | Err(ExternalError::NotSupported(_)) => {}
-                Err(_) => res.unwrap(),
+            if grab {
+                #[cfg(target_os = "macos")]
+                let mode = CursorGrabMode::Locked;
+
+                #[cfg(not(target_os = "macos"))]
+                let mode = CursorGrabMode::Confined;
+
+                let res = window.set_cursor_grab(mode);
+                match res {
+                    Ok(_) => {}
+                    Err(ExternalError::NotSupported(_)) => {
+                        dbg_logf!("Failed to grab mouse: mode {:?} NotSupported", mode);
+                    }
+                    Err(_) => res.unwrap(),
+                }
+            } else {
+                window.set_cursor_grab(CursorGrabMode::None).unwrap();
             }
+
             window.set_cursor_visible(!grab);
             self.mouse_grabbed = grab;
         }

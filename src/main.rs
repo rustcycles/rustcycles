@@ -122,16 +122,23 @@ fn main() {
     // to build and therefore iterate a tiny bit faster.
     //
     // If this gets too complex, might wanna consider https://github.com/RazrFalcon/pico-args.
-    // TODO This is broken if a cvar name/value is the same as endpoint.
-    let args = env::args().skip(1); // Skip path to self
-    for arg in args {
-        match arg.as_str() {
-            "local" => opts.endpoint = Some(Endpoint::Local),
-            "client" => opts.endpoint = Some(Endpoint::Client),
-            "server" => opts.endpoint = Some(Endpoint::Server),
-            _ => opts.cvars.push(arg),
+    let mut args = env::args().skip(1).peekable(); // Skip path to self
+    match args.peek() {
+        Some(arg) if arg == "local" => {
+            opts.endpoint = Some(Endpoint::Local);
+            args.next();
         }
+        Some(arg) if arg == "client" => {
+            opts.endpoint = Some(Endpoint::Client);
+            args.next();
+        }
+        Some(arg) if arg == "server" => {
+            opts.endpoint = Some(Endpoint::Server);
+            args.next();
+        }
+        _ => {}
     }
+    opts.cvars = args.collect();
 
     run(opts);
 }

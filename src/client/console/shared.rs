@@ -82,7 +82,7 @@ impl Console {
     }
 
     /// The user pressed enter - process the line of text
-    pub fn process_input_text(&mut self, cvars: &mut impl CvarAccess) {
+    pub fn enter(&mut self, cvars: &mut impl CvarAccess) {
         let hist_len_old = self.history.len();
 
         self.push_history_line(self.prompt.clone(), true);

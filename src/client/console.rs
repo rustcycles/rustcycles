@@ -138,21 +138,15 @@ impl FyroxConsole {
         // but not others given KeyboardInput doesn't require focus.
 
         if let Some(TextBoxMessage::Text(text)) = msg.data() {
-            self.update_prompt(text);
+            self.console.prompt = text.to_owned();
         }
         if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) = msg.data() {
             self.enter(engine, cvars);
         }
     }
 
-    pub(crate) fn update_prompt(&mut self, text: &str) {
-        dbg_logf!("update_prompt {}", text);
-        self.console.prompt = text.to_owned();
-    }
-
     pub(crate) fn enter(&mut self, engine: &mut Engine, cvars: &mut Cvars) {
-        dbg!("ENTER", &self.console.prompt);
-        self.console.process_input_text(cvars);
+        self.console.enter(cvars);
 
         let mut hist = String::new();
         // TODO history view index Option

@@ -125,12 +125,7 @@ impl FyroxConsole {
         }
     }
 
-    pub(crate) fn ui_message(
-        &mut self,
-        engine: &mut Engine,
-        cvars: &mut Cvars,
-        ui_message: UiMessage,
-    ) {
+    pub(crate) fn ui_message(&mut self, engine: &mut Engine, cvars: &mut Cvars, msg: UiMessage) {
         // We could just listen for KeyboardInput and get the text from the prompt via
         // ```
         // let node = engine.user_interface.node(self.prompt_text_box);
@@ -140,12 +135,10 @@ impl FyroxConsole {
         // At least it should reduce issues with the prompt reacting to some keys
         // but not others given KeyboardInput doesn't require focus.
 
-        if let Some(TextBoxMessage::Text(text)) = ui_message.data() {
+        if let Some(TextBoxMessage::Text(text)) = msg.data() {
             self.update_prompt(text);
         }
-        if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) =
-            ui_message.data()
-        {
+        if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) = msg.data() {
             self.enter(engine, cvars);
         }
     }

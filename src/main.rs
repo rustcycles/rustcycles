@@ -361,8 +361,8 @@ fn client_main(cvars: Cvars, local_server: bool) {
             Event::Suspended => {}
             Event::Resumed => {}
             Event::MainEventsCleared => {
-                while let Some(ui_message) = client.engine.user_interface.poll_message() {
-                    client.ui_message(ui_message);
+                while let Some(msg) = client.engine.user_interface.poll_message() {
+                    client.ui_message(msg);
                 }
                 client.update();
             }
@@ -406,7 +406,7 @@ fn server_main() {
             Event::Resumed => {}
             Event::MainEventsCleared => {
                 server.update();
-                while let Some(_ui_message) = server.engine.user_interface.poll_message() {}
+                while let Some(_msg) = server.engine.user_interface.poll_message() {}
             }
             Event::RedrawRequested(_) => {}
             Event::RedrawEventsCleared => {}

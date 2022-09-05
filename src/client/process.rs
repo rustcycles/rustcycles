@@ -321,27 +321,37 @@ impl ClientProcess {
         self.cg.lp.delta_pitch += delta_pitch;
     }
 
-    pub(crate) fn ui_message(&mut self, ui_message: UiMessage) {
-        if ui_message.direction == MessageDirection::ToWidget {
-            return;
+    pub(crate) fn ui_message(&mut self, msg: UiMessage) {
+        let mut print = self.cvars.d_ui_msgs;
+
+        match msg.direction {
+            MessageDirection::ToWidget if !self.cvars.d_ui_msgs_direction_to => print = false,
+            MessageDirection::FromWidget if !self.cvars.d_ui_msgs_direction_from => print = false,
+            _ => (),
         }
 
-        if let Some(
-            WidgetMessage::MouseMove { .. } | WidgetMessage::MouseEnter | WidgetMessage::MouseLeave,
-        ) = ui_message.data()
-        {
-            return;
+        match msg.data() {
+            Some(
+                WidgetMessage::MouseDown { .. }
+                | WidgetMessage::MouseUp { .. }
+                | WidgetMessage::MouseMove { .. }
+                | WidgetMessage::MouseWheel { .. }
+                | WidgetMessage::MouseLeave
+                | WidgetMessage::MouseEnter
+                | WidgetMessage::DoubleClick { .. },
+            ) if !self.cvars.d_ui_msgs_mouse => print = false,
+            _ => (),
         }
 
-        if self.cvars.d_ui_messages {
+        if print {
             // LATER dbg_logdp for pretty printing
-            dbg!(&ui_message);
+            dbg!(&msg);
         }
 
         // LATER This is_open() is a hack around the fact fyrox can't force the prompt to be focused.
         // When the console is open, all input should go to it.
         if self.console.is_open() {
-            self.console.ui_message(&mut self.engine, &mut self.cvars, ui_message);
+            self.console.ui_message(&mut self.engine, &mut self.cvars, msg);
         }
     }
 

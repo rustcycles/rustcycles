@@ -38,7 +38,11 @@ pub struct Cvars {
 
     pub d_panic_unknown_cvar: bool,
 
-    pub d_ui_messages: bool,
+    /// Print UI messages or a subset of them.
+    pub d_ui_msgs: bool,
+    pub d_ui_msgs_direction_from: bool,
+    pub d_ui_msgs_direction_to: bool,
+    pub d_ui_msgs_mouse: bool,
 
     pub r_quality: i32,
 }
@@ -59,7 +63,10 @@ impl Default for Cvars {
 
             d_panic_unknown_cvar: true,
 
-            d_ui_messages: false,
+            d_ui_msgs: false,
+            d_ui_msgs_direction_from: true,
+            d_ui_msgs_direction_to: false,
+            d_ui_msgs_mouse: false,
 
             r_quality: 0,
         }

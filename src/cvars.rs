@@ -22,6 +22,7 @@ pub struct Cvars {
     //  |
     //  v
     pub cl_fullscreen: bool,
+    pub cl_mouse_grab_on_focus: bool,
     pub cl_window_height: i32,
     pub cl_window_width: i32,
 
@@ -51,6 +52,7 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             cl_fullscreen: true,
+            cl_mouse_grab_on_focus: true,
             cl_window_height: 540,
             cl_window_width: 960,
 

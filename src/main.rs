@@ -92,7 +92,7 @@ struct Opts {
     /// Set cvar values - use key value pairs (separated by space).
     /// Example: g_armor 150 hud_names false
     #[cfg_attr(feature = "cli", structopt())]
-    cvars: Vec<String>,
+    cvar_args: Vec<String>,
 }
 
 #[derive(Debug, EnumString)]
@@ -138,20 +138,68 @@ fn main() {
         }
         _ => {}
     }
-    opts.cvars = args.collect();
+    opts.cvar_args = args.collect();
 
     run(opts);
 }
 
 fn run(opts: Opts) {
+    match opts.endpoint {
+        // LATER None should launch client and offer choice in menu
+        None => {
+            init_global_state("launcher");
+            client_server_main(opts)
+        }
+        Some(Endpoint::Local) => {
+            init_global_state("lo");
+            let cvars = args_to_cvars(&opts.cvar_args);
+            client_main(cvars, true)
+        }
+        Some(Endpoint::Client) => {
+            init_global_state("cl");
+            let cvars = args_to_cvars(&opts.cvar_args);
+            client_main(cvars, false)
+        }
+        Some(Endpoint::Server) => {
+            init_global_state("sv");
+            let _cvars = args_to_cvars(&opts.cvar_args); // TODO use
+            server_main()
+        }
+    }
+}
+
+fn init_global_state(endpoint_name: &'static str) {
     let prev_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
         dbg_logf!("panicking");
         prev_hook(panic_info);
     }));
 
+    let color = match endpoint_name {
+        "sv" => GREEN,
+        "cl" => RED,
+        "lo" => BLUE2,
+        _ => WHITE,
+    };
+
+    DEBUG_ENDPOINT.with(|endpoint| {
+        *endpoint.borrow_mut() = DebugEndpoint {
+            name: endpoint_name,
+            default_color: color,
+        }
+    });
+
+    // LATER Switch fyrox to a more standard logger
+    // or at least add a level below INFO so load times can remain as INFO
+    // and the other messages are hidden by default.
+    // Also used in server_main().
+    Log::set_verbosity(MessageKind::Warning);
+}
+
+fn args_to_cvars(cvar_args: &[String]) -> Cvars {
     let mut cvars = Cvars::default();
-    let mut cvars_iter = opts.cvars.iter();
+
+    let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
         let res = cvars.set_str(cvar_name, str_value);
@@ -171,13 +219,7 @@ fn run(opts: Opts) {
         }
     }
 
-    match opts.endpoint {
-        // LATER None should launch client and offer choice in menu
-        None => client_server_main(opts),
-        Some(Endpoint::Local) => client_main(cvars, true),
-        Some(Endpoint::Client) => client_main(cvars, false),
-        Some(Endpoint::Server) => server_main(),
-    }
+    cvars
 }
 
 /// Run both client and server.
@@ -188,8 +230,6 @@ fn run(opts: Opts) {
 /// LATER It should do that explicitly, right now it only kills the server
 /// because client quits without a server anyway.
 fn client_server_main(opts: Opts) {
-    init_global_state("launcher");
-
     // This is broken - most input gets ignored (on Kubuntu):
     // thread::spawn(|| {
     //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
@@ -206,9 +246,9 @@ fn client_server_main(opts: Opts) {
     server_cmd.arg("server");
     client_cmd.arg("client");
 
-    for cvar in &opts.cvars {
-        server_cmd.arg(cvar);
-        client_cmd.arg(cvar);
+    for arg in &opts.cvar_args {
+        server_cmd.arg(arg);
+        client_cmd.arg(arg);
     }
 
     let mut server = server_cmd.spawn().unwrap();
@@ -225,12 +265,6 @@ fn client_server_main(opts: Opts) {
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
 fn client_main(cvars: Cvars, local_server: bool) {
-    if local_server {
-        init_global_state("lo");
-    } else {
-        init_global_state("cl");
-    }
-
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&event_loop, &cvars);
 
@@ -342,8 +376,6 @@ fn client_main(cvars: Cvars, local_server: bool) {
 }
 
 fn server_main() {
-    init_global_state("sv");
-
     let event_loop = EventLoop::new();
     let engine = init_engine_server(&event_loop);
 
@@ -381,28 +413,6 @@ fn server_main() {
             Event::LoopDestroyed => dbg_logf!("bye"),
         }
     });
-}
-
-fn init_global_state(endpoint_name: &'static str) {
-    let color = match endpoint_name {
-        "sv" => GREEN,
-        "cl" => RED,
-        "lo" => BLUE2,
-        _ => WHITE,
-    };
-
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: endpoint_name,
-            default_color: color,
-        }
-    });
-
-    // LATER Switch fyrox to a more standard logger
-    // or at least add a level below INFO so load times can remain as INFO
-    // and the other messages are hidden by default.
-    // Also used in server_main().
-    Log::set_verbosity(MessageKind::Warning);
 }
 
 fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {

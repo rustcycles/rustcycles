@@ -180,6 +180,10 @@ impl FyroxConsole {
         self.is_open
     }
 
+    /// Open the console.
+    ///
+    /// If your game grabs the mouse, you can save the previous state here
+    /// and get it back when closing.
     pub(crate) fn open(&mut self, engine: &mut Engine, was_mouse_grabbed: bool) {
         self.is_open = true;
         self.was_mouse_grabbed = was_mouse_grabbed;
@@ -193,9 +197,10 @@ impl FyroxConsole {
         // TODO how to set focus?
     }
 
-    /// Returns whether the mouse was grabbed before opening the console.
+    /// Close the console. Returns whether the mouse was grabbed before opening the console.
     ///
-    /// It's #[must_use] so you don't forget to restore it.
+    /// It's #[must_use] so you don't accidentally forget to restore it.
+    /// You can safely ignore it intentionally.
     #[must_use]
     pub(crate) fn close(&mut self, engine: &mut Engine) -> bool {
         engine.user_interface.send_message(WidgetMessage::visibility(

@@ -199,18 +199,21 @@ impl ClientProcess {
         match input.scancode {
             ESC if pressed => {
                 if self.console.is_open() {
-                    self.console.close(&mut self.engine);
-                    self.set_mouse_grab(true);
+                    // With shift or without, ESC closes an open console.
+                    let grab = self.console.close(&mut self.engine);
+                    self.set_mouse_grab(grab);
                 } else if self.shift_pressed {
-                    self.console.open(&mut self.engine);
+                    // Shift + ESC is a common shortcut to open the console in games.
+                    self.console.open(&mut self.engine, self.mouse_grabbed);
                     self.set_mouse_grab(false);
                 } else {
+                    // ESC anywhere else just ungrabs the mouse.
                     self.set_mouse_grab(false);
                 }
             }
             BACKTICK if pressed => {
                 if !self.console.is_open() {
-                    self.console.open(&mut self.engine);
+                    self.console.open(&mut self.engine, self.mouse_grabbed);
                     self.set_mouse_grab(false);
                 }
             }

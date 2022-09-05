@@ -33,6 +33,7 @@ const PG_DOWN: ScanCode = 109;
 /// In-game console for the Fyrox game engine.
 pub(crate) struct FyroxConsole {
     is_open: bool,
+    was_mouse_grabbed: bool,
     console: Console,
     history: Handle<UiNode>,
     prompt_text_box: Handle<UiNode>,
@@ -84,6 +85,7 @@ impl FyroxConsole {
 
         FyroxConsole {
             is_open: false,
+            was_mouse_grabbed: false,
             console: Console::new(),
             history,
             prompt_text_box,
@@ -178,8 +180,9 @@ impl FyroxConsole {
         self.is_open
     }
 
-    pub(crate) fn open(&mut self, engine: &mut Engine) {
+    pub(crate) fn open(&mut self, engine: &mut Engine, was_mouse_grabbed: bool) {
         self.is_open = true;
+        self.was_mouse_grabbed = was_mouse_grabbed;
 
         engine.user_interface.send_message(WidgetMessage::visibility(
             self.layout,
@@ -190,7 +193,11 @@ impl FyroxConsole {
         // TODO how to set focus?
     }
 
-    pub(crate) fn close(&mut self, engine: &mut Engine) {
+    /// Returns whether the mouse was grabbed before opening the console.
+    ///
+    /// It's #[must_use] so you don't forget to restore it.
+    #[must_use]
+    pub(crate) fn close(&mut self, engine: &mut Engine) -> bool {
         engine.user_interface.send_message(WidgetMessage::visibility(
             self.layout,
             MessageDirection::ToWidget,
@@ -198,6 +205,7 @@ impl FyroxConsole {
         ));
 
         self.is_open = false;
+        self.was_mouse_grabbed
     }
 }
 

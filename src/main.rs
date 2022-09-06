@@ -253,7 +253,7 @@ fn client_server_main(opts: Opts) {
 
     let mut server = server_cmd.spawn().unwrap();
     // LATER This doesn't grab mouse - maybe do that when getting focus?
-    std::thread::sleep(std::time::Duration::from_millis(200));
+    std::thread::sleep(std::time::Duration::from_millis(50));
     let mut client = client_cmd.spawn().unwrap();
 
     // We wanna close just the client and automatically close the server that way.

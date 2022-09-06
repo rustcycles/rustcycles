@@ -374,8 +374,6 @@ impl ClientProcess {
             dbg!(&msg);
         }
 
-        // LATER This is_open() is a hack around the fact fyrox can't force the prompt to be focused.
-        // When the console is open, all input should go to it.
         if self.console.is_open() {
             self.console.ui_message(&mut self.engine, &mut self.cvars, msg);
         }

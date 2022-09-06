@@ -129,6 +129,16 @@ impl FyroxConsole {
         }
 
         match msg.data() {
+            Some(WidgetMessage::Unfocus) => {
+                // As long as the console is open, always keep the prompt focused
+                if self.is_open {
+                    dbg!(msg);
+                    engine.user_interface.send_message(WidgetMessage::focus(
+                        self.prompt_text_box,
+                        MessageDirection::ToWidget,
+                    ));
+                }
+            }
             Some(WidgetMessage::KeyDown(KeyCode::Up)) => {
                 self.console.history_back();
                 self.update_ui_prompt(engine);
@@ -234,6 +244,9 @@ impl FyroxConsole {
             MessageDirection::ToWidget,
             false,
         ));
+        engine
+            .user_interface
+            .send_message(WidgetMessage::unfocus(self.prompt_text_box, MessageDirection::ToWidget));
 
         self.is_open = false;
         self.was_mouse_grabbed

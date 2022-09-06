@@ -71,12 +71,6 @@ impl FyroxConsole {
         )
         .build(&mut engine.user_interface.build_ctx());
 
-        // engine.user_interface.send_message(TextMessage::text(
-        //     history,
-        //     MessageDirection::ToWidget,
-        //     "test".to_owned(),
-        // ));
-
         FyroxConsole {
             is_open: false,
             was_mouse_grabbed: false,

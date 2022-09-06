@@ -228,7 +228,6 @@ impl FyroxConsole {
             // so if the message was at the top, nobody would see it.
             self.first_open = false;
             self.console.print("Type 'help' or '?' for basic info");
-            self.console.print("Known issue: click the console to focus it");
             self.update_ui_history(engine);
         }
     }

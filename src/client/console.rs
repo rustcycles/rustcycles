@@ -105,6 +105,15 @@ impl FyroxConsole {
             MessageDirection::ToWidget,
             (size.height / 2) as f32,
         ));
+
+        // This actually goes beyond the screen but who cares.
+        // It, however, still won't let me put the cursor at the end by clicking after the text:
+        // https://github.com/FyroxEngine/Fyrox/issues/361
+        engine.user_interface.send_message(WidgetMessage::width(
+            self.prompt_text_box,
+            MessageDirection::ToWidget,
+            size.width as f32,
+        ));
     }
 
     pub(crate) fn keyboard_input(

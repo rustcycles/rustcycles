@@ -2,7 +2,7 @@
 
 /// Engine-independant parts of the in-game console.
 ///
-/// Parsing and executing commands, history, eventually tab completion, ...
+/// Parsing and executing commands, help, history, eventually cvarlist and tab completion, ...
 #[derive(Debug, Clone, Default)]
 pub struct Console {
     /// The current contents of the prompt.

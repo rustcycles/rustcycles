@@ -202,7 +202,7 @@ impl FyroxConsole {
             // Eventually though, all stdout will be printed in the console
             // so if the message was at the top, nobody would see it.
             self.first_open = false;
-            self.console.print("Type 'help' or '?' for basic info".to_owned());
+            self.console.print("Type 'help' or '?' for basic info");
             self.update_ui_history(engine);
         }
     }

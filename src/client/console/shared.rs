@@ -122,10 +122,10 @@ impl Console {
             None => return Ok(()),
         };
         if cvar_name == "help" || cvar_name == "?" {
-            self.print("Available actions:".to_owned());
-            self.print("    help                 Print this message".to_owned());
-            self.print("    <cvar name>          Print the cvar's value".to_owned());
-            self.print("    <cvar name> <value>  Set the cvar's value".to_owned());
+            self.print("Available actions:");
+            self.print("    help                 Print this message");
+            self.print("    <cvar name>          Print the cvar's value");
+            self.print("    <cvar name> <value>  Set the cvar's value");
             return Ok(());
         }
 
@@ -143,12 +143,12 @@ impl Console {
         cvars.set_str(cvar_name, cvar_value)
     }
 
-    pub(crate) fn print(&mut self, text: String) {
-        self.push_history_line(text, false);
+    pub(crate) fn print<S: Into<String>>(&mut self, text: S) {
+        self.push_history_line(text.into(), false);
     }
 
-    fn print_input(&mut self, text: String) {
-        self.push_history_line(text, true);
+    fn print_input<S: Into<String>>(&mut self, text: S) {
+        self.push_history_line(text.into(), true);
     }
 
     fn push_history_line(&mut self, text: String, is_input: bool) {

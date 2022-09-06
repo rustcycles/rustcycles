@@ -37,6 +37,7 @@ pub struct Cvars {
     pub d_draw_physics: bool,
     pub d_draw_text: bool,
 
+    pub d_keyboard_input: bool,
     pub d_panic_unknown_cvar: bool,
 
     /// Print UI messages or a subset of them.
@@ -63,6 +64,7 @@ impl Default for Cvars {
             d_draw_physics: true,
             d_draw_text: true,
 
+            d_keyboard_input: false,
             d_panic_unknown_cvar: true,
 
             d_ui_msgs: false,

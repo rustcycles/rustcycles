@@ -185,6 +185,10 @@ impl ClientProcess {
         // https://github.com/bevyengine/bevy/issues/2052
         //  Improve keyboard input with Input<ScanCode>
 
+        if self.cvars.d_keyboard_input {
+            dbg_logf!("keyboard_input: {:?}", input);
+        }
+
         self.client_input(input);
         if !self.console.is_open() {
             self.game_input(input);

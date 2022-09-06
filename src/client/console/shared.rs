@@ -9,10 +9,12 @@ pub struct Console {
     ///
     /// Should always be kept in sync with what's displayed in the UI.
     pub prompt: String,
-    prompt_saved: String,
 
-    /// Where we are in history when using up and down keys.
-    prompt_history_index: usize,
+    /// Prompt to restore when using up and down keys. None if we're not currently walking through history.
+    prompt_saved: Option<String>,
+
+    /// Where we are in history when using up and down keys. None if we're not currently walking through history.
+    prompt_history_index: Option<usize>,
 
     pub history: Vec<HistoryLine>,
 
@@ -27,8 +29,8 @@ impl Console {
         #[allow(unused_mut)]
         let mut con = Console {
             prompt: String::new(),
-            prompt_saved: String::new(),
-            prompt_history_index: 0,
+            prompt_saved: None,
+            prompt_history_index: None,
             history: Vec::new(),
             history_view_index: 0,
         };
@@ -37,39 +39,46 @@ impl Console {
     }
 
     /// Go back in command history.
+    ///
+    /// Save the prompt so that users can go back in history,
+    /// then come back to present and get what they typed back.
     pub fn history_back(&mut self) {
-        // Save the prompt so that users can go back in history,
-        // then come back to present and get what they typed back.
-        if self.prompt_history_index == self.history.len() {
-            self.prompt_saved = self.prompt.clone();
-        }
-
-        let search_slice = &self.history[0..self.prompt_history_index];
+        let search_slice = if let Some(hi) = self.prompt_history_index {
+            &self.history[0..hi]
+        } else {
+            &self.history[..]
+        };
         if let Some(new_index) = search_slice.iter().rposition(|hist_line| hist_line.is_input) {
-            self.prompt_history_index = new_index;
-            self.prompt = self.history[self.prompt_history_index].text.clone();
+            self.prompt_history_index = Some(new_index);
+            if self.prompt_saved.is_none() {
+                self.prompt_saved = Some(self.prompt.clone());
+            }
+            self.prompt = self.history[new_index].text.clone();
         }
     }
 
     /// Go forward in command history.
+    ///
+    /// Restore the saved prompt if get to the end.
     pub fn history_forward(&mut self) {
-        // Since we're starting the search at history_index+1, the condition must remain here
-        // otherwise the range could start at history.len()+1 and panic.
-        if self.prompt_history_index >= self.history.len() {
-            return;
-        }
-
-        let search_slice = &self.history[self.prompt_history_index + 1..];
-        if let Some(new_index) = search_slice.iter().position(|hist_line| hist_line.is_input) {
-            // `position` starts counting from the iterator's start,
-            // not from history's start so we add the found index to what we skipped
-            // instead of using it directly.
-            self.prompt_history_index += new_index + 1;
-            self.prompt = self.history[self.prompt_history_index].text.clone();
-        } else {
-            // We're at the end of history, restore the saved prompt.
-            self.prompt_history_index = self.history.len();
-            self.prompt = self.prompt_saved.clone();
+        if let Some(index) = self.prompt_history_index {
+            // Start after the current, otherwise we'd immediately find the current, not the next.
+            // It's ok to index 1 past the end.
+            let begin = index + 1;
+            let search_slice = &self.history[begin..];
+            if let Some(local_index) = search_slice.iter().position(|hist_line| hist_line.is_input)
+            {
+                // `position` starts counting from the iterator's start,
+                // not from history's start so we add the found index to what we skipped
+                // instead of using it directly.
+                let new_index = begin + local_index;
+                self.prompt_history_index = Some(new_index);
+                self.prompt = self.history[new_index].text.clone();
+            } else {
+                // We're at the end of history, restore the saved prompt.
+                self.prompt_history_index = None;
+                self.prompt = self.prompt_saved.take().unwrap();
+            }
         }
     }
 
@@ -101,7 +110,7 @@ impl Console {
         self.prompt = String::new();
 
         // Entering a new command resets the user's position in history to the end.
-        self.prompt_history_index = self.history.len();
+        self.prompt_history_index = None;
 
         // If the view was at the end, keep scrolling down as new lines are added.
         // Otherwise the view's position shouldn't change.

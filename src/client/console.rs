@@ -151,14 +151,32 @@ impl FyroxConsole {
         if let Some(TextBoxMessage::Text(text)) = msg.data() {
             self.console.prompt = text.to_owned();
         }
-        if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) = msg.data() {
-            self.enter(engine, cvars);
+
+        if let Some(WidgetMessage::KeyDown(KeyCode::Up)) = msg.data() {
+            self.console.history_back();
+            self.update_ui_prompt(engine);
+        } else if let Some(WidgetMessage::KeyDown(KeyCode::Down)) = msg.data() {
+            self.console.history_forward();
+            self.update_ui_prompt(engine);
+        } else if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) =
+            msg.data()
+        {
+            self.console.enter(cvars);
+            self.update_ui_prompt(engine);
+            self.update_ui_history(engine);
         }
     }
 
-    pub(crate) fn enter(&mut self, engine: &mut Engine, cvars: &mut Cvars) {
-        self.console.enter(cvars);
+    fn update_ui_prompt(&mut self, engine: &mut Engine) {
+        dbg!(&self.console.prompt);
+        engine.user_interface.send_message(TextBoxMessage::text(
+            self.prompt_text_box,
+            MessageDirection::ToWidget,
+            self.console.prompt.clone(),
+        ));
+    }
 
+    fn update_ui_history(&mut self, engine: &mut Engine) {
         let mut hist = String::new();
         // TODO history view index Option
         let hi = self.console.history_view_index;
@@ -172,12 +190,6 @@ impl FyroxConsole {
             self.history,
             MessageDirection::ToWidget,
             hist,
-        ));
-
-        engine.user_interface.send_message(TextBoxMessage::text(
-            self.prompt_text_box,
-            MessageDirection::ToWidget,
-            "".to_owned(),
         ));
     }
 

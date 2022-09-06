@@ -27,6 +27,7 @@ use crate::{cvars::Cvars, prelude::*};
 /// In-game console for the Fyrox game engine.
 pub(crate) struct FyroxConsole {
     is_open: bool,
+    first_open: bool,
     was_mouse_grabbed: bool,
     console: Console,
     history: Handle<UiNode>,
@@ -72,6 +73,7 @@ impl FyroxConsole {
 
         FyroxConsole {
             is_open: false,
+            first_open: true,
             was_mouse_grabbed: false,
             console: Console::new(),
             history,
@@ -193,6 +195,16 @@ impl FyroxConsole {
         ));
 
         // TODO how to set focus?
+
+        if self.first_open {
+            // Currently it's not necessary to track the first opening,
+            // the history will be empty so we could just print it when creating the console.
+            // Eventually though, all stdout will be printed in the console
+            // so if the message was at the top, nobody would see it.
+            self.first_open = false;
+            self.console.print("Type 'help' or '?' for basic info".to_owned());
+            self.update_ui_history(engine);
+        }
     }
 
     /// Close the console. Returns whether the mouse was grabbed before opening the console.

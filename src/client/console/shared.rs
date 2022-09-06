@@ -30,16 +30,13 @@ pub struct Console {
 
 impl Console {
     pub fn new() -> Self {
-        #[allow(unused_mut)]
-        let mut con = Console {
+        Console {
             prompt: String::new(),
             prompt_saved: None,
             prompt_history_index: None,
             history: Vec::new(),
             history_view_end: 0,
-        };
-        //con.print("Type 'help' for basic info".to_owned()); TODO
-        con
+        }
     }
 
     /// Go back in command history.
@@ -146,7 +143,7 @@ impl Console {
         cvars.set_str(cvar_name, cvar_value)
     }
 
-    fn print(&mut self, text: String) {
+    pub(crate) fn print(&mut self, text: String) {
         self.push_history_line(text, false);
     }
 

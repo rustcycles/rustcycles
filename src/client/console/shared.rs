@@ -5,6 +5,9 @@
 /// Parsing and executing commands, history, eventually tab completion, ...
 #[derive(Debug, Clone, Default)]
 pub struct Console {
+    /// The current contents of the prompt.
+    ///
+    /// Should always be kept in sync with what's displayed in the UI.
     pub prompt: String,
     prompt_saved: String,
 

@@ -158,7 +158,7 @@ impl FyroxConsole {
     fn update_ui_history(&mut self, engine: &mut Engine) {
         let mut hist = String::new();
         // TODO history view index Option
-        let hi = self.console.history_view_index;
+        let hi = self.console.history_view_end;
         let lo = hi.saturating_sub(15); // TODO measure height
         for line in &self.console.history[lo..hi] {
             hist.push_str(&line.text);

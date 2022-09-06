@@ -21,7 +21,7 @@ pub struct Console {
     /// Where we are in the history view when scrolling using page up and down keys.
     ///
     /// It's the index of the *last* line that is to be displayed at the *bottom*.
-    pub history_view_index: usize,
+    pub history_view_end: usize,
 }
 
 impl Console {
@@ -32,7 +32,7 @@ impl Console {
             prompt_saved: None,
             prompt_history_index: None,
             history: Vec::new(),
-            history_view_index: 0,
+            history_view_end: 0,
         };
         //con.print("Type 'help' for basic info".to_owned()); TODO
         con
@@ -83,16 +83,16 @@ impl Console {
     }
 
     pub fn history_scroll_up(&mut self, count: usize) {
-        self.history_view_index = self.history_view_index.saturating_sub(count);
-        if self.history_view_index == 0 && !self.history.is_empty() {
+        self.history_view_end = self.history_view_end.saturating_sub(count);
+        if self.history_view_end == 0 && !self.history.is_empty() {
             // Keep at least one line in history when possible
             // because scrolling up to an empty view looks weird.
-            self.history_view_index = 1;
+            self.history_view_end = 1;
         }
     }
 
     pub fn history_scroll_down(&mut self, count: usize) {
-        self.history_view_index = (self.history_view_index + count).min(self.history.len());
+        self.history_view_end = (self.history_view_end + count).min(self.history.len());
     }
 
     /// The user pressed enter - process the line of text
@@ -114,8 +114,8 @@ impl Console {
 
         // If the view was at the end, keep scrolling down as new lines are added.
         // Otherwise the view's position shouldn't change.
-        if self.history_view_index == hist_len_old {
-            self.history_view_index = self.history.len();
+        if self.history_view_end == hist_len_old {
+            self.history_view_end = self.history.len();
         }
     }
 

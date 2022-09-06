@@ -222,7 +222,7 @@ impl ClientProcess {
                     self.set_mouse_grab(false);
                 }
             }
-            SHIFT => self.shift_pressed = pressed,
+            L_SHIFT => self.shift_pressed = pressed,
             _ => (),
         }
     }
@@ -239,10 +239,10 @@ impl ClientProcess {
             S => self.cg.lp.input.backward = pressed,
             D => self.cg.lp.input.right = pressed,
             SPACE => self.cg.lp.input.up = pressed,
-            SHIFT => self.cg.lp.input.down = pressed,
+            L_SHIFT => self.cg.lp.input.down = pressed,
 
             // Don't print anything for these, it just spams stdout.
-            ESC | TAB | CTRL | ALT | BACKSLASH | Z => {}
+            ESC | TAB | L_CTRL | L_ALT | BACKSLASH2 | Z => {}
             F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | F9 | F10 | F11 | F12 => {}
 
             c => {
@@ -393,29 +393,83 @@ impl ClientProcess {
     }
 }
 
+/// Layout independant scancodes.
+///
+/// This is a separate mod so you can glob-import it.
+#[rustfmt::skip]
+// ...and also so I can stop rustfmt from mangling it.
+// Seriously, remove #[rustfmt::skip] and see what it does, I dare you.
+// I've never seen anybody ever format comments like that
+// and rustfmt does it by default without a way to disable it.
+// I. Just. Hate. It.
 mod scan_codes {
     #![allow(dead_code)]
 
     use fyrox::event::ScanCode;
 
     // Apparently there are different numbering schemes all called "scancodes".
-    // This image is mostly accurate for the one in winit:
+    // This image is the least inaccurate for the one in winit (on Kubuntu 22.04):
     // https://forum.thegamecreators.com/thread/145420
-    // Note that some keys are different (e.g. R_ALT, KP_ENTER)
+    // Note that many keys are different (e.g. R_ALT, KP_ENTER, arrows, ...).
 
     pub(crate) const ESC: ScanCode = 1;
+    pub(crate) const NUM1: ScanCode = 2;
+    pub(crate) const NUM2: ScanCode = 3;
+    pub(crate) const NUM3: ScanCode = 4;
+    pub(crate) const NUM4: ScanCode = 5;
+    pub(crate) const NUM5: ScanCode = 6;
+    pub(crate) const NUM6: ScanCode = 7;
+    pub(crate) const NUM7: ScanCode = 8;
+    pub(crate) const NUM8: ScanCode = 9;
+    pub(crate) const NUM9: ScanCode = 10;
+    pub(crate) const NUM0: ScanCode = 11;
+    pub(crate) const MINUS: ScanCode = 12;
+    pub(crate) const EQUALS: ScanCode = 13;
+    pub(crate) const BACKSPACE: ScanCode = 14;
     pub(crate) const TAB: ScanCode = 15;
+    pub(crate) const Q: ScanCode = 16;
     pub(crate) const W: ScanCode = 17;
+    pub(crate) const E: ScanCode = 18;
+    pub(crate) const R: ScanCode = 19;
+    pub(crate) const T: ScanCode = 20;
+    pub(crate) const Y: ScanCode = 21;
+    pub(crate) const U: ScanCode = 22;
+    pub(crate) const I: ScanCode = 23;
+    pub(crate) const O: ScanCode = 24;
+    pub(crate) const P: ScanCode = 25;
+    pub(crate) const LBRACKET: ScanCode = 26;
+    pub(crate) const RBRACKET: ScanCode = 27;
     pub(crate) const ENTER: ScanCode = 28;
-    pub(crate) const CTRL: ScanCode = 29;
+    pub(crate) const L_CTRL: ScanCode = 29;
     pub(crate) const A: ScanCode = 30;
     pub(crate) const S: ScanCode = 31;
     pub(crate) const D: ScanCode = 32;
+    pub(crate) const F: ScanCode = 33;
+    pub(crate) const G: ScanCode = 34;
+    pub(crate) const H: ScanCode = 35;
+    pub(crate) const J: ScanCode = 36;
+    pub(crate) const K: ScanCode = 37;
+    pub(crate) const L: ScanCode = 38;
+    pub(crate) const SEMICOLON: ScanCode = 39;
+    pub(crate) const APOSTROPHE: ScanCode = 40;
     pub(crate) const BACKTICK: ScanCode = 41;
-    pub(crate) const SHIFT: ScanCode = 42;
+    pub(crate) const L_SHIFT: ScanCode = 42;
+    pub(crate) const BACKSLASH: ScanCode = 43;
     pub(crate) const Z: ScanCode = 44;
-    pub(crate) const ALT: ScanCode = 56;
+    pub(crate) const X: ScanCode = 45;
+    pub(crate) const C: ScanCode = 46;
+    pub(crate) const V: ScanCode = 47;
+    pub(crate) const B: ScanCode = 48;
+    pub(crate) const N: ScanCode = 49;
+    pub(crate) const M: ScanCode = 50;
+    pub(crate) const COMMA: ScanCode = 51;
+    pub(crate) const PERIOD: ScanCode = 52;
+    pub(crate) const SLASH: ScanCode = 53;
+    pub(crate) const R_SHIFT: ScanCode = 54;
+    pub(crate) const KP_MULTIPLY: ScanCode = 55;
+    pub(crate) const L_ALT: ScanCode = 56;
     pub(crate) const SPACE: ScanCode = 57;
+    pub(crate) const CAPS_LOCK: ScanCode = 58;
     pub(crate) const F1: ScanCode = 59;
     pub(crate) const F2: ScanCode = 60;
     pub(crate) const F3: ScanCode = 61;
@@ -428,10 +482,61 @@ mod scan_codes {
     pub(crate) const F10: ScanCode = 68;
     pub(crate) const F11: ScanCode = 69;
     pub(crate) const F12: ScanCode = 70;
-    pub(crate) const BACKSLASH: ScanCode = 86;
+    pub(crate) const KP7: ScanCode = 71;
+    pub(crate) const KP8: ScanCode = 72;
+    pub(crate) const KP9: ScanCode = 73;
+    pub(crate) const KP_MINUS: ScanCode = 74;
+    pub(crate) const KP4: ScanCode = 75;
+    pub(crate) const KP5: ScanCode = 76;
+    pub(crate) const KP6: ScanCode = 77;
+    pub(crate) const KP_PLUS: ScanCode = 78;
+    pub(crate) const KP1: ScanCode = 79;
+    pub(crate) const KP2: ScanCode = 80;
+    pub(crate) const KP3: ScanCode = 81;
+    pub(crate) const KP0: ScanCode = 82;
+    pub(crate) const KP_PERIOD: ScanCode = 83;
+    // 84
+    // 85
+    pub(crate) const BACKSLASH2: ScanCode = 86; // Between LSHIFT and Z, not on all keyboards
+    // 87
+    // 88
+    // 89
+    // 90
+    // 91
+    // 92
+    // 93
+    // 94
+    // 95
     pub(crate) const KP_ENTER: ScanCode = 96;
+    pub(crate) const R_CTRL: ScanCode = 97;
+    pub(crate) const KP_DIVIDE: ScanCode = 98;
+    pub(crate) const PRINT_SCREEN: ScanCode = 99;
+    pub(crate) const R_ALT: ScanCode = 100;
+    // 101
+    pub(crate) const HOME: ScanCode = 102;
     pub(crate) const UP_ARROW: ScanCode = 103;
     pub(crate) const PG_UP: ScanCode = 104;
+    pub(crate) const LEFT_ARROW: ScanCode = 105;
+    pub(crate) const RIGHT_ARROW: ScanCode = 106;
+    pub(crate) const END: ScanCode = 107;
     pub(crate) const DOWN_ARROW: ScanCode = 108;
     pub(crate) const PG_DOWN: ScanCode = 109;
+    pub(crate) const INSERT: ScanCode = 110;
+    pub(crate) const DELETE: ScanCode = 111;
+    // 112
+    // 113
+    // 114
+    // 115
+    // 116
+    // 117
+    // 118
+    pub(crate) const PAUSE: ScanCode = 119;
+    // 120
+    // 121
+    // 122
+    // 123
+    // 124
+    pub(crate) const L_SUPER: ScanCode = 125;
+    pub(crate) const R_SUPER: ScanCode = 126;
+    pub(crate) const MENU: ScanCode = 127;
 }

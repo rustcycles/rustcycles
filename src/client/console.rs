@@ -144,6 +144,9 @@ impl FyroxConsole {
         // But this is the intended way to use the UI, even if it's more verbose.
         // At least it should reduce issues with the prompt reacting to some keys
         // but not others given KeyboardInput doesn't require focus.
+        //
+        // Note that it might still be better to read the text from the UI as the souce of truth
+        // because right now the console doesn't know about any text we set from code.
 
         if let Some(TextBoxMessage::Text(text)) = msg.data() {
             self.console.prompt = text.to_owned();

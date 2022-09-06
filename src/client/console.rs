@@ -30,6 +30,7 @@ pub(crate) struct FyroxConsole {
     first_open: bool,
     was_mouse_grabbed: bool,
     console: Console,
+    height: u32,
     history: Handle<UiNode>,
     prompt_text_box: Handle<UiNode>,
     layout: Handle<UiNode>,
@@ -76,6 +77,7 @@ impl FyroxConsole {
             first_open: true,
             was_mouse_grabbed: false,
             console: Console::new(),
+            height: 0,
             history,
             prompt_text_box,
             layout,
@@ -89,10 +91,11 @@ impl FyroxConsole {
             size.width as f32,
         ));
 
+        self.height = size.height / 2;
         engine.user_interface.send_message(WidgetMessage::height(
             self.layout,
             MessageDirection::ToWidget,
-            (size.height / 2) as f32,
+            self.height as f32,
         ));
 
         // This actually goes beyond the screen but who cares.
@@ -103,6 +106,9 @@ impl FyroxConsole {
             MessageDirection::ToWidget,
             size.width as f32,
         ));
+
+        // The number of lines that can fit might have changed - reprint history.
+        self.update_ui_history(engine);
     }
 
     pub(crate) fn ui_message(&mut self, engine: &mut Engine, cvars: &mut Cvars, msg: UiMessage) {
@@ -158,9 +164,16 @@ impl FyroxConsole {
     }
 
     fn update_ui_history(&mut self, engine: &mut Engine) {
-        let mut hist = String::new();
+        // LATER There should be a cleaner way to measure lines
+        let line_height = 14;
+        // Leave 1 line room for the prompt
+        // LATER This is not exact for tiny windows but good enough for now.
+        let max_lines = (self.height / line_height).saturating_sub(1);
+
         let hi = self.console.history_view_end;
-        let lo = hi.saturating_sub(15); // TODO measure height
+        let lo = hi.saturating_sub(max_lines.try_into().unwrap());
+
+        let mut hist = String::new();
         for line in &self.console.history[lo..hi] {
             if line.is_input {
                 hist.push_str("> ");

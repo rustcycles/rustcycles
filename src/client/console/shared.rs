@@ -20,7 +20,8 @@ pub struct Console {
 
     /// Where we are in the history view when scrolling using page up and down keys.
     ///
-    /// It's the index of the *last* line that is to be displayed at the *bottom*.
+    /// This index is *one past* the last line to be displayed at the *bottom*
+    /// so that you can use it as the high end of a range.
     pub history_view_end: usize,
 }
 

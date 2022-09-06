@@ -186,9 +186,7 @@ impl ClientProcess {
         //  Improve keyboard input with Input<ScanCode>
 
         self.client_input(input);
-        if self.console.is_open() {
-            self.console.keyboard_input(&mut self.cvars, &mut self.engine, input);
-        } else {
+        if !self.console.is_open() {
             self.game_input(input);
         }
     }

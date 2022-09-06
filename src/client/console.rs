@@ -25,9 +25,6 @@ use shared::*;
 
 use crate::{cvars::Cvars, prelude::*};
 
-const PG_UP: ScanCode = 104;
-const PG_DOWN: ScanCode = 109;
-
 /// In-game console for the Fyrox game engine.
 pub(crate) struct FyroxConsole {
     is_open: bool,
@@ -113,24 +110,6 @@ impl FyroxConsole {
         ));
     }
 
-    pub(crate) fn keyboard_input(
-        &mut self,
-        _cvars: &mut Cvars,
-        _engine: &mut Engine,
-        input: KeyboardInput,
-    ) {
-        // TODO engine needed?
-        // LATER After fyrox can force focus to prompt, this should use the normal input system.
-        if let ElementState::Pressed = input.state {
-            match input.scancode {
-                PG_UP => self.console.history_scroll_up(10),
-                PG_DOWN => self.console.history_scroll_down(10),
-
-                _ => (),
-            }
-        }
-    }
-
     pub(crate) fn ui_message(&mut self, engine: &mut Engine, cvars: &mut Cvars, msg: UiMessage) {
         // We could just listen for KeyboardInput and get the text from the prompt via
         // ```
@@ -156,6 +135,14 @@ impl FyroxConsole {
             Some(WidgetMessage::KeyDown(KeyCode::Down)) => {
                 self.console.history_forward();
                 self.update_ui_prompt(engine);
+            }
+            Some(WidgetMessage::KeyDown(KeyCode::PageUp)) => {
+                self.console.history_scroll_up(10);
+                self.update_ui_history(engine);
+            }
+            Some(WidgetMessage::KeyDown(KeyCode::PageDown)) => {
+                self.console.history_scroll_down(10);
+                self.update_ui_history(engine);
             }
             Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) => {
                 self.console.enter(cvars);

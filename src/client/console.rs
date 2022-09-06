@@ -7,7 +7,6 @@ mod shared;
 use fyrox::{
     dpi::PhysicalSize,
     engine::Engine,
-    event::{ElementState, KeyboardInput, ScanCode},
     gui::{
         border::BorderBuilder,
         brush::Brush,

@@ -194,7 +194,7 @@ impl FyroxConsole {
             true,
         ));
 
-        // TODO how to set focus?
+        // LATER Request focus: https://github.com/FyroxEngine/Fyrox/issues/361
 
         if self.first_open {
             // Currently it's not necessary to track the first opening,

@@ -25,9 +25,7 @@ use shared::*;
 
 use crate::{cvars::Cvars, prelude::*};
 
-const UP_ARROW: ScanCode = 103;
 const PG_UP: ScanCode = 104;
-const DOWN_ARROW: ScanCode = 108;
 const PG_DOWN: ScanCode = 109;
 
 /// In-game console for the Fyrox game engine.
@@ -125,8 +123,6 @@ impl FyroxConsole {
         // LATER After fyrox can force focus to prompt, this should use the normal input system.
         if let ElementState::Pressed = input.state {
             match input.scancode {
-                UP_ARROW => self.console.history_back(),
-                DOWN_ARROW => self.console.history_forward(),
                 PG_UP => self.console.history_scroll_up(10),
                 PG_DOWN => self.console.history_scroll_down(10),
 
@@ -152,18 +148,21 @@ impl FyroxConsole {
             self.console.prompt = text.to_owned();
         }
 
-        if let Some(WidgetMessage::KeyDown(KeyCode::Up)) = msg.data() {
-            self.console.history_back();
-            self.update_ui_prompt(engine);
-        } else if let Some(WidgetMessage::KeyDown(KeyCode::Down)) = msg.data() {
-            self.console.history_forward();
-            self.update_ui_prompt(engine);
-        } else if let Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) =
-            msg.data()
-        {
-            self.console.enter(cvars);
-            self.update_ui_prompt(engine);
-            self.update_ui_history(engine);
+        match msg.data() {
+            Some(WidgetMessage::KeyDown(KeyCode::Up)) => {
+                self.console.history_back();
+                self.update_ui_prompt(engine);
+            }
+            Some(WidgetMessage::KeyDown(KeyCode::Down)) => {
+                self.console.history_forward();
+                self.update_ui_prompt(engine);
+            }
+            Some(WidgetMessage::KeyDown(KeyCode::Return | KeyCode::NumpadEnter)) => {
+                self.console.enter(cvars);
+                self.update_ui_prompt(engine);
+                self.update_ui_history(engine);
+            }
+            _ => (),
         }
     }
 

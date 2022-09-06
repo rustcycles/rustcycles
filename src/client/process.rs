@@ -160,7 +160,7 @@ impl ClientProcess {
         // the game can get stuck in a loop (bugs like this are most common on startup)
         // and it would never ungrab.
         if focus {
-            if self.cvars.cl_mouse_grab_on_focus {
+            if self.cvars.cl_mouse_grab_on_focus && !self.console.is_open() {
                 self.set_mouse_grab(true);
             }
         } else {

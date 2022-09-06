@@ -1,5 +1,7 @@
 #![allow(unreachable_pub)] // TODO
 
+use std::mem;
+
 /// Engine-independant parts of the in-game console.
 ///
 /// Parsing and executing commands, help, history, eventually cvarlist and tab completion, ...
@@ -98,24 +100,24 @@ impl Console {
 
     /// The user pressed enter - process the line of text
     pub fn enter(&mut self, cvars: &mut impl CvarAccess) {
-        self.print_input(self.prompt.clone());
+        let cmd = mem::take(&mut self.prompt);
+
+        self.print_input(&cmd);
 
         // The actual command parsing logic
-        let res = self.process_line(cvars);
+        let res = self.execute_command(cvars, &cmd);
         if let Err(msg) = res {
             self.print(msg);
         }
-
-        self.prompt = String::new();
 
         // Entering a new command resets the user's position in history to the end.
         self.prompt_history_index = None;
     }
 
     /// Parse what the user typed and get or set a cvar
-    fn process_line(&mut self, cvars: &mut impl CvarAccess) -> Result<(), String> {
+    fn execute_command(&mut self, cvars: &mut impl CvarAccess, cmd: &str) -> Result<(), String> {
         // Splitting on whitespace also in effect trims leading and trailing whitespace.
-        let mut parts = self.prompt.split_whitespace();
+        let mut parts = cmd.split_whitespace();
 
         let cvar_name = match parts.next() {
             Some(name) => name,

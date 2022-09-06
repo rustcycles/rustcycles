@@ -48,6 +48,8 @@ pub(crate) use crate::v;
 ///
 /// Nalgebra's coordinate system is right-handed:
 /// index finger is X, middle finger is Y, thumb is Z.
+/// Alternatively (easier to remember?):
+/// thumb is X, index finger is Y, middle finger is Z.
 ///
 /// Nalgebra's rotations also use the right-hand rule:
 /// thumb is the axis, the curl of fingers is the direction of rotation.

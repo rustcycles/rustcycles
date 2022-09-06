@@ -132,7 +132,6 @@ impl FyroxConsole {
             Some(WidgetMessage::Unfocus) => {
                 // As long as the console is open, always keep the prompt focused
                 if self.is_open {
-                    dbg!(msg);
                     engine.user_interface.send_message(WidgetMessage::focus(
                         self.prompt_text_box,
                         MessageDirection::ToWidget,
@@ -165,7 +164,6 @@ impl FyroxConsole {
     }
 
     fn update_ui_prompt(&mut self, engine: &mut Engine) {
-        dbg!(&self.console.prompt);
         engine.user_interface.send_message(TextBoxMessage::text(
             self.prompt_text_box,
             MessageDirection::ToWidget,

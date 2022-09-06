@@ -53,7 +53,6 @@ impl FyroxConsole {
 
         let prompt_text_box = TextBoxBuilder::new(WidgetBuilder::new())
             .with_text_commit_mode(TextCommitMode::Immediate)
-            .with_text("help")
             .build(&mut engine.user_interface.build_ctx());
 
         let prompt_line = StackPanelBuilder::new(
@@ -175,7 +174,7 @@ impl FyroxConsole {
         engine.user_interface.send_message(TextBoxMessage::text(
             self.prompt_text_box,
             MessageDirection::ToWidget,
-            "new prompt".to_owned(), // TODO These spaces are so we can click on it
+            "".to_owned(),
         ));
     }
 

@@ -207,7 +207,9 @@ impl FyroxConsole {
             true,
         ));
 
-        // LATER Request focus: https://github.com/FyroxEngine/Fyrox/issues/361
+        engine
+            .user_interface
+            .send_message(WidgetMessage::focus(self.prompt_text_box, MessageDirection::ToWidget));
 
         if self.first_open {
             // Currently it's not necessary to track the first opening,

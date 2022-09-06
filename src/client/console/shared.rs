@@ -16,6 +16,9 @@ pub struct Console {
     /// Where we are in history when using up and down keys. None if we're not currently walking through history.
     prompt_history_index: Option<usize>,
 
+    /// Input and output history.
+    ///
+    /// You should prepend input lines with "> " or something similar when displaying them.
     pub history: Vec<HistoryLine>,
 
     /// Where we are in the history view when scrolling using page up and down keys.
@@ -98,26 +101,18 @@ impl Console {
 
     /// The user pressed enter - process the line of text
     pub fn enter(&mut self, cvars: &mut impl CvarAccess) {
-        let hist_len_old = self.history.len();
-
-        self.push_history_line(self.prompt.clone(), true);
+        self.print_input(self.prompt.clone());
 
         // The actual command parsing logic
         let res = self.process_line(cvars);
         if let Err(msg) = res {
-            self.push_history_line(msg, false);
+            self.print(msg);
         }
 
         self.prompt = String::new();
 
         // Entering a new command resets the user's position in history to the end.
         self.prompt_history_index = None;
-
-        // If the view was at the end, keep scrolling down as new lines are added.
-        // Otherwise the view's position shouldn't change.
-        if self.history_view_end == hist_len_old {
-            self.history_view_end = self.history.len();
-        }
     }
 
     /// Parse what the user typed and get or set a cvar
@@ -155,9 +150,16 @@ impl Console {
         self.push_history_line(text, false);
     }
 
+    fn print_input(&mut self, text: String) {
+        self.push_history_line(text, true);
+    }
+
     fn push_history_line(&mut self, text: String, is_input: bool) {
         let hist_line = HistoryLine::new(text, is_input);
         self.history.push(hist_line);
+
+        // LATER Make this configurable so adding new lines doesn't scroll the view.
+        self.history_view_end += 1;
     }
 }
 

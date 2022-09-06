@@ -161,6 +161,9 @@ impl FyroxConsole {
         let hi = self.console.history_view_end;
         let lo = hi.saturating_sub(15); // TODO measure height
         for line in &self.console.history[lo..hi] {
+            if line.is_input {
+                hist.push_str("> ");
+            }
             hist.push_str(&line.text);
             hist.push('\n');
         }

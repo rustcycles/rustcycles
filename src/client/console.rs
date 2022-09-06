@@ -160,7 +160,7 @@ impl FyroxConsole {
         let mut hist = String::new();
         // TODO history view index Option
         let hi = self.console.history_view_index;
-        let lo = hi.saturating_sub(15); // TODO measure hight
+        let lo = hi.saturating_sub(15); // TODO measure height
         for line in &self.console.history[lo..hi] {
             hist.push_str(&line.text);
             hist.push('\n');

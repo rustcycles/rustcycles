@@ -25,6 +25,7 @@ debug = false
 panic = "abort"
 
 # https://doc.rust-lang.org/cargo/reference/profiles.html#build-dependencies
+# The reference might be wrong - it says this affects proc macros but in my experience it doesn't.
 # No effect so far because we don't use and build deps yet.
 [profile.dev.build-override]
 opt-level = 3

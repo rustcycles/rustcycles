@@ -211,6 +211,10 @@ impl ClientProcess {
                     // Shift + ESC is a common shortcut to open the console in games.
                     self.console.open(&mut self.engine, self.mouse_grabbed);
                     self.set_mouse_grab(false);
+
+                    // Kinda hacky but at least this is the only 2-key shortcut
+                    // so shift is the only such special case.
+                    self.cg.lp.input.down = false;
                 } else {
                     // ESC anywhere else just ungrabs the mouse.
                     self.set_mouse_grab(false);

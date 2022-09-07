@@ -379,11 +379,10 @@ impl ClientProcess {
     }
 
     pub(crate) fn real_time(&self) -> f32 {
-        // LATER How to handle time in logging code? Real vs frame time.
-        // If real, how to make this available in logging code?
-        // Probably must use the same clock throughout all code,
-        // otherwise could 2 clocks drift out of sync
-        // because they only guarantee monotonicity?
+        // LATER How to handle time in logging code? Real or frame time?
+        // Should be OK to create one instant as 0 and clone it to a global/client/server.
+        // Elapsed is guaranteed to be monotonic even across instances
+        // because it uses Instant::now() internally.
         self.clock.elapsed().as_secs_f32()
     }
 }

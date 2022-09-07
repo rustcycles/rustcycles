@@ -244,21 +244,7 @@ impl ClientProcess {
             D => self.cg.lp.input.right = pressed,
             SPACE => self.cg.lp.input.up = pressed,
             L_SHIFT => self.cg.lp.input.down = pressed, // LATER Unhardcode release on shift+ESC
-
-            // Don't print anything for these, it just spams stdout.
-            ESC | TAB | L_CTRL | L_ALT | BACKSLASH2 | Z => {}
-            F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | F9 | F10 | F11 | F12 => {}
-
-            c => {
-                // LATER This is for easier debugging, allow disabling via cvars
-                if pressed {
-                    dbg_logf!(
-                        "pressed unhandled scancode: {} (virtual key code: {:?})",
-                        c,
-                        input.virtual_keycode
-                    );
-                }
-            }
+            _ => (),
         }
 
         self.cg.lp.input.real_time = self.real_time();

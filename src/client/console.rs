@@ -16,7 +16,7 @@ use fyrox::{
         text::{TextBuilder, TextMessage},
         text_box::{TextBoxBuilder, TextBoxMessage, TextCommitMode},
         widget::{WidgetBuilder, WidgetMessage},
-        Orientation, UiNode,
+        Orientation, UiNode, VerticalAlignment,
     },
 };
 
@@ -64,7 +64,9 @@ impl FyroxConsole {
                 .with_background(Brush::Solid(Color::BLACK.with_new_alpha(220)))
                 .with_child(
                     StackPanelBuilder::new(
-                        WidgetBuilder::new().with_children([history, prompt_line]),
+                        WidgetBuilder::new()
+                            .with_vertical_alignment(VerticalAlignment::Bottom)
+                            .with_children([history, prompt_line]),
                     )
                     .with_orientation(Orientation::Vertical)
                     .build(&mut engine.user_interface.build_ctx()),

@@ -244,6 +244,16 @@ impl ClientProcess {
             D => self.cg.lp.input.right = pressed,
             SPACE => self.cg.lp.input.up = pressed,
             L_SHIFT => self.cg.lp.input.down = pressed, // LATER Unhardcode release on shift+ESC
+            Q => self.cg.lp.input.prev_weapon = pressed,
+            E => self.cg.lp.input.next_weapon = pressed,
+            R => self.cg.lp.input.reload = pressed,
+            F => self.cg.lp.input.flag = pressed,
+            G => self.cg.lp.input.grenade = pressed,
+            M => self.cg.lp.input.map = pressed,
+            TAB => self.cg.lp.input.score = pressed,
+            ENTER => self.cg.lp.input.chat = pressed,
+            PAUSE => self.cg.lp.input.pause = pressed,
+            F12 => self.cg.lp.input.screenshot = pressed,
             _ => (),
         }
 
@@ -265,6 +275,8 @@ impl ClientProcess {
                 MouseButton::Left => self.cg.lp.input.fire1 = pressed,
                 MouseButton::Right => self.cg.lp.input.fire2 = pressed,
                 MouseButton::Middle => self.cg.lp.input.zoom = pressed,
+                MouseButton::Other(8) => self.cg.lp.input.marker1 = pressed,
+                MouseButton::Other(9) => self.cg.lp.input.marker2 = pressed,
                 MouseButton::Other(_) => {}
             }
 

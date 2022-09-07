@@ -211,7 +211,8 @@ pub(crate) struct Input {
 
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
-    pub(crate) marker: bool,
+    pub(crate) marker1: bool,
+    pub(crate) marker2: bool,
     pub(crate) zoom: bool,
     pub(crate) forward: bool,
     pub(crate) backward: bool,
@@ -223,12 +224,12 @@ pub(crate) struct Input {
     pub(crate) next_weapon: bool,
     pub(crate) reload: bool,
     pub(crate) flag: bool,
+    pub(crate) grenade: bool,
     pub(crate) map: bool,
     pub(crate) score: bool,
     pub(crate) chat: bool,
     pub(crate) pause: bool,
     pub(crate) screenshot: bool,
-    pub(crate) console: bool,
     // ^ when adding fields, also add them to Debug
 }
 
@@ -249,8 +250,11 @@ impl Debug for Input {
         if self.fire2 {
             write!(f, "fire2 ")?;
         }
-        if self.marker {
-            write!(f, "marker ")?;
+        if self.marker1 {
+            write!(f, "marker1 ")?;
+        }
+        if self.marker2 {
+            write!(f, "marker2 ")?;
         }
         if self.zoom {
             write!(f, "zoom ")?;
@@ -285,6 +289,9 @@ impl Debug for Input {
         if self.flag {
             write!(f, "flag ")?;
         }
+        if self.grenade {
+            write!(f, "grenade ")?;
+        }
         if self.map {
             write!(f, "map ")?;
         }
@@ -299,9 +306,6 @@ impl Debug for Input {
         }
         if self.screenshot {
             write!(f, "screenshot ")?;
-        }
-        if self.console {
-            write!(f, "console ")?;
         }
         write!(f, "}}")?;
         Ok(())

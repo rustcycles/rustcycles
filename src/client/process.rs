@@ -186,7 +186,7 @@ impl ClientProcess {
         //  Improve keyboard input with Input<ScanCode>
 
         if self.cvars.d_keyboard_input {
-            dbg_logf!("keyboard_input: {:?}", input);
+            dbg_logf!("{} keyboard_input: {:?}", self.real_time(), input);
         }
 
         self.client_input(input);
@@ -389,6 +389,11 @@ impl ClientProcess {
     }
 
     pub(crate) fn real_time(&self) -> f32 {
+        // LATER How to handle time in logging code? Real vs frame time.
+        // If real, how to make this available in logging code?
+        // Probably must use the same clock throughout all code,
+        // otherwise could 2 clocks drift out of sync
+        // because they only guarantee monotonicity?
         self.clock.elapsed().as_secs_f32()
     }
 }

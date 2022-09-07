@@ -211,6 +211,7 @@ pub(crate) struct Input {
 
     pub(crate) fire1: bool,
     pub(crate) fire2: bool,
+    pub(crate) marker: bool,
     pub(crate) zoom: bool,
     pub(crate) forward: bool,
     pub(crate) backward: bool,
@@ -218,8 +219,21 @@ pub(crate) struct Input {
     pub(crate) right: bool,
     pub(crate) up: bool,
     pub(crate) down: bool,
+    pub(crate) prev_weapon: bool,
+    pub(crate) next_weapon: bool,
+    pub(crate) reload: bool,
+    pub(crate) flag: bool,
+    pub(crate) map: bool,
+    pub(crate) score: bool,
+    pub(crate) chat: bool,
+    pub(crate) pause: bool,
+    pub(crate) screenshot: bool,
+    pub(crate) console: bool,
     // ^ when adding fields, also add them to Debug
 }
+
+// LATER ClientInput? - zoom, map, chat, score, pause, screenshot, console, ...
+// These don't need to be networked
 
 impl Debug for Input {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -234,6 +248,9 @@ impl Debug for Input {
         }
         if self.fire2 {
             write!(f, "fire2 ")?;
+        }
+        if self.marker {
+            write!(f, "marker ")?;
         }
         if self.zoom {
             write!(f, "zoom ")?;
@@ -255,6 +272,36 @@ impl Debug for Input {
         }
         if self.down {
             write!(f, "down ")?;
+        }
+        if self.prev_weapon {
+            write!(f, "prev_weapon ")?;
+        }
+        if self.next_weapon {
+            write!(f, "next_weapon ")?;
+        }
+        if self.reload {
+            write!(f, "reload ")?;
+        }
+        if self.flag {
+            write!(f, "flag ")?;
+        }
+        if self.map {
+            write!(f, "map ")?;
+        }
+        if self.score {
+            write!(f, "score ")?;
+        }
+        if self.chat {
+            write!(f, "chat ")?;
+        }
+        if self.pause {
+            write!(f, "pause ")?;
+        }
+        if self.screenshot {
+            write!(f, "screenshot ")?;
+        }
+        if self.console {
+            write!(f, "console ")?;
         }
         write!(f, "}}")?;
         Ok(())

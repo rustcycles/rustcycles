@@ -1,4 +1,4 @@
-# This is to be used together with .cargo/config-example.toml - more info there.
+# This is to be used together with .cargo/config-example.toml - more info in readme.
 
 [toolchain]
 # We don't use any nightly features, this is only for -Zshare-generics,

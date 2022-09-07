@@ -243,7 +243,7 @@ impl ClientProcess {
             S => self.cg.lp.input.backward = pressed,
             D => self.cg.lp.input.right = pressed,
             SPACE => self.cg.lp.input.up = pressed,
-            L_SHIFT => self.cg.lp.input.down = pressed,
+            L_SHIFT => self.cg.lp.input.down = pressed, // LATER Unhardcode release on shift+ESC
 
             // Don't print anything for these, it just spams stdout.
             ESC | TAB | L_CTRL | L_ALT | BACKSLASH2 | Z => {}

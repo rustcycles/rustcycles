@@ -253,23 +253,25 @@ impl ClientProcess {
     }
 
     pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
-        if self.console.is_open() {
-            return;
+        if self.cvars.d_mouse_input {
+            dbg_logf!("{} mouse_input: {:?} {:?}", self.real_time(), state, button);
         }
 
-        self.set_mouse_grab(true);
+        if !self.console.is_open() {
+            self.set_mouse_grab(true);
 
-        let pressed = state == ElementState::Pressed;
-        match button {
-            MouseButton::Left => self.cg.lp.input.fire1 = pressed,
-            MouseButton::Right => self.cg.lp.input.fire2 = pressed,
-            MouseButton::Middle => self.cg.lp.input.zoom = pressed,
-            MouseButton::Other(_) => {}
+            let pressed = state == ElementState::Pressed;
+            match button {
+                MouseButton::Left => self.cg.lp.input.fire1 = pressed,
+                MouseButton::Right => self.cg.lp.input.fire2 = pressed,
+                MouseButton::Middle => self.cg.lp.input.zoom = pressed,
+                MouseButton::Other(_) => {}
+            }
+
+            self.cg.lp.input.real_time = self.real_time();
+            self.cg.lp.input.game_time = self.cg.gs.game_time;
+            self.cg.send_input();
         }
-
-        self.cg.lp.input.real_time = self.real_time();
-        self.cg.lp.input.game_time = self.cg.gs.game_time;
-        self.cg.send_input();
     }
 
     /// Either grab mouse and hide cursor

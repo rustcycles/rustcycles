@@ -41,6 +41,7 @@ cli = ["structopt"]
 [dependencies]
 bincode = "1.3.3"
 cvars = "0.1.0"
+cvars-console = { path = "../cvars/cvars-console" }
 fxhash = "0.2.1"
 #fyrox = "0.27.1"
 fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "b16c78456f43c3ff0b5b006ff295d1d46a73b0f7" }

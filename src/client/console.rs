@@ -2,8 +2,6 @@
 //!
 //! LATER Split into a reusable crate: cvars-console-fyrox.
 
-mod shared;
-
 use fyrox::{
     dpi::PhysicalSize,
     engine::Engine,
@@ -20,7 +18,7 @@ use fyrox::{
     },
 };
 
-use shared::*;
+use cvars_console::*;
 
 use crate::{cvars::Cvars, prelude::*};
 

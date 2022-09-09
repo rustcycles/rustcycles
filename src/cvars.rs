@@ -1,6 +1,7 @@
 //! Console variables - configuration options for anything and everything.
 
 use cvars::SetGet;
+use cvars_console::CvarAccess;
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -76,5 +77,15 @@ impl Default for Cvars {
 
             r_quality: 0,
         }
+    }
+}
+
+impl CvarAccess for Cvars {
+    fn get_string(&self, cvar_name: &str) -> Result<String, String> {
+        self.get_string(cvar_name)
+    }
+
+    fn set_str(&mut self, cvar_name: &str, cvar_value: &str) -> Result<(), String> {
+        self.set_str(cvar_name, cvar_value)
     }
 }

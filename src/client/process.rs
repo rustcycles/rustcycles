@@ -12,6 +12,7 @@ use std::{
     time::Duration,
 };
 
+use cvars_console_fyrox::FyroxConsole;
 use fyrox::{
     core::instant::Instant,
     dpi::PhysicalSize,
@@ -29,7 +30,7 @@ use fyrox::{
 };
 
 use crate::{
-    client::{console::FyroxConsole, game::ClientGame},
+    client::game::ClientGame,
     common::net::{LocalConnection, LocalListener, TcpConnection},
     cvars::Cvars,
     prelude::*,

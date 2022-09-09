@@ -532,6 +532,14 @@ name = "cvars-console"
 version = "0.1.0"
 
 [[package]]
+name = "cvars-console-fyrox"
+version = "0.1.0"
+dependencies = [
+ "cvars-console",
+ "fyrox",
+]
+
+[[package]]
 name = "darling"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2194,6 +2202,7 @@ dependencies = [
  "bincode",
  "cvars",
  "cvars-console",
+ "cvars-console-fyrox",
  "fxhash",
  "fyrox",
  "inline_tweak",

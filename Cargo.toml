@@ -45,7 +45,7 @@ cvars-console = { path = "../cvars/cvars-console" }
 cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
 fxhash = "0.2.1"
 #fyrox = "0.27.1"
-fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "d137bd39ea5d6171f6908e8f0a005bce4c2c90de" }
+fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "7d1b8f1733a7a043c779f5767b6c92777404a5f4" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "922b623a929a079694adce1ded4006ef7d43fd02" }
 #fyrox = { path = "../fyrox" }
 inline_tweak = "1.0.8"

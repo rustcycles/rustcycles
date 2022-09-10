@@ -919,7 +919,7 @@ dependencies = [
 [[package]]
 name = "fyrox"
 version = "0.27.1"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "bitflags",
  "clap 3.2.20",
@@ -952,7 +952,7 @@ dependencies = [
 [[package]]
 name = "fyrox-core"
 version = "0.21.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "arrayvec 0.7.2",
  "base64",
@@ -979,7 +979,7 @@ dependencies = [
 [[package]]
 name = "fyrox-core-derive"
 version = "0.16.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "convert_case",
  "darling 0.14.1",
@@ -992,7 +992,7 @@ dependencies = [
 [[package]]
 name = "fyrox-resource"
 version = "0.5.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "fyrox-core",
 ]
@@ -1000,7 +1000,7 @@ dependencies = [
 [[package]]
 name = "fyrox-sound"
 version = "0.28.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "alsa-sys",
  "core-foundation-sys",
@@ -1018,7 +1018,7 @@ dependencies = [
 [[package]]
 name = "fyrox-ui"
 version = "0.18.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=d137bd39ea5d6171f6908e8f0a005bce4c2c90de#d137bd39ea5d6171f6908e8f0a005bce4c2c90de"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7d1b8f1733a7a043c779f5767b6c92777404a5f4#7d1b8f1733a7a043c779f5767b6c92777404a5f4"
 dependencies = [
  "copypasta",
  "fontdue",

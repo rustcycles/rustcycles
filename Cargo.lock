@@ -536,7 +536,7 @@ name = "cvars-console-fyrox"
 version = "0.1.0"
 dependencies = [
  "cvars-console",
- "fyrox",
+ "fyrox-ui",
 ]
 
 [[package]]

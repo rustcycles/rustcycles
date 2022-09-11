@@ -72,7 +72,7 @@ impl ClientProcess {
 
         // Z index doesn't work, console has to be created after debug_text (and any other UI):
         // https://github.com/FyroxEngine/Fyrox/issues/356
-        let console = FyroxConsole::new(&mut engine);
+        let console = FyroxConsole::new(&mut engine.user_interface);
 
         let (sg, cg) = if local_game {
             // LATER Multithreading would be sweet but we can't use threads in WASM.
@@ -151,7 +151,11 @@ impl ClientProcess {
             size.width as f32,
         ));
 
-        self.console.resized(&mut self.engine, size);
+        self.console.resized(
+            &mut self.engine.user_interface,
+            size.width as f32,
+            size.height as f32,
+        );
     }
 
     pub(crate) fn focused(&mut self, focus: bool) {
@@ -206,11 +210,11 @@ impl ClientProcess {
             ESC if pressed => {
                 if self.console.is_open() {
                     // With shift or without, ESC closes an open console.
-                    let grab = self.console.close(&mut self.engine);
+                    let grab = self.console.close(&mut self.engine.user_interface);
                     self.set_mouse_grab(grab);
                 } else if self.shift_pressed {
                     // Shift + ESC is a common shortcut to open the console in games.
-                    self.console.open(&mut self.engine, self.mouse_grabbed);
+                    self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
                     self.set_mouse_grab(false);
 
                     // Kinda hacky but at least this is the only 2-key shortcut
@@ -223,7 +227,7 @@ impl ClientProcess {
             }
             BACKTICK if pressed => {
                 if !self.console.is_open() {
-                    self.console.open(&mut self.engine, self.mouse_grabbed);
+                    self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
                     self.set_mouse_grab(false);
                 }
             }
@@ -380,7 +384,7 @@ impl ClientProcess {
         }
 
         if self.console.is_open() {
-            self.console.ui_message(&mut self.engine, &mut self.cvars, msg);
+            self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
         }
     }
 

@@ -265,7 +265,16 @@ fn client_server_main(opts: Opts) {
 /// client and server in one thread? Update docs on Endpoint or wherever.
 fn client_main(cvars: Cvars, local_server: bool) {
     let event_loop = EventLoop::new();
-    let engine = init_engine_client(&event_loop, &cvars);
+    let mut engine = init_engine_client(&event_loop, &cvars);
+
+    use fyrox::gui::{message::*, test::*, text_box::*, widget::*};
+
+    let text_box = TextBoxBuilder::new(WidgetBuilder::new().with_visibility(false))
+        .build(&mut engine.user_interface.build_ctx());
+
+    engine
+        .user_interface
+        .send_message(WidgetMessage::focus(text_box, MessageDirection::ToWidget));
 
     let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
     event_loop.run(move |event, _, control_flow| {
@@ -314,6 +323,11 @@ fn client_main(cvars: Cvars, local_server: bool) {
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         dbg_logf!("{} mouse wheel {:?} {:?}", client.real_time(), delta, phase);
+                        client.engine.user_interface.send_message(TextMessage::text(
+                            text_box,
+                            MessageDirection::ToWidget,
+                            "".to_owned(),
+                        ));
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
                         client.mouse_input(state, button);

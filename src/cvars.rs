@@ -37,6 +37,10 @@ pub struct Cvars {
     /// This ruins perf in debug builds: https://github.com/FyroxEngine/Fyrox/issues/237
     pub d_draw_physics: bool,
     pub d_draw_text: bool,
+    pub d_draw_text_shadow: bool,
+    pub d_draw_text_shadow_dilation: f32,
+    pub d_draw_text_shadow_offset_x: f32,
+    pub d_draw_text_shadow_offset_y: f32,
 
     pub d_keyboard_input: bool,
     pub d_mouse_input: bool,
@@ -65,6 +69,10 @@ impl Default for Cvars {
             d_draw_frame_timings: true,
             d_draw_physics: true,
             d_draw_text: true,
+            d_draw_text_shadow: true,
+            d_draw_text_shadow_dilation: 1.0,
+            d_draw_text_shadow_offset_x: 1.0,
+            d_draw_text_shadow_offset_y: 1.0,
 
             d_keyboard_input: false,
             d_mouse_input: false,

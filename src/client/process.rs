@@ -66,6 +66,13 @@ impl ClientProcess {
 
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
+                // LATER react to changes at runtime
+                .with_shadow(cvars.d_draw_text_shadow)
+                .with_shadow_dilation(cvars.d_draw_text_shadow_dilation)
+                .with_shadow_offset(Vector2::new(
+                    cvars.d_draw_text_shadow_offset_x,
+                    cvars.d_draw_text_shadow_offset_y,
+                ))
                 // Word wrap doesn't work if there's an extremely long word.
                 .with_wrap(WrapMode::Letter)
                 .build(&mut engine.user_interface.build_ctx());

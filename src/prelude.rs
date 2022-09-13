@@ -9,13 +9,11 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use fyrox::core::algebra::Vector3;
-
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and unlikely to collide.
 pub(crate) use fyrox::{
     core::{
-        algebra::{Unit, UnitQuaternion},
+        algebra::{Unit, UnitQuaternion, Vector2, Vector3, Vector4},
         color::Color,
         pool::{Handle, Pool},
     },

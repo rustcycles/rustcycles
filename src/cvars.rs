@@ -70,7 +70,7 @@ impl Default for Cvars {
             d_draw_physics: true,
             d_draw_text: true,
             d_draw_text_shadow: true,
-            d_draw_text_shadow_dilation: 1.0,
+            d_draw_text_shadow_dilation: 0.0,
             d_draw_text_shadow_offset_x: 1.0,
             d_draw_text_shadow_offset_y: 1.0,
 

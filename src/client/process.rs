@@ -390,9 +390,7 @@ impl ClientProcess {
             dbg!(&msg);
         }
 
-        if self.console.is_open() {
-            self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
-        }
+        self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
     }
 
     pub(crate) fn update(&mut self) {

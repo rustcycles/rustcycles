@@ -364,6 +364,12 @@ impl ClientProcess {
     }
 
     pub(crate) fn ui_message(&mut self, msg: UiMessage) {
+        self.ui_message_logging(&msg);
+
+        self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
+    }
+
+    fn ui_message_logging(&mut self, msg: &UiMessage) {
         let mut print = self.cvars.d_ui_msgs;
 
         match msg.direction {
@@ -389,8 +395,6 @@ impl ClientProcess {
             // LATER dbg_logdp for pretty printing
             dbg!(&msg);
         }
-
-        self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
     }
 
     pub(crate) fn update(&mut self) {

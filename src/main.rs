@@ -361,7 +361,7 @@ fn client_main(cvars: Cvars, local_server: bool) {
             Event::Resumed => {}
             Event::MainEventsCleared => {
                 while let Some(msg) = client.engine.user_interface.poll_message() {
-                    client.ui_message(msg);
+                    client.ui_message(&msg);
                 }
                 client.update();
             }

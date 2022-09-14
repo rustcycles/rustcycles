@@ -530,10 +530,12 @@ dependencies = [
 [[package]]
 name = "cvars-console"
 version = "0.1.0"
+source = "git+https://github.com/martin-t/cvars?rev=76a079e07de3f98d11cbd504ceb3842353ebeb98#76a079e07de3f98d11cbd504ceb3842353ebeb98"
 
 [[package]]
 name = "cvars-console-fyrox"
 version = "0.1.0"
+source = "git+https://github.com/martin-t/cvars?rev=76a079e07de3f98d11cbd504ceb3842353ebeb98#76a079e07de3f98d11cbd504ceb3842353ebeb98"
 dependencies = [
  "cvars-console",
  "fyrox-ui",

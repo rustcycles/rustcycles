@@ -364,9 +364,9 @@ impl ClientProcess {
     }
 
     pub(crate) fn ui_message(&mut self, msg: &UiMessage) {
-        self.ui_message_logging(&msg);
+        self.ui_message_logging(msg);
 
-        self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, &msg);
+        self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
     }
 
     fn ui_message_logging(&mut self, msg: &UiMessage) {

@@ -150,10 +150,14 @@ impl ClientGame {
             self.tick_before_physics(engine, dt);
 
             // Update animations, transformations, physics, ...
-            // Dummy control flow since we don't use fyrox plugins.
+            // There's currently no need to split this into pre_ and post_update like on the client.
+            // Dummy control flow and lag since we don't use fyrox plugins.
             let mut cf = fyrox::event_loop::ControlFlow::Poll;
-            engine.pre_update(dt, &mut cf);
+            let mut lag = 0.0;
+            engine.pre_update(dt, &mut cf, &mut lag);
+            // Sanity check - if the engine starts doing something with these, we'll know.
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
+            assert_eq!(lag, 0.0);
 
             // `tick_after_physics` tells the engine to draw debug shapes and text.
             // Any debug calls after it will show up next frame.

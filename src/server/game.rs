@@ -50,11 +50,14 @@ impl ServerGame {
 
             self.gs.tick_before_physics(engine, dt);
 
-            // There's currently no need to split this like on the client.
-            // Dummy control flow ince we don't use fyrox plugins.
+            // There's currently no need to split this into pre_ and post_update like on the client.
+            // Dummy control flow and lag since we don't use fyrox plugins.
             let mut cf = fyrox::event_loop::ControlFlow::Poll;
-            engine.update(dt, &mut cf);
+            let mut lag = 0.0;
+            engine.update(dt, &mut cf, &mut lag);
+            // Sanity check - if the engine starts doing something with these, we'll know.
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
+            assert_eq!(lag, 0.0);
 
             // `sys_send_update` sends debug shapes and text to client.
             // Any debug calls after it will show up next frame.

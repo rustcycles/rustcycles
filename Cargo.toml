@@ -41,13 +41,13 @@ cli = ["structopt"]
 [dependencies]
 bincode = "1.3.3"
 cvars = "0.1.0"
-cvars-console = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
-cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
+cvars-console = { git = "https://github.com/martin-t/cvars", rev = "ae2e3e59ff06d61c9038f33237ea49d05f91e3b5" }
+cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "ae2e3e59ff06d61c9038f33237ea49d05f91e3b5" }
 #cvars-console = { path = "../cvars/cvars-console" }
 #cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
 fxhash = "0.2.1"
-#fyrox = "0.27.1"
-fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "102ec67c7ab86cb993864d51c49069dca0ec0fd0" }
+fyrox = "0.28.0"
+#fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "102ec67c7ab86cb993864d51c49069dca0ec0fd0" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "922b623a929a079694adce1ded4006ef7d43fd02" }
 #fyrox = { path = "../fyrox" }
 inline_tweak = "1.0.8"

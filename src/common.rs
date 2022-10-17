@@ -178,7 +178,7 @@ impl GameState {
     #[allow(dead_code)]
     pub(crate) fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
         let step = (self.frame_number % steps) as f32;
-        let angle = 2.0 * std::f32::consts::PI / steps as f32 * step as f32;
+        let angle = 2.0 * std::f32::consts::PI / steps as f32 * step;
         let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);

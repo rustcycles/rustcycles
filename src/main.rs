@@ -298,15 +298,6 @@ fn client_main(cvars: Cvars, local_server: bool) {
                     WindowEvent::MouseInput { state, button, .. } => {
                         client.mouse_input(state, button);
                     }
-                    WindowEvent::CursorMoved {
-                        position: _position,
-                        ..
-                    } => {
-                        //dbg_logd!(_position);
-                    }
-                    WindowEvent::AxisMotion { value: _value, .. } => {
-                        //dbg_logd!(_value);
-                    }
                     _ => {}
                 }
             }

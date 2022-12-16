@@ -29,7 +29,6 @@ use strum_macros::EnumString;
 
 use crate::{
     client::process::ClientProcess,
-    cvars::Cvars,
     debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
     prelude::*,
     server::process::ServerProcess,

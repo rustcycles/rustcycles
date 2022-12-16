@@ -19,7 +19,6 @@ use crate::{
         net::{self, Connection},
         GameState, Input,
     },
-    cvars::Cvars,
     debug::{
         self,
         details::{Lines, DEBUG_SHAPES, DEBUG_TEXTS},

@@ -32,7 +32,6 @@ use fyrox::{
 use crate::{
     client::game::ClientGame,
     common::net::{LocalConnection, LocalListener, TcpConnection},
-    cvars::Cvars,
     prelude::*,
     server::game::ServerGame,
 };

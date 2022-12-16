@@ -235,6 +235,7 @@ fn client_server_main(opts: Opts) {
     }
 
     let mut server = server_cmd.spawn().unwrap();
+    // Sleep so the client window appears later and gets focus.
     std::thread::sleep(std::time::Duration::from_millis(50));
     let mut client = client_cmd.spawn().unwrap();
 

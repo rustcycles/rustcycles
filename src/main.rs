@@ -99,13 +99,6 @@ enum Endpoint {
     Server,
 }
 
-#[cfg(feature = "cli")]
-fn main() {
-    let opts = Opts::from_args();
-    run(opts);
-}
-
-#[cfg(not(feature = "cli"))]
 fn main() {
     let mut opts = Opts::default();
 
@@ -114,9 +107,8 @@ fn main() {
     //
     // If hand parsing gets too complex, might wanna consider one of the libs here:
     // https://github.com/rosetta-rs/argparse-rosetta-rs
-
+    //
     // LATER Add --help and --version
-
     let mut args = env::args().skip(1).peekable(); // Skip path to self
     match args.peek() {
         Some(arg) if arg == "local" => {
@@ -135,10 +127,6 @@ fn main() {
     }
     opts.cvar_args = args.collect();
 
-    run(opts);
-}
-
-fn run(opts: Opts) {
     match opts.endpoint {
         // LATER None should launch client and offer choice in menu
         None => {

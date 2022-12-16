@@ -27,9 +27,6 @@ use fyrox::{
 };
 use strum_macros::EnumString;
 
-#[cfg(feature = "cli")]
-use structopt::StructOpt;
-
 use crate::{
     client::process::ClientProcess,
     cvars::Cvars,
@@ -82,21 +79,17 @@ use crate::{
 //          todo, panic, unreachable, unimplemented, ...
 
 #[derive(Debug, Default)]
-#[cfg_attr(feature = "cli", derive(StructOpt))]
 struct Opts {
     /// Whether to run the client, server or both.
-    #[cfg_attr(feature = "cli", structopt(subcommand))]
     endpoint: Option<Endpoint>,
 
     // LATER Fix examples
     /// Set cvar values - use key value pairs (separated by space).
     /// Example: g_armor 150 hud_names false
-    #[cfg_attr(feature = "cli", structopt())]
     cvar_args: Vec<String>,
 }
 
 #[derive(Debug, EnumString)]
-#[cfg_attr(feature = "cli", derive(StructOpt))]
 enum Endpoint {
     /// Run a local game (client and server in one process)
     Local,
@@ -116,12 +109,14 @@ fn main() {
 fn main() {
     let mut opts = Opts::default();
 
-    // We kinda wanna use structopt because it has nice QoL features
-    // but it adds a couple hundred ms to incremental debug builds.
-    // So for dev builds we use this crude way of parsing input instead
-    // to build and therefore iterate a tiny bit faster.
+    // We are not using a derive-based library (anymore)
+    // because they add a couple hundred ms to incremental debug builds.
     //
-    // If this gets too complex, might wanna consider https://github.com/RazrFalcon/pico-args.
+    // If hand parsing gets too complex, might wanna consider one of the libs here:
+    // https://github.com/rosetta-rs/argparse-rosetta-rs
+
+    // LATER Add --help and --version
+
     let mut args = env::args().skip(1).peekable(); // Skip path to self
     match args.peek() {
         Some(arg) if arg == "local" => {

@@ -35,9 +35,6 @@ codegen-units = 1
 opt-level = 3
 codegen-units = 1
 
-[features]
-cli = ["structopt"]
-
 [dependencies]
 bincode = "1.3.3"
 cvars = "0.1.0"
@@ -52,6 +49,5 @@ fyrox = "0.28.0"
 #fyrox = { path = "../fyrox" }
 inline_tweak = "1.0.8"
 serde = { version = "1.0.150", features = ["derive"] }
-structopt = { version = "0.3.25", optional = true }
 strum = "0.24.0"
 strum_macros = "0.24.3"

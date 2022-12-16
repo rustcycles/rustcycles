@@ -1,5 +1,14 @@
 //! Debug tools - soft asserts, logging, visualization in 3D.
 //!
+//! General principles:
+//! - When the these macros are used on the server,
+//!   they tell clients what to print or draw (unlike `dbg` or `println`)
+//!   to make it easy to debug server-side issues.
+//! - Prefer `soft_assert` over `assert` in gamecode.
+//! - Use `dbg_log*` instead of `dbg`.
+//! - Use `dbg_text*` to print things that happen every frame.
+//! - Use `dbg_line`, `dbg_arrow`, `dbg_cross`, `dbg_rot` to draw shapes in 3D space.
+//!
 //! # Soft asserts
 //!
 //! Games shouldn't crash. It's better to have a gamelogic or rendering bug
@@ -17,6 +26,8 @@
 //! A corrupted game state is generally better than no game state.
 //! This should, of course, only be used in gamelogic code
 //! which is not concerned with security, doesn't save to disk, etc.
+//!
+//! LATER soft_unwrap
 //!
 //! LATER Gamecode will be sandboxed using WASM.
 //! LATER Offer a way for servers and clients to autoreport errors.

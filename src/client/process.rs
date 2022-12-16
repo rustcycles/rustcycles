@@ -402,7 +402,7 @@ impl ClientProcess {
         self.cg.update(&self.cvars, &mut self.engine, target);
         let target = self.real_time(); // Borrowck dance
         if let Some(sg) = &mut self.sg {
-            sg.update(&mut self.engine, target)
+            sg.update(&self.cvars, &mut self.engine, target);
         }
     }
 

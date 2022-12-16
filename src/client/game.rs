@@ -163,11 +163,11 @@ impl ClientGame {
             // Any debug calls after it will show up next frame.
             if cvars.d_draw && cvars.d_draw_frame_timings {
                 // LATER put cvars inside
-                self.gs.debug_engine_updates(v!(-5 3 3), 4);
+                self.gs.debug_engine_updates(cvars, v!(-5 3 3));
             }
             self.tick_after_physics(cvars, engine, dt);
             if cvars.d_draw && cvars.d_draw_frame_timings {
-                self.gs.debug_engine_updates(v!(-6 3 3), 4);
+                self.gs.debug_engine_updates(cvars, v!(-6 3 3));
             }
 
             // Update UI

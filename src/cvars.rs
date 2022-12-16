@@ -31,9 +31,12 @@ pub struct Cvars {
     /// so I don't have to add a cvar each time I want a quick toggle.
     pub d_dbg: bool,
 
+    // TODO A lot of these cvars need to be synced to server when playing locally.
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_frame_timings: bool,
+    pub d_draw_frame_timings_steps: usize,
+    pub d_draw_frame_timings_text: bool,
     /// This ruins perf in debug builds: https://github.com/FyroxEngine/Fyrox/issues/237
     pub d_draw_physics: bool,
     pub d_draw_text: bool,
@@ -67,6 +70,8 @@ impl Default for Cvars {
 
             d_draw: true,
             d_draw_frame_timings: true,
+            d_draw_frame_timings_steps: 4,
+            d_draw_frame_timings_text: false,
             d_draw_physics: true,
             d_draw_text: true,
             d_draw_text_shadow: true,

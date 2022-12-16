@@ -176,13 +176,15 @@ impl GameState {
     ///
     /// The rotation is clockwise when looking in the forward direction.
     #[allow(dead_code)]
-    pub(crate) fn debug_engine_updates(&self, pos: Vec3, steps: usize) {
-        let step = (self.frame_number % steps) as f32;
-        let angle = 2.0 * std::f32::consts::PI / steps as f32 * step;
+    pub(crate) fn debug_engine_updates(&self, cvars: &Cvars, pos: Vec3) {
+        let step = (self.frame_number % cvars.d_draw_frame_timings_steps) as f32;
+        let angle = 2.0 * std::f32::consts::PI / cvars.d_draw_frame_timings_steps as f32 * step;
         let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);
-        dbg_textd!(self.frame_number, pos, angle.to_degrees());
+        if cvars.d_draw_frame_timings_text {
+            dbg_textd!(self.frame_number, pos, angle.to_degrees());
+        }
     }
 }
 

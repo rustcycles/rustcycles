@@ -33,6 +33,8 @@ pub(crate) use fyrox::{
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub(crate) use inline_tweak::tweak;
 
+pub(crate) use crate::cvars::Cvars;
+
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root
 // so we import it here to make it part of prelude.

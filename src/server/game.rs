@@ -36,7 +36,7 @@ impl ServerGame {
         }
     }
 
-    pub(crate) fn update(&mut self, engine: &mut Engine, game_time_target: f32) {
+    pub(crate) fn update(&mut self, cvars: &Cvars, engine: &mut Engine, game_time_target: f32) {
         // This is similar to Client::update,
         // see that for more information.
 
@@ -61,9 +61,9 @@ impl ServerGame {
 
             // `sys_send_update` sends debug shapes and text to client.
             // Any debug calls after it will show up next frame.
-            self.gs.debug_engine_updates(v!(-5 5 3), 4);
+            self.gs.debug_engine_updates(cvars, v!(-5 5 3));
             self.sys_send_update(engine);
-            self.gs.debug_engine_updates(v!(-6 5 3), 4);
+            self.gs.debug_engine_updates(cvars, v!(-6 5 3));
         }
     }
 

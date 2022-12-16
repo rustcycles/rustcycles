@@ -131,22 +131,22 @@ fn main() {
         // LATER None should launch client and offer choice in menu
         None => {
             init_global_state("launcher");
-            client_server_main(opts)
+            client_server_main(opts);
         }
         Some(Endpoint::Local) => {
             init_global_state("lo");
             let cvars = args_to_cvars(&opts.cvar_args);
-            client_main(cvars, true)
+            client_main(cvars, true);
         }
         Some(Endpoint::Client) => {
             init_global_state("cl");
             let cvars = args_to_cvars(&opts.cvar_args);
-            client_main(cvars, false)
+            client_main(cvars, false);
         }
         Some(Endpoint::Server) => {
             init_global_state("sv");
-            let _cvars = args_to_cvars(&opts.cvar_args); // TODO use
-            server_main()
+            let cvars = args_to_cvars(&opts.cvar_args);
+            server_main(cvars);
         }
     }
 }
@@ -358,11 +358,11 @@ fn client_main(cvars: Cvars, local_server: bool) {
     });
 }
 
-fn server_main() {
+fn server_main(cvars: Cvars) {
     let event_loop = EventLoop::new();
     let engine = init_engine_server(&event_loop);
 
-    let mut server = executor::block_on(ServerProcess::new(engine));
+    let mut server = executor::block_on(ServerProcess::new(cvars, engine));
     event_loop.run(move |event, _, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;

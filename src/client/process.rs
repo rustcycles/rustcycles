@@ -143,6 +143,10 @@ impl ClientProcess {
     pub(crate) fn resized(&mut self, size: PhysicalSize<u32>) {
         // This is also called when the window is first created.
 
+        if self.cvars.d_events && self.cvars.d_events_resized {
+            dbg_logf!("{} resized: {:?}", self.real_time(), size);
+        }
+
         self.engine.set_frame_size(size.into()).unwrap();
 
         // mrDIMAS on discord:
@@ -165,6 +169,10 @@ impl ClientProcess {
     }
 
     pub(crate) fn focused(&mut self, focus: bool) {
+        if self.cvars.d_events && self.cvars.d_events_focused {
+            dbg_logf!("{} focused: {:?}", self.real_time(), focus);
+        }
+
         // Ungrab here is needed in addition to ESC,
         // otherwise the mouse stays grabbed when alt+tabbing to other windows.
         // However, don't automatically grab it when gaining focus,
@@ -182,6 +190,9 @@ impl ClientProcess {
     }
 
     pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
+        // NOTE: This event is repeated if the key is held, that means
+        // there can be more `state: Pressed` events before a `state: Released`.
+
         // Use scancodes, not virtual keys, because they don't depend on layout.
         // This is problematic in other ways so here's a bunch of issues to follow:
         // https://github.com/rust-windowing/winit/issues/732:
@@ -196,7 +207,7 @@ impl ClientProcess {
         // https://github.com/bevyengine/bevy/issues/2052
         //  Improve keyboard input with Input<ScanCode>
 
-        if self.cvars.d_keyboard_input {
+        if self.cvars.d_events && self.cvars.d_events_keyboard_input {
             dbg_logf!("{} keyboard_input: {:?}", self.real_time(), input);
         }
 
@@ -274,7 +285,7 @@ impl ClientProcess {
     }
 
     pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
-        if self.cvars.d_mouse_input {
+        if self.cvars.d_events && self.cvars.d_events_mouse_input {
             dbg_logf!("{} mouse_input: {:?} {:?}", self.real_time(), state, button);
         }
 

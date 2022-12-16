@@ -45,8 +45,12 @@ pub struct Cvars {
     pub d_draw_text_shadow_offset_x: f32,
     pub d_draw_text_shadow_offset_y: f32,
 
-    pub d_keyboard_input: bool,
-    pub d_mouse_input: bool,
+    pub d_events: bool,
+    pub d_events_focused: bool,
+    pub d_events_keyboard_input: bool,
+    pub d_events_mouse_input: bool,
+    pub d_events_resized: bool,
+
     pub d_panic_unknown_cvar: bool,
 
     /// Print UI messages or a subset of them.
@@ -79,8 +83,12 @@ impl Default for Cvars {
             d_draw_text_shadow_offset_x: 1.0,
             d_draw_text_shadow_offset_y: 1.0,
 
-            d_keyboard_input: false,
-            d_mouse_input: false,
+            d_events: true,
+            d_events_focused: false,
+            d_events_keyboard_input: false,
+            d_events_mouse_input: false,
+            d_events_resized: false,
+
             d_panic_unknown_cvar: true,
 
             d_ui_msgs: false,

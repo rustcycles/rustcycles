@@ -277,19 +277,9 @@ fn client_main(cvars: Cvars, local_server: bool) {
                         *control_flow = ControlFlow::Exit;
                     }
                     WindowEvent::Focused(focus) => {
-                        //dbg_logf!("{} focus {:?}", client.real_time(), focus);
-
                         client.focused(focus);
                     }
                     WindowEvent::KeyboardInput { input, .. } => {
-                        // NOTE: This event is repeated if the key is held, that means
-                        // there can be more `state: Pressed` events before a `state: Released`.
-                        // dbg_logf!(
-                        //     "{} keyboard input {:?}",
-                        //     client.real_time(),
-                        //     input
-                        // );
-
                         client.keyboard_input(input);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {

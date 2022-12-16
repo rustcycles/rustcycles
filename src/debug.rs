@@ -96,9 +96,9 @@ macro_rules! dbg_textf {
             use std::fmt::Write;
             let mut s = String::new();
             $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                write!(s, "{} ", endpoint.borrow().name).expect("writing to String always succeeds");
+                write!(s, "{} ", endpoint.borrow().name).expect("unreachable - writing to String always succeeds");
             });
-            write!(s, $( $t )* ).expect("writing to String always succeeds");
+            write!(s, $( $t )* ).expect("unreachable - writing to String always succeeds");
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {
                 texts.borrow_mut().push(s);
             });

@@ -276,9 +276,6 @@ fn client_main(cvars: Cvars, local_server: bool) {
                     WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit;
                     }
-                    WindowEvent::ReceivedCharacter(_) => {
-                        // LATER might be useful for console/chat?
-                    }
                     WindowEvent::Focused(focus) => {
                         //dbg_logf!("{} focus {:?}", client.real_time(), focus);
 

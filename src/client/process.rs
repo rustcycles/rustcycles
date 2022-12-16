@@ -341,6 +341,20 @@ impl ClientProcess {
     }
 
     pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
+        if self.cvars.d_events && self.cvars.d_events_mouse_motion {
+            // LATER This event normally happens every 4 ms for me when moving the mouse. Print stats.
+            // Is it limited by my polling rate? Would it be helpful to teach players how to increase it?
+            // Sometimes i get a batch of 4 events every 16 ms. Detect this.
+            // https://github.com/martin-t/rustcycles/issues/1
+            //
+            // Might be because the main thread is blocked running game logic.
+            // Update this comment after separating things to threads.
+
+            // LATER This doesn't have enough precision, and neither do the other events.
+            // the smallest delta is a whole pixel.
+            dbg_logf!("{} mouse_motion: {:?}", self.real_time(), delta);
+        }
+
         if self.console.is_open() {
             return;
         }
@@ -356,9 +370,6 @@ impl ClientProcess {
         // So there's no point trying to calculate things like mouse speed
         // based on real time from last event. Instead, save the cumulative delta
         // and update angles/speeds once per frame.
-        //
-        // LATER Might be because the main thread is blocked running game logic.
-        //  Update this comment after separating things to threads.
 
         // LATER cvars
         let mouse_sensitivity_horizontal = 0.5;

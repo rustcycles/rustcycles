@@ -49,6 +49,7 @@ pub struct Cvars {
     pub d_events_focused: bool,
     pub d_events_keyboard_input: bool,
     pub d_events_mouse_input: bool,
+    pub d_events_mouse_motion: bool,
     pub d_events_resized: bool,
 
     pub d_panic_unknown_cvar: bool,
@@ -87,6 +88,7 @@ impl Default for Cvars {
             d_events_focused: false,
             d_events_keyboard_input: false,
             d_events_mouse_input: false,
+            d_events_mouse_motion: false,
             d_events_resized: false,
 
             d_panic_unknown_cvar: true,

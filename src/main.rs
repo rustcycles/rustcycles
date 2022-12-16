@@ -72,10 +72,10 @@ use crate::{
 //    As the game matures, some of them might be promoted to todos.
 
 // LATERs:
-//  - [ ] Remove all unwraps - go through all the code, convert infallible ones to except, fallible ones to Result
+//  - [ ] Maybe remove all unwraps - go through all the code, convert infallible ones to {soft,hard}_unwrap, fallible ones to Result.
 //  - [x] Remove all prints and dbgs, convert them to a proper logger impl which differentiates client and server logs.
 //  - [ ] If possible, lint against unwrap, print, println, dbg,
-//          todo, panic, unreachable, unimplemented, ...
+//          todo, panic, unreachable, unimplemented, ... See debug.rs for alternatives.
 
 #[derive(Debug, Default)]
 struct Opts {

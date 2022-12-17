@@ -160,14 +160,9 @@ impl ClientGame {
 
             // `tick_after_physics` tells the engine to draw debug shapes and text.
             // Any debug calls after it will show up next frame.
-            if cvars.d_draw && cvars.d_draw_frame_timings {
-                // LATER put cvars inside
-                self.gs.debug_engine_updates(cvars, v!(-5 3 3));
-            }
+            self.gs.debug_engine_updates(cvars, v!(-5 3 3));
             self.tick_after_physics(cvars, engine, dt);
-            if cvars.d_draw && cvars.d_draw_frame_timings {
-                self.gs.debug_engine_updates(cvars, v!(-6 3 3));
-            }
+            self.gs.debug_engine_updates(cvars, v!(-6 3 3));
 
             // Update UI
             engine.post_update(dt);

@@ -75,6 +75,12 @@ pub struct Cvars {
     pub d_ui_msgs_direction_to: bool,
     pub d_ui_msgs_mouse: bool,
 
+    /// This is needed because the default 1 causes the wheel to randomly stutter/stop
+    /// when passing between poles - they use a single trimesh collider.
+    /// 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
+    /// It never completely goes away, even with 100.
+    pub g_physics_max_ccd_substeps: u32,
+
     pub m_sensitivity_horizontal: f32,
     pub m_sensitivity_vertical: f32,
 
@@ -127,6 +133,8 @@ impl Default for Cvars {
             d_ui_msgs_direction_from: true,
             d_ui_msgs_direction_to: false,
             d_ui_msgs_mouse: false,
+
+            g_physics_max_ccd_substeps: 100,
 
             m_sensitivity_horizontal: 0.5,
             m_sensitivity_vertical: 0.5,

@@ -144,7 +144,7 @@ impl ClientGame {
 
             self.tick_begin_frame(engine);
 
-            self.gs.tick_before_physics(engine, dt);
+            self.gs.tick_before_physics(cvars, engine, dt);
 
             self.tick_before_physics(cvars, engine, dt);
 

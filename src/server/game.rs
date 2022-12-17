@@ -48,7 +48,7 @@ impl ServerGame {
 
             self.tick_begin_frame(engine);
 
-            self.gs.tick_before_physics(engine, dt);
+            self.gs.tick_before_physics(cvars, engine, dt);
 
             // There's currently no need to split this into pre_ and post_update like on the client.
             // Dummy control flow and lag since we don't use fyrox plugins.

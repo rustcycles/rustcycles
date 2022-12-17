@@ -39,15 +39,6 @@ impl GameState {
     pub(crate) async fn new(engine: &mut Engine) -> Self {
         let mut scene = Scene::new();
 
-        // This is needed because the default 1 causes the wheel to randomly stutter/stop
-        // when passing between poles - they use a single trimesh collider.
-        // 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
-        // It never completely goes away, even with 100.
-        scene.graph.physics.integration_parameters.max_ccd_substeps = 100;
-        // LATER allow setting by cvars, make sure it actually does something
-        //      after fyrox hid rapier behind a different API
-        // LATER allow changing integration_parameters.dt ?
-
         engine
             .resource_manager
             .request_model("data/arena/arena.rgs")
@@ -76,8 +67,11 @@ impl GameState {
         }
     }
 
-    pub(crate) fn tick_before_physics(&mut self, engine: &mut Engine, dt: f32) {
+    pub(crate) fn tick_before_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
         let scene = &mut engine.scenes[self.scene];
+
+        scene.graph.physics.integration_parameters.max_ccd_substeps =
+            cvars.g_physics_max_ccd_substeps;
 
         for cycle in &self.cycles {
             let player = &self.players[cycle.player_handle];

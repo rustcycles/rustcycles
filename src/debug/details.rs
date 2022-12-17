@@ -75,12 +75,20 @@ pub struct ColorDef {
 }
 
 impl DebugShape {
-    pub(crate) fn to_lines(&self, lines: &mut Lines) {
+    pub(crate) fn to_lines(&self, cvars: &Cvars, lines: &mut Lines) {
         match self.shape {
             Shape::Line { begin, end } => {
+                if !cvars.d_draw_lines {
+                    return;
+                }
+
                 lines.insert(begin, end, self.color);
             }
             Shape::Arrow { begin, dir } => {
+                if !cvars.d_draw_arrows {
+                    return;
+                }
+
                 let end = begin + dir;
                 lines.insert(begin, end, self.color);
 
@@ -106,23 +114,29 @@ impl DebugShape {
                 lines.insert(end, end + (-dir - up) * 0.25, self.color);
             }
             Shape::Cross { point } => {
-                let half_len = 0.5; // LATER cvar
-                let dir1 = v!(1 1 1) * half_len;
-                let dir2 = v!(-1 1 1) * half_len;
-                let dir3 = v!(1 1 -1) * half_len;
-                let dir4 = v!(-1 1 -1) * half_len;
+                if !cvars.d_draw_crosses {
+                    return;
+                }
+
+                let dir1 = v!(1 1 1) * cvars.d_draw_crosses_half_len;
+                let dir2 = v!(-1 1 1) * cvars.d_draw_crosses_half_len;
+                let dir3 = v!(1 1 -1) * cvars.d_draw_crosses_half_len;
+                let dir4 = v!(-1 1 -1) * cvars.d_draw_crosses_half_len;
                 lines.insert(point - dir1, point + dir1, self.color);
                 lines.insert(point - dir2, point + dir2, self.color);
                 lines.insert(point - dir3, point + dir3, self.color);
                 lines.insert(point - dir4, point + dir4, self.color);
 
-                let from_origin = false; // LATER cvar
-                if from_origin {
+                if cvars.d_draw_crosses_line_from_origin {
                     // This is sometimes useful if we have trouble finding the cross.
                     lines.insert(Vec3::zeros(), point, self.color);
                 }
             }
             Shape::Rot { point, rot } => {
+                if !cvars.d_draw_rots {
+                    return;
+                }
+
                 // Oringally, this used SceneDrawingContext::draw_transform
                 // but this way we can use BLUE2 instead of the hard to see BLUE.
                 lines.insert(point, point + rot * LEFT, RED);

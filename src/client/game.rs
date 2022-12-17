@@ -433,7 +433,7 @@ impl ClientGame {
             let mut lines = Lines::new();
             for shape in shapes.iter_mut() {
                 if cvars.d_draw {
-                    shape.to_lines(&mut lines);
+                    shape.to_lines(cvars, &mut lines);
                 }
                 shape.time -= dt;
             }

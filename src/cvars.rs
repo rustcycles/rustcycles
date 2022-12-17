@@ -22,6 +22,9 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
+    pub cl_camera_back: f32,
+    pub cl_camera_up: f32,
+
     pub cl_fullscreen: bool,
     pub cl_mouse_grab_on_focus: bool,
     pub cl_window_height: i32,
@@ -71,6 +74,9 @@ pub struct Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
+            cl_camera_back: 2.0,
+            cl_camera_up: 0.5,
+
             cl_fullscreen: true,
             cl_mouse_grab_on_focus: true,
             cl_window_height: 540,

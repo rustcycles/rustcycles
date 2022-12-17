@@ -146,7 +146,7 @@ impl ClientGame {
 
             self.gs.tick_before_physics(engine, dt);
 
-            self.tick_before_physics(engine, dt);
+            self.tick_before_physics(cvars, engine, dt);
 
             // Update animations, transformations, physics, ...
             // There's currently no need to split this into pre_ and post_update like on the client.
@@ -289,7 +289,7 @@ impl ClientGame {
         }
     }
 
-    fn tick_before_physics(&mut self, engine: &mut Engine, dt: f32) {
+    fn tick_before_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
         // Join / spec
         let ps = self.gs.players[self.lp.player_handle].ps;
         if ps == PlayerState::Observing && self.lp.input.fire1 {
@@ -346,9 +346,8 @@ impl ClientGame {
                 camera_pos += -up * dt * camera_speed;
             }
         } else if ps == PlayerState::Playing {
-            // LATER cvars
-            let back = -(cam_rot * FORWARD * 2.0);
-            let up = UP * 0.5;
+            let back = cam_rot * BACK * cvars.cl_camera_back;
+            let up = UP * cvars.cl_camera_up;
             camera_pos = player_cycle_pos + back + up;
         }
         camera.local_transform_mut().set_position(camera_pos);

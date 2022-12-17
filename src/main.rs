@@ -210,10 +210,9 @@ fn args_to_cvars(cvar_args: &[String]) -> Cvars {
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
-        let str_value = cvars_iter.next().expect(&format!(
-            "missing value for cvar `{}` or incorrect command line option",
-            cvar_name
-        ));
+        let str_value = cvars_iter.next().unwrap_or_else(|| {
+            panic!("missing value for cvar `{}` or incorrect command line option", cvar_name)
+        });
         let res = cvars.set_str(cvar_name, str_value);
         match res.as_ref() {
             Ok(_) => {

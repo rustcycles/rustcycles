@@ -122,6 +122,9 @@ fn main() {
             opts.endpoint = Some(Endpoint::Server);
             args.next();
         }
+        Some(arg) if arg.starts_with('-') => {
+            panic!("Unknown option: {}", arg);
+        }
         _ => {}
     }
     opts.cvar_args = args.collect();
@@ -183,7 +186,8 @@ fn args_to_cvars(cvar_args: &[String]) -> Cvars {
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
-        let str_value = cvars_iter.next().unwrap();
+        let str_value =
+            cvars_iter.next().expect(&format!("missing value for cvar `{}`", cvar_name));
         let res = cvars.set_str(cvar_name, str_value);
         match res.as_ref() {
             Ok(_) => {

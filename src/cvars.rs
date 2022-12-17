@@ -27,6 +27,8 @@ pub struct Cvars {
     pub cl_window_height: i32,
     pub cl_window_width: i32,
 
+    pub cl_zoom_factor: f32,
+
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
     pub d_dbg: bool,
@@ -60,6 +62,9 @@ pub struct Cvars {
     pub d_ui_msgs_direction_to: bool,
     pub d_ui_msgs_mouse: bool,
 
+    pub m_sensitivity_horizontal: f32,
+    pub m_sensitivity_vertical: f32,
+
     pub r_quality: i32,
 }
 
@@ -70,6 +75,8 @@ impl Default for Cvars {
             cl_mouse_grab_on_focus: true,
             cl_window_height: 540,
             cl_window_width: 960,
+
+            cl_zoom_factor: 4.0,
 
             d_dbg: false,
 
@@ -97,6 +104,9 @@ impl Default for Cvars {
             d_ui_msgs_direction_from: true,
             d_ui_msgs_direction_to: false,
             d_ui_msgs_mouse: false,
+
+            m_sensitivity_horizontal: 0.5,
+            m_sensitivity_vertical: 0.5,
 
             r_quality: 0,
         }

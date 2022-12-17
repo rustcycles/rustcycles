@@ -371,14 +371,15 @@ impl ClientProcess {
         // based on real time from last event. Instead, save the cumulative delta
         // and update angles/speeds once per frame.
 
-        // LATER cvars
-        let mouse_sensitivity_horizontal = 0.5;
-        let mouse_sensitivity_vertical = 0.5;
-        let zoom_factor = if self.cg.lp.input.zoom { 4.0 } else { 1.0 };
+        let zoom_factor = if self.cg.lp.input.zoom {
+            self.cvars.cl_zoom_factor
+        } else {
+            1.0
+        };
 
         // Subtract, don't add the delta - nalgebra rotations are counterclockwise.
-        let delta_yaw = -delta.0 as f32 * mouse_sensitivity_horizontal / zoom_factor;
-        let delta_pitch = delta.1 as f32 * mouse_sensitivity_vertical / zoom_factor;
+        let delta_yaw = -delta.0 as f32 * self.cvars.m_sensitivity_horizontal / zoom_factor;
+        let delta_pitch = delta.1 as f32 * self.cvars.m_sensitivity_vertical / zoom_factor;
 
         self.cg.lp.delta_yaw += delta_yaw;
         self.cg.lp.delta_pitch += delta_pitch;

@@ -229,11 +229,37 @@ pub(crate) struct Input {
     pub(crate) chat: bool,
     pub(crate) pause: bool,
     pub(crate) screenshot: bool,
-    // ^ when adding fields, also add them to Debug
+    // ^ when adding fields, also add them to other impls and functions below
 }
 
 // LATER ClientInput? - zoom, map, chat, score, pause, screenshot, console, ...
 // These don't need to be networked
+
+impl Input {
+    pub(crate) fn release_all_keys(&mut self) {
+        self.fire1 = false;
+        self.fire2 = false;
+        self.marker1 = false;
+        self.marker2 = false;
+        self.zoom = false;
+        self.forward = false;
+        self.backward = false;
+        self.left = false;
+        self.right = false;
+        self.up = false;
+        self.down = false;
+        self.prev_weapon = false;
+        self.next_weapon = false;
+        self.reload = false;
+        self.flag = false;
+        self.grenade = false;
+        self.map = false;
+        self.score = false;
+        self.chat = false;
+        self.pause = false;
+        self.screenshot = false;
+    }
+}
 
 impl Debug for Input {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

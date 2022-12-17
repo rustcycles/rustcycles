@@ -227,30 +227,37 @@ impl ClientProcess {
             ESC if pressed => {
                 if self.console.is_open() {
                     // With shift or without, ESC closes an open console.
-                    let grab = self.console.close(&mut self.engine.user_interface);
-                    self.set_mouse_grab(grab);
+                    self.close_console();
                 } else if self.shift_pressed {
                     // Shift + ESC is a common shortcut to open the console in games.
-                    self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
-                    self.set_mouse_grab(false);
-
-                    // Kinda hacky but at least this is the only 2-key shortcut
-                    // so shift is the only such special case.
-                    self.cg.lp.input.down = false;
+                    // This shortcut should not be configurable so it works for all players
+                    // no matter how much they break their config.
+                    self.open_console();
                 } else {
                     // ESC anywhere else just ungrabs the mouse.
                     self.set_mouse_grab(false);
                 }
             }
             BACKTICK if pressed => {
+                // LATER Configurable console bind.
                 if !self.console.is_open() {
-                    self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
-                    self.set_mouse_grab(false);
+                    self.open_console();
                 }
             }
             L_SHIFT => self.shift_pressed = pressed,
             _ => (),
         }
+    }
+
+    fn open_console(&mut self) {
+        self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
+        self.cg.lp.input.release_all_keys();
+        self.set_mouse_grab(false);
+    }
+
+    fn close_console(&mut self) {
+        let grab = self.console.close(&mut self.engine.user_interface);
+        self.set_mouse_grab(grab);
     }
 
     /// Input that is handdled only when we're in game.
@@ -265,7 +272,7 @@ impl ClientProcess {
             S => self.cg.lp.input.backward = pressed,
             D => self.cg.lp.input.right = pressed,
             SPACE => self.cg.lp.input.up = pressed,
-            L_SHIFT => self.cg.lp.input.down = pressed, // LATER Unhardcode release on shift+ESC
+            L_SHIFT => self.cg.lp.input.down = pressed,
             Q => self.cg.lp.input.prev_weapon = pressed,
             E => self.cg.lp.input.next_weapon = pressed,
             R => self.cg.lp.input.reload = pressed,

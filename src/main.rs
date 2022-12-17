@@ -109,16 +109,16 @@ fn main() {
     //
     // LATER Add --help and --version
     let mut args = env::args().skip(1).peekable(); // Skip path to self
-    match args.peek() {
-        Some(arg) if arg == "local" => {
+    match args.peek().map(String::as_str) {
+        Some("local") => {
             opts.endpoint = Some(Endpoint::Local);
             args.next();
         }
-        Some(arg) if arg == "client" => {
+        Some("client") => {
             opts.endpoint = Some(Endpoint::Client);
             args.next();
         }
-        Some(arg) if arg == "server" => {
+        Some("server") => {
             opts.endpoint = Some(Endpoint::Server);
             args.next();
         }
@@ -127,6 +127,9 @@ fn main() {
         }
         _ => {}
     }
+    // Anything else, we assume it's a cvar.
+    // Some games require cvars to be prefixed by `+` which allows more specific error messages.
+    // We might wanna do that too but this is slightly less typing for now.
     opts.cvar_args = args.collect();
 
     match opts.endpoint {
@@ -186,8 +189,10 @@ fn args_to_cvars(cvar_args: &[String]) -> Cvars {
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
-        let str_value =
-            cvars_iter.next().expect(&format!("missing value for cvar `{}`", cvar_name));
+        let str_value = cvars_iter.next().expect(&format!(
+            "missing value for cvar `{}` or incorrect command line option",
+            cvar_name
+        ));
         let res = cvars.set_str(cvar_name, str_value);
         match res.as_ref() {
             Ok(_) => {

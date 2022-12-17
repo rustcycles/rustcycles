@@ -110,6 +110,9 @@ fn main() {
     // LATER Add --help and --version
     let mut args = env::args().skip(1).peekable(); // Skip path to self
     match args.peek().map(String::as_str) {
+        Some("launcher") => {
+            args.next();
+        }
         Some("local") => {
             opts.endpoint = Some(Endpoint::Local);
             args.next();
@@ -121,6 +124,24 @@ fn main() {
         Some("server") => {
             opts.endpoint = Some(Endpoint::Server);
             args.next();
+        }
+        #[rustfmt::skip]
+        Some("--help") => {
+            println!("Usage: rustcycles [launcher|local|client|server] [cvar1 value1 cvar2 value2 ...]");
+            println!();
+            println!("    launcher   (default) Run both the game client and server");
+            println!("    local      Run a local game - client and server in one process (experimental)");
+            println!("    client     Run only the game client");
+            println!("    server     Run only the dedicated game server");
+            return;
+        }
+        Some("--version") => {
+            // LATER Would be nice to print git hash and dirty status here.
+            // Find a way to do that without increasing compile times or only do that in release builds.
+            // Note that it's especially annoying when dirty status changes and forces a rebuild.
+            // Maybe also include time of build.
+            println!("rustcycles {}", env!("CARGO_PKG_VERSION"));
+            return;
         }
         Some(arg) if arg.starts_with('-') => {
             panic!("Unknown option: {}", arg);

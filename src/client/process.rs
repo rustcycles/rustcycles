@@ -16,7 +16,7 @@ use cvars_console_fyrox::FyroxConsole;
 use fyrox::{
     core::instant::Instant,
     dpi::PhysicalSize,
-    event::{ElementState, KeyboardInput, MouseButton},
+    event::{ElementState, KeyboardInput, MouseButton, MouseScrollDelta, TouchPhase},
     gui::{
         brush::Brush,
         formatted_text::WrapMode,
@@ -282,6 +282,23 @@ impl ClientProcess {
         self.cg.lp.input.real_time = self.real_time();
         self.cg.lp.input.game_time = self.cg.gs.game_time;
         self.cg.send_input();
+    }
+
+    pub(crate) fn mouse_wheel(&self, delta: MouseScrollDelta, phase: TouchPhase) {
+        if self.cvars.d_events && self.cvars.d_events_mouse_wheel {
+            dbg_logf!("{} mouse wheel {:?} {:?}", self.real_time(), delta, phase);
+        }
+
+        // LATER After figuring out input: prev/next weap on mouse wheel.
+        //       Currently there is no way to do this.
+        // if let MouseScrollDelta::LineDelta(_, y) = delta {
+        //     // Scrolling seems to always produce only 1 or -1.
+        //     if y == 1.0 {
+        //         // self.cg.lp.input.next_weapon
+        //     } else if y == -1.0 {
+        //         // self.cg.lp.input.prev_weapon
+        //     }
+        // }
     }
 
     pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {

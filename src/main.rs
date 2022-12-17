@@ -312,7 +312,7 @@ fn client_main(cvars: Cvars, local_server: bool) {
                         client.keyboard_input(input);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
-                        dbg_logf!("{} mouse wheel {:?} {:?}", client.real_time(), delta, phase);
+                        client.mouse_wheel(delta, phase);
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
                         client.mouse_input(state, button);

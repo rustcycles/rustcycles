@@ -355,12 +355,12 @@ impl ClientGame {
         // Camera zoom
         let camera = camera.as_camera_mut();
         if let Projection::Perspective(perspective) = camera.projection_mut() {
-            // LATER cvar
-            if self.lp.input.zoom {
-                perspective.fov = 20.0_f32.to_radians();
+            let zoom_factor = if self.lp.input.zoom {
+                cvars.cl_zoom_factor
             } else {
-                perspective.fov = 75.0_f32.to_radians();
-            }
+                1.0
+            };
+            perspective.fov = cvars.cl_fov.to_radians() / zoom_factor;
         } else {
             unreachable!();
         }

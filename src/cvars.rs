@@ -24,6 +24,7 @@ pub struct Cvars {
     //  v
     pub cl_camera_back: f32,
     pub cl_camera_up: f32,
+    pub cl_fov: f32,
 
     pub cl_fullscreen: bool,
     pub cl_mouse_grab_on_focus: bool,
@@ -76,6 +77,7 @@ impl Default for Cvars {
         Self {
             cl_camera_back: 2.0,
             cl_camera_up: 0.5,
+            cl_fov: 75.0,
 
             cl_fullscreen: true,
             cl_mouse_grab_on_focus: true,

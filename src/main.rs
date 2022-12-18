@@ -343,7 +343,9 @@ fn client_main(cvars: Cvars, local_server: bool) {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
             Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => dbg_logf!("bye"),
+            Event::LoopDestroyed => {
+                client.loop_destroyed();
+            }
         }
     });
 }

@@ -452,6 +452,10 @@ impl ClientProcess {
         }
     }
 
+    pub(crate) fn loop_destroyed(&self) {
+        dbg_logf!("{} bye", self.real_time());
+    }
+
     pub(crate) fn real_time(&self) -> f32 {
         // LATER How to handle time in logging code? Real or frame time?
         // Should be OK to create one instant as 0 and clone it to a global/client/server.

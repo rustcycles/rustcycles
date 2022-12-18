@@ -14,6 +14,8 @@ pub(crate) enum ClientMessage {
     Observe,
 }
 
+// LATER Since messages get serialized immediately, consider using slices instead of Vecs to avoid allocations.
+
 /// Message sent from server to client
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ServerMessage {

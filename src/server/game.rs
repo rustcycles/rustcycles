@@ -1,6 +1,6 @@
 //! Server-side gamelogic.
 
-use std::io::ErrorKind;
+use std::{io::ErrorKind, mem};
 
 use crate::{
     common::{
@@ -228,15 +228,11 @@ impl ServerGame {
         // Calling debug::details::cleanup() would only clear expired.
         let debug_texts = DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
-            let ret = texts.clone();
-            texts.clear();
-            ret
+            mem::replace(&mut *texts, Vec::new())
         });
         let debug_shapes = DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
-            let ret = shapes.clone();
-            shapes.clear();
-            ret
+            mem::replace(&mut *shapes, Vec::new())
         });
 
         let msg = ServerMessage::Update(Update {

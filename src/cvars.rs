@@ -23,11 +23,13 @@ pub struct Cvars {
     //  |
     //  v
     pub cl_camera_back: f32,
-    pub cl_camera_up: f32,
     /// Horizontal field of view in degrees.
     ///
     /// LATER What do other games use? Horiz/vert, what values?
-    pub cl_fov: f32,
+    pub cl_camera_fov: f32,
+    pub cl_camera_up: f32,
+    pub cl_camera_z_near: f32,
+    pub cl_camera_z_far: f32,
 
     pub cl_fullscreen: bool,
     pub cl_mouse_grab_on_focus: bool,
@@ -36,9 +38,13 @@ pub struct Cvars {
 
     pub cl_zoom_factor: f32,
 
-    /// "Temporary" cvar for quick testing. Normally unused but kept here
+    /// A "temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
     pub d_dbg: bool,
+    /// Same as d_dbg but for floats.
+    pub d_dbgf: f32,
+    /// Same as d_dbg but for ints.
+    pub d_dbgi: i32,
 
     // TODO A lot of these cvars need to be synced to server when playing locally.
     /// Master switch for debug output - the d_draw_* group.
@@ -81,6 +87,7 @@ pub struct Cvars {
     /// 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
     /// It never completely goes away, even with 100.
     pub g_physics_max_ccd_substeps: u32,
+    pub g_physics_nudge: f32,
 
     pub m_sensitivity_horizontal: f32,
     pub m_sensitivity_vertical: f32,
@@ -92,8 +99,10 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             cl_camera_back: 2.0,
+            cl_camera_fov: 75.0,
             cl_camera_up: 0.5,
-            cl_fov: 75.0,
+            cl_camera_z_near: 0.001,
+            cl_camera_z_far: 2048.0,
 
             cl_fullscreen: true,
             cl_mouse_grab_on_focus: true,
@@ -103,6 +112,8 @@ impl Default for Cvars {
             cl_zoom_factor: 4.0,
 
             d_dbg: false,
+            d_dbgf: 0.0,
+            d_dbgi: 0,
 
             d_draw: true,
             d_draw_arrows: true,
@@ -137,6 +148,7 @@ impl Default for Cvars {
             d_ui_msgs_mouse: false,
 
             g_physics_max_ccd_substeps: 100,
+            g_physics_nudge: 0.01,
 
             m_sensitivity_horizontal: 0.5,
             m_sensitivity_vertical: 0.5,

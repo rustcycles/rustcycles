@@ -131,6 +131,7 @@ impl GameState {
             // Size manually copied from the result of rusty-editor's Fit Collider
             // LATER Remove rustcycle.rgs?
             .with_shape(ColliderShape::cuboid(0.125, 0.271, 0.271))
+            .with_collision_groups(InteractionGroups::new(IG_ENTITIES, IG_ALL))
             .build(&mut scene.graph);
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()

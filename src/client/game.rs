@@ -321,46 +321,80 @@ impl ClientGame {
         dbg_arrow!(v!(0 5 0), cam_rot * FORWARD);
 
         // Camera movement
-        let mut camera_pos = **camera.local_transform().position();
+        let camera_pos_old = **camera.local_transform().position();
+        let ray_origin;
+        let ray_direction;
         if ps == PlayerState::Observing {
             let forward = camera.forward_vec_normed();
             let left = camera.left_vec_normed();
             let up = camera.up_vec_normed();
             let camera_speed = 10.0;
+            let mut delta = Vec3::zeros();
             if self.lp.input.forward {
-                camera_pos += forward * dt * camera_speed;
+                delta += forward * dt * camera_speed;
             }
             if self.lp.input.backward {
-                camera_pos += -forward * dt * camera_speed;
+                delta += -forward * dt * camera_speed;
             }
             if self.lp.input.left {
-                camera_pos += left * dt * camera_speed;
+                delta += left * dt * camera_speed;
             }
             if self.lp.input.right {
-                camera_pos += -left * dt * camera_speed;
+                delta += -left * dt * camera_speed;
             }
             if self.lp.input.up {
-                camera_pos += up * dt * camera_speed;
+                delta += up * dt * camera_speed;
             }
             if self.lp.input.down {
-                camera_pos += -up * dt * camera_speed;
+                delta += -up * dt * camera_speed;
             }
+
+            ray_origin = camera_pos_old;
+            ray_direction = delta;
         } else if ps == PlayerState::Playing {
             let back = cam_rot * BACK * cvars.cl_camera_back;
             let up = UP * cvars.cl_camera_up;
-            camera_pos = player_cycle_pos + back + up;
+            let offset = back + up;
+
+            ray_origin = player_cycle_pos + cvars.d_dbgf * offset;
+            ray_direction = offset;
+        } else {
+            unreachable!(); // LATER Spectating
         }
-        camera.local_transform_mut().set_position(camera_pos);
+
+        // LATER(perf) Smallvec instead? ArrayVec can discard intersections if it overflows.
+        let mut intersections = Vec::new();
+        if ray_direction.norm_squared() > 0.0 {
+            scene.graph.physics.cast_ray(
+                RayCastOptions {
+                    ray_origin: ray_origin.into(),
+                    ray_direction,
+                    max_len: ray_direction.norm(),
+                    groups: InteractionGroups::new(IG_ALL, !IG_ENTITIES),
+                    sort_results: true,
+                },
+                &mut intersections,
+            );
+
+            let camera_pos_new = if let Some(intersection) = intersections.first() {
+                intersection.position.coords - ray_direction.normalize() * cvars.g_physics_nudge
+            } else {
+                ray_origin + ray_direction
+            };
+            scene.graph[self.camera].local_transform_mut().set_position(camera_pos_new);
+        }
 
         // Camera zoom
-        let camera = camera.as_camera_mut();
+        let camera = scene.graph[self.camera].as_camera_mut();
         if let Projection::Perspective(perspective) = camera.projection_mut() {
             let zoom_factor = if self.lp.input.zoom {
                 cvars.cl_zoom_factor
             } else {
                 1.0
             };
-            perspective.fov = cvars.cl_fov.to_radians() / zoom_factor;
+            perspective.fov = cvars.cl_camera_fov.to_radians() / zoom_factor;
+            perspective.z_near = cvars.cl_camera_z_near;
+            perspective.z_far = cvars.cl_camera_z_far;
         } else {
             unreachable!();
         }
@@ -369,6 +403,21 @@ impl ClientGame {
         for cycle in &self.gs.cycles {
             let body_pos = scene.graph[cycle.body_handle].global_position();
             dbg_cross!(body_pos, 3.0);
+        }
+
+        // LATER Intersect with each pole (currently it probably assumes they're all one object)
+        scene.graph.physics.cast_ray(
+            RayCastOptions {
+                ray_origin: (0.5 * DOWN + BACK).into(),
+                ray_direction: FORWARD,
+                max_len: 100.0,
+                groups: Default::default(),
+                sort_results: true,
+            },
+            &mut intersections,
+        );
+        for intersection in intersections {
+            dbg_cross!(intersection.position.coords, 0.0);
         }
 
         // Examples of all the debug shapes

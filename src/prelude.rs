@@ -9,6 +9,8 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use fyrox::scene::collider::BitMask;
+
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and unlikely to collide.
 pub(crate) use fyrox::{
@@ -21,7 +23,8 @@ pub(crate) use fyrox::{
     resource::model::Model,
     scene::{
         base::{Base, BaseBuilder},
-        collider::{Collider, ColliderBuilder, ColliderShape},
+        collider::{Collider, ColliderBuilder, ColliderShape, InteractionGroups},
+        graph::physics::RayCastOptions,
         node::Node,
         rigidbody::{RigidBody, RigidBodyBuilder, RigidBodyType},
         transform::TransformBuilder,
@@ -199,6 +202,13 @@ pub(crate) const BLUE2: Color = Color::opaque(0, 100, 255);
 pub(crate) const YELLOW: Color = Color::opaque(255, 255, 0);
 pub(crate) const MAGENTA: Color = Color::opaque(255, 0, 255);
 pub(crate) const CYAN: Color = Color::opaque(0, 255, 255);
+
+// Note: These are a bit weird because the default is all bits set
+// so most colliders have all bits but some special objects only have a subset.
+// For example, the player can have only IG_ENTITIES and then we can
+// raycast while ignoring the player by setting `filter` to !IG_ENTITIES.
+pub(crate) const IG_ENTITIES: BitMask = BitMask(1 << 0);
+pub(crate) const IG_ALL: BitMask = BitMask(u32::MAX);
 
 #[cfg(test)]
 mod tests {

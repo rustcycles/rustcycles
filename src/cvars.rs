@@ -28,6 +28,7 @@ pub struct Cvars {
     ///
     /// LATER What do other games use? Horiz/vert, what values?
     pub cl_camera_fov: f32,
+    pub cl_camera_speed: f32,
     pub cl_camera_z_near: f32,
     pub cl_camera_z_far: f32,
 
@@ -101,6 +102,7 @@ impl Default for Cvars {
             cl_camera_3rd_person_back: 2.0,
             cl_camera_3rd_person_up: 0.5,
             cl_camera_fov: 75.0,
+            cl_camera_speed: 10.0,
             cl_camera_z_near: 0.001,
             cl_camera_z_far: 2048.0,
 

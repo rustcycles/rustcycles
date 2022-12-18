@@ -328,25 +328,24 @@ impl ClientGame {
             let forward = camera.forward_vec_normed();
             let left = camera.left_vec_normed();
             let up = camera.up_vec_normed();
-            let camera_speed = 10.0;
             let mut delta = Vec3::zeros();
             if self.lp.input.forward {
-                delta += forward * dt * camera_speed;
+                delta += forward * dt * cvars.cl_camera_speed;
             }
             if self.lp.input.backward {
-                delta += -forward * dt * camera_speed;
+                delta += -forward * dt * cvars.cl_camera_speed;
             }
             if self.lp.input.left {
-                delta += left * dt * camera_speed;
+                delta += left * dt * cvars.cl_camera_speed;
             }
             if self.lp.input.right {
-                delta += -left * dt * camera_speed;
+                delta += -left * dt * cvars.cl_camera_speed;
             }
             if self.lp.input.up {
-                delta += up * dt * camera_speed;
+                delta += up * dt * cvars.cl_camera_speed;
             }
             if self.lp.input.down {
-                delta += -up * dt * camera_speed;
+                delta += -up * dt * cvars.cl_camera_speed;
             }
 
             ray_origin = camera_pos_old;

@@ -228,11 +228,11 @@ impl ServerGame {
         // Calling debug::details::cleanup() would only clear expired.
         let debug_texts = DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
-            mem::replace(&mut *texts, Vec::new())
+            mem::take(&mut *texts)
         });
         let debug_shapes = DEBUG_SHAPES.with(|shapes| {
             let mut shapes = shapes.borrow_mut();
-            mem::replace(&mut *shapes, Vec::new())
+            mem::take(&mut *shapes)
         });
 
         let msg = ServerMessage::Update(Update {

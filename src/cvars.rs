@@ -22,12 +22,12 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
-    pub cl_camera_back: f32,
+    pub cl_camera_3rd_person_back: f32,
+    pub cl_camera_3rd_person_up: f32,
     /// Horizontal field of view in degrees.
     ///
     /// LATER What do other games use? Horiz/vert, what values?
     pub cl_camera_fov: f32,
-    pub cl_camera_up: f32,
     pub cl_camera_z_near: f32,
     pub cl_camera_z_far: f32,
 
@@ -98,9 +98,9 @@ pub struct Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
-            cl_camera_back: 2.0,
+            cl_camera_3rd_person_back: 2.0,
+            cl_camera_3rd_person_up: 0.5,
             cl_camera_fov: 75.0,
-            cl_camera_up: 0.5,
             cl_camera_z_near: 0.001,
             cl_camera_z_far: 2048.0,
 

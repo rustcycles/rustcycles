@@ -352,8 +352,8 @@ impl ClientGame {
             ray_origin = camera_pos_old;
             ray_direction = delta;
         } else if ps == PlayerState::Playing {
-            let back = cam_rot * BACK * cvars.cl_camera_back;
-            let up = UP * cvars.cl_camera_up;
+            let back = cam_rot * BACK * cvars.cl_camera_3rd_person_back;
+            let up = UP * cvars.cl_camera_3rd_person_up;
             let offset = back + up;
 
             ray_origin = player_cycle_pos + cvars.d_dbgf * offset;

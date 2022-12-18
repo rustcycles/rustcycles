@@ -464,7 +464,7 @@ impl ClientGame {
             debug_string,
         ));
 
-        debug::details::cleanup();
+        debug::details::clear_expired();
     }
 
     fn network_send(&mut self, msg: ClientMessage) {

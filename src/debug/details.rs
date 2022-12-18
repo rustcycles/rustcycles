@@ -225,7 +225,7 @@ pub(crate) fn default_color() -> Color {
     DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
 }
 
-pub(crate) fn cleanup() {
+pub(crate) fn clear_expired() {
     DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
     DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
 }

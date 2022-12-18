@@ -444,11 +444,26 @@ impl ClientProcess {
     }
 
     pub(crate) fn update(&mut self) {
+        // This is a hack.
+        // Both ClientGame and ServerGame call Engine::pre_update() to update physics
+        // which means their scenes would both get updated twice.
+        // So when running client update, we disable the server scene and vice versa.
+        // It's still ugly because pre_update does more than just updating physics
+        // and post_update also gets called twice which means a lot of work is done
+        // twice per frame unnecessarily but at least those other things don't affect gameplay.
+
         let target = self.real_time();
+        if let Some(sg) = &mut self.sg {
+            self.engine.scenes[sg.gs.scene].enabled = false;
+        }
         self.cg.update(&self.cvars, &mut self.engine, target);
+
         let target = self.real_time(); // Borrowck dance
         if let Some(sg) = &mut self.sg {
+            self.engine.scenes[self.cg.gs.scene].enabled = false;
+            self.engine.scenes[sg.gs.scene].enabled = true;
             sg.update(&self.cvars, &mut self.engine, target);
+            self.engine.scenes[self.cg.gs.scene].enabled = true;
         }
     }
 

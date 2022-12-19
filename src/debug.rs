@@ -140,7 +140,7 @@ macro_rules! dbg_line {
         $crate::debug::details::debug_line($begin, $end, $time as f32, $color)
     };
     ($begin:expr, $end:expr, $time:expr) => {
-        $crate::dbg_line!($begin, $end, $time, $crate::debug::details::default_color())
+        $crate::dbg_line!($begin, $end, $time, $crate::debug::details::endpoint_color())
     };
     ($begin:expr, $end:expr) => {
         $crate::dbg_line!($begin, $end, 0.0)
@@ -157,7 +157,7 @@ macro_rules! dbg_arrow {
         $crate::debug::details::debug_arrow($begin, $dir, $time as f32, $color)
     };
     ($begin:expr, $dir:expr, $time:expr) => {
-        $crate::dbg_arrow!($begin, $dir, $time, $crate::debug::details::default_color())
+        $crate::dbg_arrow!($begin, $dir, $time, $crate::debug::details::endpoint_color())
     };
     ($begin:expr, $dir:expr) => {
         $crate::dbg_arrow!($begin, $dir, 0.0)
@@ -174,7 +174,7 @@ macro_rules! dbg_cross {
         $crate::debug::details::debug_cross($point, $time as f32, $color)
     };
     ($point:expr, $time:expr) => {
-        $crate::dbg_cross!($point, $time, $crate::debug::details::default_color())
+        $crate::dbg_cross!($point, $time, $crate::debug::details::endpoint_color())
     };
     ($point:expr) => {
         $crate::dbg_cross!($point, 0.0)

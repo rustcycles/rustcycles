@@ -221,7 +221,28 @@ thread_local! {
     pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 
-pub(crate) fn default_color() -> Color {
+pub(crate) fn set_endpoint(name: &'static str) {
+    DEBUG_ENDPOINT.with(|endpoint| {
+        let mut endpoint = endpoint.borrow_mut();
+        endpoint.name = name;
+        endpoint.default_color = endpoint_to_color(name);
+    });
+}
+
+fn endpoint_to_color(name: &'static str) -> Color {
+    match name {
+        "sv" | "losv" => GREEN,
+        "cl" | "locl" => RED,
+        "lo" => BLUE2,
+        _ => WHITE,
+    }
+}
+
+pub(crate) fn endpoint_name() -> &'static str {
+    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().name)
+}
+
+pub(crate) fn endpoint_color() -> Color {
     DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
 }
 

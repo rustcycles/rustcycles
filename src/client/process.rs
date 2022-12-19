@@ -32,6 +32,7 @@ use fyrox::{
 use crate::{
     client::game::ClientGame,
     common::net::{LocalConnection, LocalListener, TcpConnection},
+    debug,
     prelude::*,
     server::game::ServerGame,
 };
@@ -452,19 +453,29 @@ impl ClientProcess {
         // and post_update also gets called twice which means a lot of work is done
         // twice per frame unnecessarily but at least those other things don't affect gameplay.
 
+        let old_name = debug::details::endpoint_name();
+
         let target = self.real_time();
         if let Some(sg) = &mut self.sg {
+            debug::details::set_endpoint("locl");
             self.engine.scenes[sg.gs.scene].enabled = false;
         }
+
         self.cg.update(&self.cvars, &mut self.engine, target);
 
         let target = self.real_time(); // Borrowck dance
         if let Some(sg) = &mut self.sg {
+            debug::details::set_endpoint("losv");
             self.engine.scenes[self.cg.gs.scene].enabled = false;
             self.engine.scenes[sg.gs.scene].enabled = true;
             sg.update(&self.cvars, &mut self.engine, target);
+
+            // The client scene has to be reenabled here, not before running `cg.update()`,
+            // so that it gets rendered.
             self.engine.scenes[self.cg.gs.scene].enabled = true;
         }
+
+        debug::details::set_endpoint(old_name);
     }
 
     pub(crate) fn loop_destroyed(&self) {

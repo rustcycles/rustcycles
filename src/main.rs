@@ -27,12 +27,7 @@ use fyrox::{
 };
 use strum_macros::EnumString;
 
-use crate::{
-    client::process::ClientProcess,
-    debug::details::{DebugEndpoint, DEBUG_ENDPOINT},
-    prelude::*,
-    server::process::ServerProcess,
-};
+use crate::{client::process::ClientProcess, prelude::*, server::process::ServerProcess};
 
 // Master TODO list:
 // v0.1 - MVP:
@@ -184,24 +179,11 @@ fn init_global_state(endpoint_name: &'static str) {
         prev_hook(panic_info);
     }));
 
-    let color = match endpoint_name {
-        "sv" => GREEN,
-        "cl" => RED,
-        "lo" => BLUE2,
-        _ => WHITE,
-    };
-
-    DEBUG_ENDPOINT.with(|endpoint| {
-        *endpoint.borrow_mut() = DebugEndpoint {
-            name: endpoint_name,
-            default_color: color,
-        }
-    });
+    debug::details::set_endpoint(endpoint_name);
 
     // LATER Switch fyrox to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
     // and the other messages are hidden by default.
-    // Also used in server_main().
     Log::set_verbosity(MessageKind::Warning);
 }
 

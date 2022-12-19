@@ -402,9 +402,11 @@ impl ClientProcess {
             1.0
         };
 
+        let sens_h = self.cvars.m_sensitivity * self.cvars.m_sensitivity_horizontal;
+        let sens_v = self.cvars.m_sensitivity * self.cvars.m_sensitivity_vertical;
         // Subtract, don't add the delta - nalgebra rotations are counterclockwise.
-        let delta_yaw = -delta.0 as f32 * self.cvars.m_sensitivity_horizontal / zoom_factor;
-        let delta_pitch = delta.1 as f32 * self.cvars.m_sensitivity_vertical / zoom_factor;
+        let delta_yaw = -delta.0 as f32 * sens_h / zoom_factor;
+        let delta_pitch = delta.1 as f32 * sens_v / zoom_factor;
 
         self.cg.lp.delta_yaw += delta_yaw;
         self.cg.lp.delta_pitch += delta_pitch;

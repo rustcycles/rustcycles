@@ -156,8 +156,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         _ => {}
     }
     // Anything else, we assume it's a cvar.
-    // Some games require cvars to be prefixed by `+` which allows more specific error messages.
-    // We might wanna do that too but this is slightly less typing for now.
+    // Some games require cvars to be prefixed by `+` which allows more specific error messages
+    // because they know it's meant to be a cvar and not a malformed command line option.
+    // We might wanna require that too but this is slightly less typing for now.
     opts.cvar_args = args.collect();
 
     match opts.endpoint {
@@ -206,10 +207,12 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
+        // Cvar names can optionally be prefixed by '+'.
         let mut cvar_name = cvar_name.as_str();
         if cvar_name.starts_with('+') {
             cvar_name = &cvar_name[1..];
         }
+
         let str_value = cvars_iter.next().ok_or_else(|| {
             format!("missing value for cvar `{}` or incorrect command line option", cvar_name)
         })?;

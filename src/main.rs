@@ -124,10 +124,15 @@ fn main() {
         Some("--help") => {
             println!("Usage: rustcycles [launcher|local|client|server] [cvar1 value1 cvar2 value2 ...]");
             println!();
+            println!("Commands (optional):");
             println!("    launcher   (default) Run both the game client and server");
             println!("    local      Run a local game - client and server in one process (experimental)");
             println!("    client     Run only the game client");
             println!("    server     Run only the dedicated game server");
+            println!();
+            println!("Cvars (optional):");
+            println!("    You can specify cvars in key value pairs separated by space.");
+            println!("    Example: rustcycles cl_camera_fov 100 m_sensitivity 0.8");
             return;
         }
         Some("--version") => {

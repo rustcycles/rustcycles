@@ -125,8 +125,8 @@ fn main() {
             println!("Usage: rustcycles [launcher|local|client|server] [cvar1 value1 cvar2 value2 ...]");
             println!();
             println!("Commands (optional):");
-            println!("    launcher   (default) Run both the game client and server");
-            println!("    local      Run a local game - client and server in one process (experimental)");
+            println!("    launcher   Run a local game with separate client and server processes (default)");
+            println!("    local      Run a local game with client and server in one process (experimental)");
             println!("    client     Run only the game client");
             println!("    server     Run only the dedicated game server");
             println!();

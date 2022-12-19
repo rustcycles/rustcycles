@@ -206,6 +206,10 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
+        let mut cvar_name = cvar_name.as_str();
+        if cvar_name.starts_with('+') {
+            cvar_name = &cvar_name[1..];
+        }
         let str_value = cvars_iter.next().ok_or_else(|| {
             format!("missing value for cvar `{}` or incorrect command line option", cvar_name)
         })?;

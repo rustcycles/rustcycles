@@ -133,6 +133,12 @@ fn main() {
             println!("Cvars (optional):");
             println!("    You can specify cvars in key value pairs separated by space.");
             println!("    Example: rustcycles cl_camera_fov 100 m_sensitivity 0.8");
+            println!();
+            println!("    Cvars can be changed at runtime using the console but some of them");
+            println!("    are only read at startup so the value needs to be specified");
+            println!("    on the command line to take effect");
+            println!();
+            // LATER ^ Reloading the map should also work.
             return;
         }
         Some("--version") => {
@@ -140,7 +146,8 @@ fn main() {
             // Find a way to do that without increasing compile times or only do that in release builds.
             // Note that it's especially annoying when dirty status changes and forces a rebuild.
             // Maybe also include time of build.
-            println!("rustcycles {}", env!("CARGO_PKG_VERSION"));
+            // https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates
+            println!("RustCycles {}", env!("CARGO_PKG_VERSION"));
             return;
         }
         Some(arg) if arg.starts_with('-') => {

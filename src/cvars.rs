@@ -24,7 +24,7 @@ pub struct Cvars {
     //  v
     pub cl_camera_3rd_person_back: f32,
     pub cl_camera_3rd_person_up: f32,
-    /// Horizontal field of view in degrees.
+    /// Vertical field of view in degrees.
     ///
     /// LATER What do other games use? Horiz/vert, what values?
     pub cl_camera_fov: f32,

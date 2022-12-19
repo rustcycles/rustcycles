@@ -11,7 +11,7 @@ mod cvars;
 mod prelude;
 mod server;
 
-use std::{env, panic, process::Command, sync::Arc};
+use std::{env, error::Error, panic, process::Command, sync::Arc};
 
 use fyrox::{
     core::futures::executor,
@@ -93,7 +93,7 @@ enum Endpoint {
     Server,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let mut opts = Opts::default();
 
     // We are not using a derive-based library (anymore)
@@ -139,7 +139,7 @@ fn main() {
             println!("    on the command line to take effect");
             println!();
             // LATER ^ Reloading the map should also work.
-            return;
+            return Ok(());
         }
         Some("--version") => {
             // LATER Would be nice to print git hash and dirty status here.
@@ -148,7 +148,7 @@ fn main() {
             // Maybe also include time of build.
             // https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates
             println!("RustCycles {}", env!("CARGO_PKG_VERSION"));
-            return;
+            return Ok(());
         }
         Some(arg) if arg.starts_with('-') => {
             panic!("Unknown option: {}", arg);
@@ -168,20 +168,22 @@ fn main() {
         }
         Some(Endpoint::Local) => {
             init_global_state("lo");
-            let cvars = args_to_cvars(&opts.cvar_args);
+            let cvars = args_to_cvars(&opts.cvar_args)?;
             client_main(cvars, true);
         }
         Some(Endpoint::Client) => {
             init_global_state("cl");
-            let cvars = args_to_cvars(&opts.cvar_args);
+            let cvars = args_to_cvars(&opts.cvar_args)?;
             client_main(cvars, false);
         }
         Some(Endpoint::Server) => {
             init_global_state("sv");
-            let cvars = args_to_cvars(&opts.cvar_args);
+            let cvars = args_to_cvars(&opts.cvar_args)?;
             server_main(cvars);
         }
     }
+
+    Ok(())
 }
 
 fn init_global_state(endpoint_name: &'static str) {
@@ -199,14 +201,14 @@ fn init_global_state(endpoint_name: &'static str) {
     Log::set_verbosity(MessageKind::Warning);
 }
 
-fn args_to_cvars(cvar_args: &[String]) -> Cvars {
+fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
     let mut cvars = Cvars::default();
 
     let mut cvars_iter = cvar_args.iter();
     while let Some(cvar_name) = cvars_iter.next() {
-        let str_value = cvars_iter.next().unwrap_or_else(|| {
-            panic!("missing value for cvar `{}` or incorrect command line option", cvar_name)
-        });
+        let str_value = cvars_iter.next().ok_or_else(|| {
+            format!("missing value for cvar `{}` or incorrect command line option", cvar_name)
+        })?;
         let res = cvars.set_str(cvar_name, str_value);
         match res.as_ref() {
             Ok(_) => {
@@ -214,17 +216,20 @@ fn args_to_cvars(cvar_args: &[String]) -> Cvars {
                 // so the user can check it was parsed correctly.
                 dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
             }
-            e @ Err(msg) => {
-                if cvars.d_panic_unknown_cvar {
-                    e.unwrap();
+            Err(msg) => {
+                if cvars.d_exit_on_unknown_cvar {
+                    return Err(format!(
+                        "failed to set cvar {} to value {}: {}",
+                        cvar_name, str_value, msg
+                    ));
                 } else {
-                    dbg_logf!("Failed to set cvar {} to {}: {}", cvar_name, str_value, msg);
+                    dbg_logf!("failed to set cvar {} to value {}: {}", cvar_name, str_value, msg);
                 }
             }
         }
     }
 
-    cvars
+    Ok(cvars)
 }
 
 /// Run both client and server.

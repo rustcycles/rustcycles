@@ -75,7 +75,7 @@ pub struct Cvars {
     pub d_events_mouse_wheel: bool,
     pub d_events_resized: bool,
 
-    pub d_panic_unknown_cvar: bool,
+    pub d_exit_on_unknown_cvar: bool,
 
     /// Print UI messages or a subset of them.
     pub d_ui_msgs: bool,
@@ -146,7 +146,7 @@ impl Default for Cvars {
             d_events_mouse_wheel: false,
             d_events_resized: false,
 
-            d_panic_unknown_cvar: true,
+            d_exit_on_unknown_cvar: true,
 
             d_ui_msgs: false,
             d_ui_msgs_direction_from: true,

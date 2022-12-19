@@ -77,9 +77,8 @@ macro_rules! soft_assert {
 macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
         {
-            $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                print!("{} ", endpoint.borrow().name);
-            });
+            let name = $crate::debug::details::endpoint_name();
+            print!("{} ", name);
             println!( $( $t )* );
         }
     };
@@ -106,12 +105,9 @@ macro_rules! dbg_textf {
     };
     ( $( $t:tt )* ) => {
         {
-            use std::fmt::Write;
-            let mut s = String::new();
-            $crate::debug::details::DEBUG_ENDPOINT.with(|endpoint|{
-                write!(s, "{} ", endpoint.borrow().name).expect("unreachable - writing to String always succeeds");
-            });
-            write!(s, $( $t )* ).expect("unreachable - writing to String always succeeds");
+            let name = $crate::debug::details::endpoint_name();
+            let mut s = format!("{} ", name);
+            s.push_str(&format!( $( $t )* ));
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {
                 texts.borrow_mut().push(s);
             });

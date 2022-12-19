@@ -212,7 +212,7 @@ thread_local! {
     // whether the thread is a client or a server. If you see it in stdout/stderr,
     // something is wrong - it's very early in startup or somebody spawned
     // more threads without setting this.
-    pub(crate) static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = RefCell::new(DebugEndpoint{
+    static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = RefCell::new(DebugEndpoint{
         name: "??cl/sv",
         default_color: Color::WHITE,
     });

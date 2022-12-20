@@ -42,6 +42,7 @@ jobs:
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features
       - run: cargo test --verbose --all-features
+      - run: cargo run --verbose --all-features -- local d_exit_after_one_frame true
 
   format:
     runs-on: ubuntu-latest

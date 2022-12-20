@@ -123,7 +123,8 @@ impl GameState {
 
         for proj in &mut self.projectiles {
             proj.pos += proj.vel * dt;
-            dbg_arrow!(proj.pos, proj.vel.normalize(), 0.0);
+            let vel_norm = proj.vel.normalize();
+            dbg_arrow!(proj.pos - vel_norm, vel_norm, 0.0);
         }
 
         dbg_textf!("Projectiles: {}", self.projectiles.total_count());

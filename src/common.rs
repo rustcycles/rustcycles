@@ -9,7 +9,7 @@ use std::fmt::{self, Debug, Display, Formatter};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    common::entities::{Cycle, Player, PlayerState},
+    common::entities::{Cycle, Player, PlayerState, Projectile},
     prelude::*,
 };
 
@@ -33,6 +33,7 @@ pub(crate) struct GameState {
     cycle_model: Model,
     pub(crate) players: Pool<Player>,
     pub(crate) cycles: Pool<Cycle>,
+    pub(crate) projectiles: Pool<Projectile>,
 }
 
 impl GameState {
@@ -64,6 +65,7 @@ impl GameState {
             cycle_model,
             players: Pool::new(),
             cycles: Pool::new(),
+            projectiles: Pool::new(),
         }
     }
 
@@ -109,7 +111,22 @@ impl GameState {
             //  Use an impulse proportional to mouse movement instead?
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
             body.local_transform_mut().set_rotation(rot);
+
+            if input.fire1 {
+                let _ = self.projectiles.spawn(Projectile {
+                    player_handle: cycle.player_handle,
+                    pos: **body.local_transform().position(),
+                    vel: dir * cvars.g_projectile_speed,
+                });
+            }
         }
+
+        for proj in &mut self.projectiles {
+            proj.pos += proj.vel * dt;
+            dbg_arrow!(proj.pos, proj.vel.normalize(), 0.0);
+        }
+
+        dbg_textf!("Projectiles: {}", self.projectiles.total_count());
     }
 
     pub(crate) fn free_player(&mut self, scene: &mut Scene, player_handle: Handle<Player>) {

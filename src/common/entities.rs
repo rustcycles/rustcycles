@@ -45,3 +45,10 @@ pub(crate) struct Cycle {
     pub(crate) body_handle: Handle<Node>,
     pub(crate) player_handle: Handle<Player>,
 }
+
+#[derive(Debug)]
+pub(crate) struct Projectile {
+    pub(crate) player_handle: Handle<Player>,
+    pub(crate) pos: Vec3,
+    pub(crate) vel: Vec3,
+}

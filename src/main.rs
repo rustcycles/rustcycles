@@ -348,7 +348,11 @@ fn client_main(cvars: Cvars, local_server: bool) {
             Event::RedrawRequested(_) => {
                 client.engine.render().unwrap(); // LATER only crash if failed multiple times
             }
-            Event::RedrawEventsCleared => {}
+            Event::RedrawEventsCleared => {
+                if client.exit {
+                    *control_flow = ControlFlow::Exit;
+                }
+            }
             Event::LoopDestroyed => {
                 client.loop_destroyed();
             }

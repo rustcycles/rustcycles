@@ -75,6 +75,8 @@ pub struct Cvars {
     pub d_events_mouse_wheel: bool,
     pub d_events_resized: bool,
 
+    /// Run init, gamelogic, and rendering once, then exit. Useful for crude testing/benchmarking.
+    pub d_exit_after_one_frame: bool,
     pub d_exit_on_unknown_cvar: bool,
 
     /// Print UI messages or a subset of them.
@@ -146,6 +148,7 @@ impl Default for Cvars {
             d_events_mouse_wheel: false,
             d_events_resized: false,
 
+            d_exit_after_one_frame: false,
             d_exit_on_unknown_cvar: true,
 
             d_ui_msgs: false,

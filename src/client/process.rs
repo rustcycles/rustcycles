@@ -48,6 +48,7 @@ pub(crate) struct ClientProcess {
     debug_text: Handle<UiNode>,
     sg: Option<ServerGame>,
     cg: ClientGame,
+    pub(crate) exit: bool,
 }
 
 impl ClientProcess {
@@ -128,6 +129,8 @@ impl ClientProcess {
             (None, cg)
         };
 
+        let exit = cvars.d_exit_after_one_frame;
+
         Self {
             cvars,
             clock: Instant::now(),
@@ -138,6 +141,7 @@ impl ClientProcess {
             debug_text,
             sg,
             cg,
+            exit,
         }
     }
 

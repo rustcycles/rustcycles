@@ -67,6 +67,8 @@ pub struct Cvars {
     pub d_draw_text_shadow_offset_x: f32,
     pub d_draw_text_shadow_offset_y: f32,
 
+    pub d_engine_stats: bool,
+
     pub d_events: bool,
     pub d_events_focused: bool,
     pub d_events_keyboard_input: bool,
@@ -142,6 +144,8 @@ impl Default for Cvars {
             d_draw_text_shadow_dilation: 0.0,
             d_draw_text_shadow_offset_x: 1.0,
             d_draw_text_shadow_offset_y: 1.0,
+
+            d_engine_stats: true,
 
             d_events: true,
             d_events_focused: false,

@@ -52,4 +52,5 @@ pub(crate) struct Projectile {
     pub(crate) player_handle: Handle<Player>,
     pub(crate) pos: Vec3,
     pub(crate) vel: Vec3,
+    pub(crate) time_fired: f32,
 }

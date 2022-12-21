@@ -92,6 +92,7 @@ pub struct Cvars {
     pub g_physics_max_ccd_substeps: u32,
     pub g_physics_nudge: f32,
 
+    pub g_projectile_lifetime: f32,
     pub g_projectile_speed: f32,
 
     /// Mouse sensitivity.
@@ -161,6 +162,7 @@ impl Default for Cvars {
             g_physics_max_ccd_substeps: 100,
             g_physics_nudge: 0.01,
 
+            g_projectile_lifetime: 60.0,
             g_projectile_speed: 50.0,
 
             m_sensitivity: 0.5,

@@ -37,8 +37,8 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt-get update # Run update first or install might start failing eventually.
-          # Deps for fyrox, xvfb, openGL libs (I installed a bunch of stuff, not sure it's all needed)
-          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev xvfb libgl1-mesa-glx mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev libegl1-mesa libegl1
+          # Fyrox deps, xvfb, openGL (I installed a bunch of stuff, not sure it's all needed), ALSA (same)
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev xvfb libgl1-mesa-glx mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev libegl1-mesa libegl1 alsa-base alsa-utils
       - run: rustc --version && cargo --version
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features

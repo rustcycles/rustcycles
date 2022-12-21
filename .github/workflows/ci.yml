@@ -49,7 +49,10 @@ jobs:
         # LATER When fyrox has a headless mode, run the server on all OSes
         #       https://github.com/FyroxEngine/Fyrox/issues/222
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: RUST_BACKTRACE=1 xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true
+        run: |
+          Xvfb :99 &
+          export DISPLAY=:99
+          RUST_BACKTRACE=1 cargo run --verbose --all-features -- local d_exit_after_one_frame true
 
   format:
     runs-on: ubuntu-latest

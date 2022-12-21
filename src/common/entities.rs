@@ -42,8 +42,9 @@ pub(crate) enum PlayerState {
 
 #[derive(Debug)]
 pub(crate) struct Cycle {
-    pub(crate) body_handle: Handle<Node>,
     pub(crate) player_handle: Handle<Player>,
+    pub(crate) body_handle: Handle<Node>,
+    pub(crate) collider_handle: Handle<Node>,
 }
 
 #[derive(Debug)]

@@ -121,10 +121,44 @@ impl GameState {
             }
         }
 
-        for proj in &mut self.projectiles {
-            proj.pos += proj.vel * dt;
-            let vel_norm = proj.vel.normalize();
-            dbg_arrow!(proj.pos - vel_norm, vel_norm, 0.0);
+        // LATER Split into functions
+        // LATER iter_handles()?
+        let mut free = None;
+        'outer: for (proj_handle, proj) in self.projectiles.pair_iter_mut() {
+            let step = proj.vel * dt;
+
+            let mut intersections = Vec::new();
+            scene.graph.physics.cast_ray(
+                RayCastOptions {
+                    ray_origin: proj.pos.into(),
+                    ray_direction: step,
+                    max_len: step.norm(),
+                    groups: Default::default(),
+                    sort_results: true,
+                },
+                &mut intersections,
+            );
+            for intersection in intersections {
+                let cycle_handle = self.players[proj.player_handle].cycle_handle.unwrap();
+                let cycle_collider_handle = self.cycles[cycle_handle].collider_handle;
+                if intersection.collider == cycle_collider_handle {
+                    // LATER Let the player shoot himself - enable self collision after the projectile clears the player's hitbox.
+                    continue;
+                }
+
+                // Free projectile
+                dbg_cross!(intersection.position.coords, 0.5);
+                free = Some(proj_handle);
+                break 'outer;
+            }
+
+            let step_norm = step.normalize();
+            dbg_arrow!(proj.pos - step_norm, step_norm, 0.0);
+
+            proj.pos += step;
+        }
+        if let Some(handle) = free {
+            self.projectiles.free(handle);
         }
 
         dbg_textf!("Projectiles: {}", self.projectiles.total_count());
@@ -164,8 +198,9 @@ impl GameState {
         .build(&mut scene.graph);
 
         let cycle = Cycle {
-            body_handle,
             player_handle,
+            body_handle,
+            collider_handle,
         };
         let cycle_handle = if let Some(index) = cycle_index {
             self.cycles.spawn_at(index, cycle).unwrap()

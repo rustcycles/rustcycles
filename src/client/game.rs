@@ -361,7 +361,7 @@ impl ClientGame {
             unreachable!(); // LATER Spectating
         }
 
-        // LATER(perf) Smallvec instead? ArrayVec can discard intersections if it overflows.
+        // LATER(perf) Smallvec instead? ArrayVec can discard intersections if it overflows. Other raycasts too.
         let mut intersections = Vec::new();
         if ray_direction.norm_squared() > 0.0 {
             scene.graph.physics.cast_ray(

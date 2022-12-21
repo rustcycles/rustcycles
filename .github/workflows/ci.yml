@@ -33,16 +33,21 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
-      - name: Install linux deps
+      - name: Install linux deps and xvfb
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt-get update # Run update first or install might start failing eventually.
-          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev xvfb
       - run: rustc --version && cargo --version
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features
       - run: cargo test --verbose --all-features
-      - run: cargo run --verbose --all-features -- local d_exit_after_one_frame true
+      - name: Run the client (headless)
+        # LATER Look for ways to run the client on all OSes
+        # LATER When fyrox has a healdess mode, run the server on all OSes
+        #       https://github.com/FyroxEngine/Fyrox/issues/222
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true
 
   format:
     runs-on: ubuntu-latest

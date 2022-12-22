@@ -421,6 +421,7 @@ fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
         resource_manager,
         events_loop: event_loop,
         vsync: true,
+        headless: cvars.cl_headless,
     })
     .unwrap()
 }
@@ -440,6 +441,7 @@ fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
         resource_manager,
         events_loop: event_loop,
         vsync: true,
+        headless: true,
     })
     .unwrap()
 }

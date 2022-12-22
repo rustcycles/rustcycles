@@ -88,16 +88,16 @@ impl GameState {
 
                 let mut wheel_accel = Vec3::zeros();
                 if input.forward {
-                    wheel_accel += forward * dt * 20.0;
+                    wheel_accel += forward * dt * cvars.g_wheel_acceleration;
                 }
                 if input.backward {
-                    wheel_accel -= forward * dt * 20.0;
+                    wheel_accel -= forward * dt * cvars.g_wheel_acceleration;
                 }
                 if input.left {
-                    wheel_accel += left * dt * 20.0;
+                    wheel_accel += left * dt * cvars.g_wheel_acceleration;
                 }
                 if input.right {
-                    wheel_accel -= left * dt * 20.0;
+                    wheel_accel -= left * dt * cvars.g_wheel_acceleration;
                 }
 
                 let mut lin_vel = body.lin_vel();

@@ -497,7 +497,7 @@ version = "0.1.0"
 source = "git+https://github.com/martin-t/cvars?rev=ae2e3e59ff06d61c9038f33237ea49d05f91e3b5#ae2e3e59ff06d61c9038f33237ea49d05f91e3b5"
 dependencies = [
  "cvars-console",
- "fyrox-ui 0.19.0",
+ "fyrox-ui 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -907,6 +907,8 @@ dependencies = [
 [[package]]
 name = "fyrox-core"
 version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c814ea7bd8f02e559860fd6239e4bc79ffbd6833bc9d5f5e67b65efe655f71ba"
 dependencies = [
  "arrayvec 0.7.2",
  "base64",
@@ -914,15 +916,16 @@ dependencies = [
  "byteorder",
  "futures",
  "fxhash",
- "fyrox-core-derive 0.17.0",
+ "fyrox-core-derive 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "instant",
  "js-sys",
  "lazy_static",
- "memoffset 0.7.1",
+ "memoffset 0.6.5",
  "nalgebra",
  "num-traits 0.2.15",
  "parking_lot",
  "rand",
+ "thiserror",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -958,6 +961,8 @@ dependencies = [
 [[package]]
 name = "fyrox-core-derive"
 version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e236c2c5a1ce4acb7c01a1dbebcc5071f9d15dc73d4c8e1950487ec195a283b"
 dependencies = [
  "convert_case",
  "darling 0.14.2",
@@ -1009,11 +1014,13 @@ dependencies = [
 [[package]]
 name = "fyrox-ui"
 version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a8cad932030fc1697f8cfa60477684a1cb2ff19b0e0cc60fa092a3b7aa212f4"
 dependencies = [
  "copypasta",
  "fontdue",
  "fxhash",
- "fyrox-core 0.22.0",
+ "fyrox-core 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "notify",
  "strum",

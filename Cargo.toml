@@ -53,5 +53,7 @@ strum_macros = "0.24.3"
 #fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "102ec67c7ab86cb993864d51c49069dca0ec0fd0" }
 fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
 #fyrox = { path = "../Fyrox" }
-# Might need to override this as well so that cvars/console use the same version
-fyrox-ui = { path = "../Fyrox/fyrox-ui" }
+# Might need to override this as well so that cvars-console-fyrox uses the same version.
+# LATER Is this still necessary when cvars-console-fyrox is on crates.io?
+fyrox-ui = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
+#fyrox-ui = { path = "../Fyrox/fyrox-ui" }

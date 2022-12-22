@@ -37,8 +37,10 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt-get update # Run update first or install might start failing eventually.
-          # Fyrox deps, openGL (I installed a bunch of stuff, not sure it's all needed), ALSA (same)
-          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libgl1-mesa-glx mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev libegl1-mesa libegl1 alsa-base alsa-utils
+          # Fyrox deps
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libgl1-mesa-glx
+          # Add OpenGL libs to the CI runner because Fyrox currently has no headless mode
+          sudo apt-get install --no-install-recommends -y libegl1-mesa libegl1
       - run: rustc --version && cargo --version
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features
@@ -49,10 +51,7 @@ jobs:
         # LATER When fyrox has a headless mode, run the server on all OSes
         #       https://github.com/FyroxEngine/Fyrox/issues/222
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          Xvfb :99 &
-          export DISPLAY=:99
-          RUST_BACKTRACE=1 cargo run --verbose --all-features -- local d_exit_after_one_frame true cl_headless true
+        run: RUST_BACKTRACE=1 xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true cl_headless true
 
   format:
     runs-on: ubuntu-latest

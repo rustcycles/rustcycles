@@ -117,6 +117,7 @@ impl GameState {
                     player_handle: cycle.player_handle,
                     pos: **body.local_transform().position(),
                     vel: dir * cvars.g_projectile_speed,
+                    time_fired: self.game_time,
                 });
             }
         }
@@ -125,6 +126,11 @@ impl GameState {
         // LATER iter_handles()?
         let mut free = None;
         'outer: for (proj_handle, proj) in self.projectiles.pair_iter_mut() {
+            if proj.time_fired + cvars.g_projectile_lifetime < self.game_time {
+                free = Some(proj_handle);
+                continue;
+            }
+
             let step = proj.vel * dt;
 
             let mut intersections = Vec::new();

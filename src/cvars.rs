@@ -68,6 +68,8 @@ pub struct Cvars {
     pub d_draw_text_shadow_offset_x: f32,
     pub d_draw_text_shadow_offset_y: f32,
 
+    pub d_engine_stats: bool,
+
     pub d_events: bool,
     pub d_events_focused: bool,
     pub d_events_keyboard_input: bool,
@@ -93,6 +95,7 @@ pub struct Cvars {
     pub g_physics_max_ccd_substeps: u32,
     pub g_physics_nudge: f32,
 
+    pub g_projectile_lifetime: f32,
     pub g_projectile_speed: f32,
 
     /// Mouse sensitivity.
@@ -144,6 +147,8 @@ impl Default for Cvars {
             d_draw_text_shadow_offset_x: 1.0,
             d_draw_text_shadow_offset_y: 1.0,
 
+            d_engine_stats: true,
+
             d_events: true,
             d_events_focused: false,
             d_events_keyboard_input: false,
@@ -163,6 +168,7 @@ impl Default for Cvars {
             g_physics_max_ccd_substeps: 100,
             g_physics_nudge: 0.01,
 
+            g_projectile_lifetime: 60.0,
             g_projectile_speed: 50.0,
 
             m_sensitivity: 0.5,

@@ -492,10 +492,12 @@ impl ClientGame {
 
         let mut debug_string = String::new();
         if cvars.d_draw_text {
-            debug_string.push_str(&engine.renderer.get_statistics().to_string());
-            debug_string.push_str(&scene.performance_statistics.to_string());
-            debug_string.push('\n');
-            debug_string.push('\n');
+            if cvars.d_engine_stats {
+                debug_string.push_str(&engine.renderer.get_statistics().to_string());
+                debug_string.push_str(&scene.performance_statistics.to_string());
+                debug_string.push('\n');
+                debug_string.push('\n');
+            }
             DEBUG_TEXTS.with(|texts| {
                 let texts = texts.borrow();
                 for text in texts.iter() {

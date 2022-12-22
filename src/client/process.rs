@@ -469,7 +469,11 @@ impl ClientProcess {
 
         self.cg.update(&self.cvars, &mut self.engine, target);
 
-        let target = self.real_time(); // Borrowck dance
+        // New target time because:
+        //  - We want to run as much forward as we can.
+        //  - When using separate processes, cl and sv need to synchronize their game_time.
+        //    This forces us to do it even locally and therefore test that it works properly.
+        let target = self.real_time();
         if let Some(sg) = &mut self.sg {
             debug::details::set_endpoint("losv");
             self.engine.scenes[self.cg.gs.scene].enabled = false;

@@ -44,10 +44,16 @@ cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "ae2e3e
 #cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
 fxhash = "0.2.1"
 fyrox = "0.28.0"
-#fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "102ec67c7ab86cb993864d51c49069dca0ec0fd0" }
-#fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "922b623a929a079694adce1ded4006ef7d43fd02" }
-#fyrox = { path = "../fyrox" }
 inline_tweak = "1.0.8"
 serde = { version = "1.0.151", features = ["derive"] }
 strum = "0.24.0"
 strum_macros = "0.24.3"
+
+[patch.crates-io]
+#fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "102ec67c7ab86cb993864d51c49069dca0ec0fd0" }
+fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
+#fyrox = { path = "../Fyrox" }
+# Might need to override this as well so that cvars-console-fyrox uses the same version.
+# LATER Is this still necessary when cvars-console-fyrox is on crates.io?
+fyrox-ui = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
+#fyrox-ui = { path = "../Fyrox/fyrox-ui" }

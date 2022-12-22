@@ -33,6 +33,7 @@ pub struct Cvars {
     pub cl_camera_z_far: f32,
 
     pub cl_fullscreen: bool,
+    pub cl_headless: bool,
     pub cl_mouse_grab_on_focus: bool,
     pub cl_window_height: i32,
     pub cl_window_width: i32,
@@ -118,6 +119,7 @@ impl Default for Cvars {
             cl_camera_z_far: 2048.0,
 
             cl_fullscreen: true,
+            cl_headless: false,
             cl_mouse_grab_on_focus: true,
             cl_window_height: 540,
             cl_window_width: 960,

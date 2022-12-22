@@ -45,7 +45,7 @@ impl GameState {
             .request_model("data/arena/arena.rgs")
             .await
             .unwrap()
-            .instantiate_geometry(&mut scene);
+            .instantiate(&mut scene);
 
         let cycle_model = engine
             .resource_manager
@@ -184,7 +184,7 @@ impl GameState {
         player_handle: Handle<Player>,
         cycle_index: Option<u32>,
     ) -> Handle<Cycle> {
-        let node_handle = self.cycle_model.instantiate_geometry(scene);
+        let node_handle = self.cycle_model.instantiate(scene);
         let collider_handle = ColliderBuilder::new(BaseBuilder::new())
             // Size manually copied from the result of rusty-editor's Fit Collider
             // LATER Remove rustcycle.rgs?

@@ -28,6 +28,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v3
+        with:
+          lfs: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -51,7 +53,7 @@ jobs:
         # LATER When fyrox has a headless mode, run the server on all OSes
         #       https://github.com/FyroxEngine/Fyrox/issues/222
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: RUST_BACKTRACE=1 xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true
+        run: RUST_BACKTRACE=1 xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true cl_headless true
 
   format:
     runs-on: ubuntu-latest

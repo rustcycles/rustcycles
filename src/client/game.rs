@@ -142,7 +142,7 @@ impl ClientGame {
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
 
-            self.tick_begin_frame(engine);
+            self.tick_begin_frame(cvars, engine);
 
             self.gs.tick_before_physics(cvars, engine, dt);
 
@@ -176,14 +176,15 @@ impl ClientGame {
     }
 
     /// All once-per-frame networking.
-    fn tick_begin_frame(&mut self, engine: &mut Engine) {
+    fn tick_begin_frame(&mut self, cvars: &Cvars, engine: &mut Engine) {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
         self.lp.input_prev = self.lp.input;
 
         self.lp.input.yaw.0 += self.lp.delta_yaw; // LATER Normalize to [0, 360°) or something
-        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + self.lp.delta_pitch).clamp(-90.0, 90.0);
+        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + self.lp.delta_pitch)
+            .clamp(cvars.m_pitch_min, cvars.m_pitch_max);
 
         let delta_time = self.gs.game_time - self.gs.game_time_prev;
         soft_assert!(delta_time > 0.0);

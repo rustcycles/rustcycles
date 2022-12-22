@@ -52,7 +52,7 @@ jobs:
         run: |
           Xvfb :99 &
           export DISPLAY=:99
-          RUST_BACKTRACE=1 cargo run --verbose --all-features -- local d_exit_after_one_frame true
+          RUST_BACKTRACE=1 cargo run --verbose --all-features -- local d_exit_after_one_frame true cl_headless true
 
   format:
     runs-on: ubuntu-latest

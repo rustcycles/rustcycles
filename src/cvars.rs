@@ -181,7 +181,7 @@ impl Default for Cvars {
             m_pitch_max: 90.0,
             m_pitch_min: -90.0,
 
-            m_sensitivity: 0.5,
+            m_sensitivity: 0.15,
             m_sensitivity_horizontal: 1.0,
             m_sensitivity_vertical: 1.0,
 

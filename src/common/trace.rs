@@ -1,3 +1,5 @@
+//! Raycasting - a more ergonomic wrapper around Fyrox's raycasting API.
+
 use fyrox::scene::{
     collider::{BitMask, InteractionGroups},
     graph::physics::{FeatureId, Intersection, RayCastOptions},

@@ -129,7 +129,7 @@ where
 
         scene.graph.physics.cast_ray(
             RayCastOptions {
-                ray_origin: ray_origin,
+                ray_origin,
                 ray_direction,
                 max_len,
                 groups: InteractionGroups::new(options.memberships, options.filter),

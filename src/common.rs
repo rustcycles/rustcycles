@@ -3,9 +3,11 @@
 pub(crate) mod entities;
 pub(crate) mod messages;
 pub(crate) mod net;
+pub(crate) mod trace;
 
 use std::fmt::{self, Debug, Display, Formatter};
 
+use fyrox::scene::collider::InteractionGroups;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -133,27 +135,17 @@ impl GameState {
 
             let step = proj.vel * dt;
 
-            let mut intersections = Vec::new();
-            scene.graph.physics.cast_ray(
-                RayCastOptions {
-                    ray_origin: proj.pos.into(),
-                    ray_direction: step,
-                    max_len: step.norm(),
-                    groups: Default::default(),
-                    sort_results: true,
-                },
-                &mut intersections,
-            );
-            for intersection in intersections {
+            let hits = trace_line(scene, proj.pos, step, Default::default());
+            for hit in hits {
                 let cycle_handle = self.players[proj.player_handle].cycle_handle.unwrap();
                 let cycle_collider_handle = self.cycles[cycle_handle].collider_handle;
-                if intersection.collider == cycle_collider_handle {
+                if hit.collider == cycle_collider_handle {
                     // LATER Let the player shoot himself - enable self collision after the projectile clears the player's hitbox.
                     continue;
                 }
 
                 // Free projectile
-                dbg_cross!(intersection.position.coords, 0.5);
+                dbg_cross!(hit.position.coords, 0.5);
                 free = Some(proj_handle);
                 break 'outer;
             }

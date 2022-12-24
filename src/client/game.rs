@@ -323,8 +323,7 @@ impl ClientGame {
 
         // Camera movement
         let camera_pos_old = **camera.local_transform().position();
-        let ray_origin;
-        let ray_direction;
+        let trace_opts = TraceOptions::filter(!IG_ENTITIES).with_end(true);
         if ps == PlayerState::Observing {
             let forward = camera.forward_vec_normed();
             let left = camera.left_vec_normed();
@@ -349,39 +348,19 @@ impl ClientGame {
                 delta += -up * dt * cvars.cl_camera_speed;
             }
 
-            ray_origin = camera_pos_old;
-            ray_direction = delta;
+            let hits = trace_line(scene, camera_pos_old, delta, trace_opts);
+            let new_pos = hits[0].position.coords;
+            scene.graph[self.camera].local_transform_mut().set_position(new_pos);
         } else if ps == PlayerState::Playing {
-            let back = cam_rot * BACK * cvars.cl_camera_3rd_person_back;
             let up = UP * cvars.cl_camera_3rd_person_up;
-            let offset = back + up;
+            let back = cam_rot * BACK * cvars.cl_camera_3rd_person_back;
 
-            ray_origin = player_cycle_pos + cvars.d_dbgf * offset;
-            ray_direction = offset;
+            let hits = trace_line(scene, player_cycle_pos, up, trace_opts);
+            let hits = trace_line(scene, hits[0].position, back, trace_opts);
+            let new_pos = hits[0].position.coords;
+            scene.graph[self.camera].local_transform_mut().set_position(new_pos);
         } else {
             unreachable!(); // LATER Spectating
-        }
-
-        // LATER(perf) Smallvec instead? ArrayVec can discard intersections if it overflows. Other raycasts too.
-        let mut intersections = Vec::new();
-        if ray_direction.norm_squared() > 0.0 {
-            scene.graph.physics.cast_ray(
-                RayCastOptions {
-                    ray_origin: ray_origin.into(),
-                    ray_direction,
-                    max_len: ray_direction.norm(),
-                    groups: InteractionGroups::new(IG_ALL, !IG_ENTITIES),
-                    sort_results: true,
-                },
-                &mut intersections,
-            );
-
-            let camera_pos_new = if let Some(intersection) = intersections.first() {
-                intersection.position.coords - ray_direction.normalize() * cvars.g_physics_nudge
-            } else {
-                ray_origin + ray_direction
-            };
-            scene.graph[self.camera].local_transform_mut().set_position(camera_pos_new);
         }
 
         // Camera zoom
@@ -406,18 +385,9 @@ impl ClientGame {
         }
 
         // LATER Intersect with each pole (currently it probably assumes they're all one object)
-        scene.graph.physics.cast_ray(
-            RayCastOptions {
-                ray_origin: (0.5 * DOWN + BACK).into(),
-                ray_direction: FORWARD,
-                max_len: 100.0,
-                groups: Default::default(),
-                sort_results: true,
-            },
-            &mut intersections,
-        );
-        for intersection in intersections {
-            dbg_cross!(intersection.position.coords, 0.0);
+        let hits = trace_line(scene, 0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
+        for hit in hits {
+            dbg_cross!(hit.position.coords, 0.0);
         }
 
         // Examples of all the debug shapes

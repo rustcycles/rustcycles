@@ -9,7 +9,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use fyrox::scene::collider::BitMask;
+use fyrox::{core::algebra::Point, scene::collider::BitMask};
 
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and unlikely to collide.
@@ -23,8 +23,7 @@ pub(crate) use fyrox::{
     resource::model::Model,
     scene::{
         base::{Base, BaseBuilder},
-        collider::{Collider, ColliderBuilder, ColliderShape, InteractionGroups},
-        graph::physics::RayCastOptions,
+        collider::{Collider, ColliderBuilder, ColliderShape},
         node::Node,
         rigidbody::{RigidBody, RigidBodyBuilder, RigidBodyType},
         transform::TransformBuilder,
@@ -36,7 +35,10 @@ pub(crate) use fyrox::{
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub(crate) use inline_tweak::tweak;
 
-pub(crate) use crate::cvars::Cvars;
+pub(crate) use crate::{
+    common::trace::{trace_line, TraceOptions},
+    cvars::Cvars,
+};
 
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root
@@ -85,6 +87,7 @@ macro_rules! v {
 ///
 /// X, Y, Z is left, up, forward.
 pub(crate) type Vec3 = Vector3<f32>;
+pub(crate) type Point3 = Point<f32, 3>;
 
 // Consts take less typing than using an extension trait - e.g. `Vec3::up()`
 // even though it's less explicit we're talking about 3D vectors.

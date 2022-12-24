@@ -8,6 +8,8 @@ pub(crate) mod trace;
 use std::fmt::{self, Debug, Display, Formatter};
 
 use fyrox::scene::collider::InteractionGroups;
+use rand::{distributions::Uniform, Rng, SeedableRng};
+use rand_xoshiro::Xoshiro256PlusPlus;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -31,6 +33,13 @@ pub(crate) struct GameState {
     /// it's just a debugging aid (e.g. run something on odd/even frames).
     pub(crate) frame_number: usize,
 
+    /// The RNG for all gamelogic
+    pub rng: Xoshiro256PlusPlus,
+
+    /// Inclusive range [-1.0, 1.0].
+    /// Creating it once and saving it here might be faster than using gen_range according to docs.
+    pub range_uniform11: Uniform<f64>,
+
     pub(crate) scene: Handle<Scene>,
     cycle_model: Model,
     pub(crate) players: Pool<Player>,
@@ -39,7 +48,7 @@ pub(crate) struct GameState {
 }
 
 impl GameState {
-    pub(crate) async fn new(engine: &mut Engine) -> Self {
+    pub(crate) async fn new(cvars: &Cvars, engine: &mut Engine) -> Self {
         let mut scene = Scene::new();
 
         engine
@@ -63,6 +72,8 @@ impl GameState {
             // It would usually be 0.0 / 0.0 anyway so now it's 0.0 / -1.0.
             game_time_prev: -1.0,
             frame_number: 0,
+            rng: Xoshiro256PlusPlus::seed_from_u64(cvars.d_seed),
+            range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
             scene,
             cycle_model,
             players: Pool::new(),
@@ -183,10 +194,12 @@ impl GameState {
             .with_shape(ColliderShape::cuboid(0.125, 0.271, 0.271))
             .with_collision_groups(InteractionGroups::new(IG_ENTITIES, IG_ALL))
             .build(&mut scene.graph);
+        // Slightly randomize spawn pos just to use the RNG
+        let left = 3.0 * self.rng.sample(self.range_uniform11);
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()
                 .with_local_transform(
-                    TransformBuilder::new().with_local_position(v!(-1 5 0)).build(),
+                    TransformBuilder::new().with_local_position(v!(left, 5, 0)).build(),
                 )
                 .with_children(&[node_handle, collider_handle]),
         )

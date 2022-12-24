@@ -92,7 +92,7 @@ impl ClientProcess {
 
             // Init server first, otherwise the client has nothing to connect to.
             let listener = LocalListener::new(conn1);
-            let mut sg = ServerGame::new(&mut engine, Box::new(listener)).await;
+            let mut sg = ServerGame::new(&cvars, &mut engine, Box::new(listener)).await;
 
             // Make the server accept the local connection
             // and send init data into it so the client can read it during creation.
@@ -100,7 +100,7 @@ impl ClientProcess {
             // Yes, this is really ugly.
             sg.accept_new_connections(&mut engine);
 
-            let cg = ClientGame::new(&mut engine, debug_text, Box::new(conn2)).await;
+            let cg = ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn2)).await;
 
             (Some(sg), cg)
         } else {
@@ -124,7 +124,7 @@ impl ClientProcess {
             stream.set_nonblocking(true).unwrap();
 
             let conn = TcpConnection::new(stream, addr);
-            let cg = ClientGame::new(&mut engine, debug_text, Box::new(conn)).await;
+            let cg = ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn)).await;
 
             (None, cg)
         };

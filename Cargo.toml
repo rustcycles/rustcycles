@@ -45,6 +45,8 @@ cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "ae2e3e
 fxhash = "0.2.1"
 fyrox = "0.28.0"
 inline_tweak = "1.0.8"
+rand = { version = "0.8.5", default-features = false }
+rand_xoshiro = "0.6.0"
 serde = { version = "1.0.151", features = ["derive"] }
 strum = "0.24.0"
 strum_macros = "0.24.3"

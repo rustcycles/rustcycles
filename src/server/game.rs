@@ -26,8 +26,12 @@ pub(crate) struct ServerGame {
 }
 
 impl ServerGame {
-    pub(crate) async fn new(engine: &mut Engine, listener: Box<dyn Listener>) -> Self {
-        let gs = GameState::new(engine).await;
+    pub(crate) async fn new(
+        cvars: &Cvars,
+        engine: &mut Engine,
+        listener: Box<dyn Listener>,
+    ) -> Self {
+        let gs = GameState::new(cvars, engine).await;
 
         Self {
             gs,

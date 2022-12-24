@@ -19,7 +19,7 @@ impl ServerProcess {
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
         listener.set_nonblocking(true).unwrap();
 
-        let sg = ServerGame::new(&mut engine, Box::new(listener)).await;
+        let sg = ServerGame::new(&cvars, &mut engine, Box::new(listener)).await;
 
         Self {
             cvars,

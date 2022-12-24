@@ -40,11 +40,12 @@ pub(crate) struct ClientGame {
 
 impl ClientGame {
     pub(crate) async fn new(
+        cvars: &Cvars,
         engine: &mut Engine,
         debug_text: Handle<UiNode>,
         mut conn: Box<dyn Connection>,
     ) -> Self {
-        let mut gs = GameState::new(engine).await;
+        let mut gs = GameState::new(cvars, engine).await;
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails

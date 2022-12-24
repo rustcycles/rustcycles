@@ -82,6 +82,15 @@ pub struct Cvars {
     pub d_exit_after_one_frame: bool,
     pub d_exit_on_unknown_cvar: bool,
 
+    /// The seed to initialize the RNG.
+    ///
+    /// This is not very helpful by itself because by the time you can change cvars in the console,
+    /// the seed has already been used. However, in the desktop version, you can set it on the command line.
+    ///
+    /// LATER If the seed is 0 at match start, the cvar is changed to the current time and that is used as seed.
+    /// This means you can look at the cvar's value later and know what seed you need to replay the same game.
+    pub d_seed: u64,
+
     /// Print UI messages or a subset of them.
     pub d_ui_msgs: bool,
     pub d_ui_msgs_direction_from: bool,
@@ -164,6 +173,8 @@ impl Default for Cvars {
 
             d_exit_after_one_frame: false,
             d_exit_on_unknown_cvar: true,
+
+            d_seed: 0,
 
             d_ui_msgs: false,
             d_ui_msgs_direction_from: true,

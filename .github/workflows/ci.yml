@@ -74,7 +74,6 @@ jobs:
       - run: cargo clippy --version
         # Use --all-targets to also check tests.
         # Note that --all-features doesn't check all code when something is *disabled* by a feature.
-      - run: cargo clippy --all-targets -- --deny warnings
       - run: cargo clippy --all-targets --all-features -- --deny warnings
         # No fixmes allowed - they're to be fixed before committing or at least before merging to master.
         # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).

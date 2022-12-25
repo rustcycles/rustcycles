@@ -34,7 +34,7 @@ pub(crate) struct ClientGame {
     debug_text: Handle<UiNode>,
     pub(crate) gs: GameState,
     pub(crate) lp: LocalPlayer,
-    pub(crate) camera: Handle<Node>,
+    pub(crate) camera_handle: Handle<Node>,
     conn: Box<dyn Connection>,
 }
 
@@ -51,9 +51,9 @@ impl ClientGame {
         // LATER Report error if loading fails
         let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
 
-        let scene = &mut engine.scenes[gs.scene];
+        let scene = &mut engine.scenes[gs.scene_handle];
 
-        let camera =
+        let camera_handle =
             CameraBuilder::new(BaseBuilder::new().with_local_transform(
                 TransformBuilder::new().with_local_position(v!(0 1 -3)).build(),
             ))
@@ -127,7 +127,7 @@ impl ClientGame {
             debug_text,
             gs,
             lp,
-            camera,
+            camera_handle,
             conn,
         }
     }
@@ -197,7 +197,7 @@ impl ClientGame {
 
         self.send_input();
 
-        let scene = &mut engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene_handle];
 
         scene.drawing_context.clear_lines();
 
@@ -300,13 +300,13 @@ impl ClientGame {
             self.network_send(ClientMessage::Observe);
         }
 
-        let scene = &mut engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene_handle];
 
         let player_cycle_handle = self.gs.players[self.lp.player_handle].cycle_handle.unwrap();
         let player_body_handle = self.gs.cycles[player_cycle_handle].body_handle;
         let player_cycle_pos = **scene.graph[player_body_handle].local_transform().position();
 
-        let camera = &mut scene.graph[self.camera];
+        let camera = &mut scene.graph[self.camera_handle];
 
         // Camera turning
         let yaw_angle = self.lp.input.yaw.0.to_radians();
@@ -351,7 +351,7 @@ impl ClientGame {
 
             let hits = trace_line(scene, camera_pos_old, delta, trace_opts);
             let new_pos = hits[0].position.coords;
-            scene.graph[self.camera].local_transform_mut().set_position(new_pos);
+            scene.graph[self.camera_handle].local_transform_mut().set_position(new_pos);
         } else if ps == PlayerState::Playing {
             let up = UP * cvars.cl_camera_3rd_person_up;
             let back = cam_rot * BACK * cvars.cl_camera_3rd_person_back;
@@ -359,13 +359,13 @@ impl ClientGame {
             let hits = trace_line(scene, player_cycle_pos, up, trace_opts);
             let hits = trace_line(scene, hits[0].position, back, trace_opts);
             let new_pos = hits[0].position.coords;
-            scene.graph[self.camera].local_transform_mut().set_position(new_pos);
+            scene.graph[self.camera_handle].local_transform_mut().set_position(new_pos);
         } else {
             unreachable!(); // LATER Spectating
         }
 
         // Camera zoom
-        let camera = scene.graph[self.camera].as_camera_mut();
+        let camera = scene.graph[self.camera_handle].as_camera_mut();
         if let Projection::Perspective(perspective) = camera.projection_mut() {
             let zoom_factor = if self.lp.input.zoom {
                 cvars.cl_zoom_factor
@@ -418,7 +418,7 @@ impl ClientGame {
     }
 
     fn tick_after_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
-        let scene = &mut engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene_handle];
 
         if cvars.d_dbg {
             scene.graph.update_hierarchical_data();

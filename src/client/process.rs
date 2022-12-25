@@ -464,7 +464,7 @@ impl ClientProcess {
         let target = self.real_time();
         if let Some(sg) = &mut self.sg {
             debug::details::set_endpoint("locl");
-            self.engine.scenes[sg.gs.scene].enabled = false;
+            self.engine.scenes[sg.gs.scene_handle].enabled = false;
         }
 
         self.cg.update(&self.cvars, &mut self.engine, target);
@@ -476,13 +476,13 @@ impl ClientProcess {
         let target = self.real_time();
         if let Some(sg) = &mut self.sg {
             debug::details::set_endpoint("losv");
-            self.engine.scenes[self.cg.gs.scene].enabled = false;
-            self.engine.scenes[sg.gs.scene].enabled = true;
+            self.engine.scenes[self.cg.gs.scene_handle].enabled = false;
+            self.engine.scenes[sg.gs.scene_handle].enabled = true;
             sg.update(&self.cvars, &mut self.engine, target);
 
             // The client scene has to be reenabled here, not before running `cg.update()`,
             // so that it gets rendered.
-            self.engine.scenes[self.cg.gs.scene].enabled = true;
+            self.engine.scenes[self.cg.gs.scene_handle].enabled = true;
         }
 
         debug::details::set_endpoint(old_name);

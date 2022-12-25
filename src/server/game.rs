@@ -101,7 +101,7 @@ impl ServerGame {
                     self.send_init(engine, client_handle);
 
                     // Spawn cycle
-                    let scene = &mut engine.scenes[self.gs.scene];
+                    let scene = &mut engine.scenes[self.gs.scene_handle];
                     let cycle_handle = self.gs.spawn_cycle(scene, player_handle, None);
 
                     // Tell all players
@@ -168,7 +168,7 @@ impl ServerGame {
     }
 
     fn disconnect(&mut self, engine: &mut Engine, client_handle: Handle<RemoteClient>) {
-        let scene = &mut engine.scenes[self.gs.scene];
+        let scene = &mut engine.scenes[self.gs.scene_handle];
         let client = self.clients.free(client_handle);
         self.gs.free_player(scene, client.player_handle);
         let msg = ServerMessage::RemovePlayer {
@@ -204,7 +204,7 @@ impl ServerGame {
     }
 
     fn sys_send_update(&mut self, engine: &mut Engine) {
-        let scene = &engine.scenes[self.gs.scene];
+        let scene = &engine.scenes[self.gs.scene_handle];
 
         let mut player_inputs = Vec::new();
         for (player_handle, player) in self.gs.players.pair_iter() {

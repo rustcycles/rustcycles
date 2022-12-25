@@ -40,7 +40,7 @@ pub(crate) struct GameState {
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
     pub range_uniform11: Uniform<f64>,
 
-    pub(crate) scene: Handle<Scene>,
+    pub(crate) scene_handle: Handle<Scene>,
     cycle_model: Model,
     pub(crate) players: Pool<Player>,
     pub(crate) cycles: Pool<Cycle>,
@@ -64,7 +64,7 @@ impl GameState {
             .await
             .unwrap();
 
-        let scene = engine.scenes.add(scene);
+        let scene_handle = engine.scenes.add(scene);
 
         Self {
             game_time: 0.0,
@@ -74,7 +74,7 @@ impl GameState {
             frame_number: 0,
             rng: Xoshiro256PlusPlus::seed_from_u64(cvars.d_seed),
             range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
-            scene,
+            scene_handle,
             cycle_model,
             players: Pool::new(),
             cycles: Pool::new(),
@@ -83,7 +83,7 @@ impl GameState {
     }
 
     pub(crate) fn tick_before_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
-        let scene = &mut engine.scenes[self.scene];
+        let scene = &mut engine.scenes[self.scene_handle];
 
         scene.graph.physics.integration_parameters.max_ccd_substeps =
             cvars.g_physics_max_ccd_substeps;

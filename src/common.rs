@@ -19,6 +19,8 @@ use crate::{
 
 /// The state of the game - all data needed to run the gamelogic.
 pub(crate) struct GameState {
+    pub(crate) gs_type: GameStateType,
+
     /// This gamelogic frame's time in seconds.
     ///
     /// This does *not* have to run at the same speed as real world time.
@@ -47,8 +49,35 @@ pub(crate) struct GameState {
     pub(crate) projectiles: Pool<Projectile>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum GameStateType {
+    Server,
+    Client,
+    Shared,
+}
+
+/// All data necessary to run a frame of shared gamelogic in one convenient package.
+///
+/// It could be all passed as separate arguments to the functions that need it,
+/// but this is more ergonomic.
+pub(crate) struct FrameData<'a> {
+    pub(crate) cvars: &'a Cvars,
+    // We have two choices here:
+    // 1) Borrow the whole engine
+    // 2) Borrow only the scene
+    // Option 1 lets us access things like the UI and resource manager
+    // but it's also easy to do bad stuff like calling update() twice per frame
+    // and we have to borrow the scene in every method.
+    // Option 2 lets us have separate client and server scenes
+    // and easily pass the one we want to update.
+    // So currently we only borrow the scene and {Client,Server}Process deal with the engine.
+    // We could also borrow the UI and the resource manager here too if needed.
+    pub(crate) scene: &'a mut Scene,
+    pub(crate) gs: &'a mut GameState,
+}
+
 impl GameState {
-    pub(crate) async fn new(cvars: &Cvars, engine: &mut Engine) -> Self {
+    pub(crate) async fn new(cvars: &Cvars, engine: &mut Engine, gs_type: GameStateType) -> Self {
         let mut scene = Scene::new();
 
         engine
@@ -67,6 +96,7 @@ impl GameState {
         let scene_handle = engine.scenes.add(scene);
 
         Self {
+            gs_type,
             game_time: 0.0,
             // We wanna avoid having to specialcase divisions by zero in the first frame.
             // It would usually be 0.0 / 0.0 anyway so now it's 0.0 / -1.0.
@@ -81,36 +111,36 @@ impl GameState {
             projectiles: Pool::new(),
         }
     }
+}
 
-    pub(crate) fn tick_before_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
-        let scene = &mut engine.scenes[self.scene_handle];
+impl FrameData<'_> {
+    pub(crate) fn tick_before_physics(&mut self, dt: f32) {
+        self.scene.graph.physics.integration_parameters.max_ccd_substeps =
+            self.cvars.g_physics_max_ccd_substeps;
 
-        scene.graph.physics.integration_parameters.max_ccd_substeps =
-            cvars.g_physics_max_ccd_substeps;
-
-        for cycle in &self.cycles {
-            let player = &self.players[cycle.player_handle];
+        for cycle in &self.gs.cycles {
+            let player = &self.gs.players[cycle.player_handle];
 
             let playing = player.ps == PlayerState::Playing;
             let input = player.input;
             let rot = UnitQuaternion::from_axis_angle(&UP_AXIS, input.yaw.to_radians());
-            let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
+            let body = self.scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing {
                 let forward = rot * FORWARD;
                 let left = rot * LEFT;
 
                 let mut wheel_accel = Vec3::zeros();
                 if input.forward {
-                    wheel_accel += forward * dt * cvars.g_wheel_acceleration;
+                    wheel_accel += forward * dt * self.cvars.g_wheel_acceleration;
                 }
                 if input.backward {
-                    wheel_accel -= forward * dt * cvars.g_wheel_acceleration;
+                    wheel_accel -= forward * dt * self.cvars.g_wheel_acceleration;
                 }
                 if input.left {
-                    wheel_accel += left * dt * cvars.g_wheel_acceleration;
+                    wheel_accel += left * dt * self.cvars.g_wheel_acceleration;
                 }
                 if input.right {
-                    wheel_accel -= left * dt * cvars.g_wheel_acceleration;
+                    wheel_accel -= left * dt * self.cvars.g_wheel_acceleration;
                 }
 
                 let mut lin_vel = body.lin_vel();
@@ -126,11 +156,11 @@ impl GameState {
             body.local_transform_mut().set_rotation(rot);
 
             if input.fire1 {
-                let _ = self.projectiles.spawn(Projectile {
+                let _ = self.gs.projectiles.spawn(Projectile {
                     player_handle: cycle.player_handle,
                     pos: **body.local_transform().position(),
-                    vel: dir * cvars.g_projectile_speed,
-                    time_fired: self.game_time,
+                    vel: dir * self.cvars.g_projectile_speed,
+                    time_fired: self.gs.game_time,
                 });
             }
         }
@@ -138,18 +168,18 @@ impl GameState {
         // LATER Split into functions
         // LATER iter_handles()?
         let mut free = None;
-        'outer: for (proj_handle, proj) in self.projectiles.pair_iter_mut() {
-            if proj.time_fired + cvars.g_projectile_lifetime < self.game_time {
+        'outer: for (proj_handle, proj) in self.gs.projectiles.pair_iter_mut() {
+            if proj.time_fired + self.cvars.g_projectile_lifetime < self.gs.game_time {
                 free = Some(proj_handle);
                 continue;
             }
 
             let step = proj.vel * dt;
 
-            let hits = trace_line(scene, proj.pos, step, Default::default());
+            let hits = trace_line(self.scene, proj.pos, step, Default::default());
             for hit in hits {
-                let cycle_handle = self.players[proj.player_handle].cycle_handle.unwrap();
-                let cycle_collider_handle = self.cycles[cycle_handle].collider_handle;
+                let cycle_handle = self.gs.players[proj.player_handle].cycle_handle.unwrap();
+                let cycle_collider_handle = self.gs.cycles[cycle_handle].collider_handle;
                 if hit.collider == cycle_collider_handle {
                     // LATER Let the player shoot himself - enable self collision after the projectile clears the player's hitbox.
                     continue;
@@ -167,35 +197,34 @@ impl GameState {
             proj.pos += step;
         }
         if let Some(handle) = free {
-            self.projectiles.free(handle);
+            self.gs.projectiles.free(handle);
         }
 
-        dbg_textf!("Projectiles: {}", self.projectiles.total_count());
+        dbg_textf!("Projectiles: {}", self.gs.projectiles.total_count());
     }
 
-    pub(crate) fn free_player(&mut self, scene: &mut Scene, player_handle: Handle<Player>) {
-        let player = self.players.free(player_handle);
+    pub(crate) fn free_player(&mut self, player_handle: Handle<Player>) {
+        let player = self.gs.players.free(player_handle);
         if let Some(handle) = player.cycle_handle {
-            let cycle = self.cycles.free(handle);
-            scene.remove_node(cycle.body_handle);
+            let cycle = self.gs.cycles.free(handle);
+            self.scene.remove_node(cycle.body_handle);
         }
     }
 
     pub(crate) fn spawn_cycle(
         &mut self,
-        scene: &mut Scene,
         player_handle: Handle<Player>,
         cycle_index: Option<u32>,
     ) -> Handle<Cycle> {
-        let node_handle = self.cycle_model.instantiate(scene);
+        let node_handle = self.gs.cycle_model.instantiate(self.scene);
         let collider_handle = ColliderBuilder::new(BaseBuilder::new())
             // Size manually copied from the result of rusty-editor's Fit Collider
             // LATER Remove rustcycle.rgs?
             .with_shape(ColliderShape::cuboid(0.125, 0.271, 0.271))
             .with_collision_groups(InteractionGroups::new(IG_ENTITIES, IG_ALL))
-            .build(&mut scene.graph);
+            .build(&mut self.scene.graph);
         // Slightly randomize spawn pos just to use the RNG
-        let left = 3.0 * self.rng.sample(self.range_uniform11);
+        let left = 3.0 * self.gs.rng.sample(self.gs.range_uniform11);
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()
                 .with_local_transform(
@@ -206,7 +235,7 @@ impl GameState {
         .with_ccd_enabled(true)
         .with_locked_rotations(true)
         .with_can_sleep(false)
-        .build(&mut scene.graph);
+        .build(&mut self.scene.graph);
 
         let cycle = Cycle {
             player_handle,
@@ -214,12 +243,12 @@ impl GameState {
             collider_handle,
         };
         let cycle_handle = if let Some(index) = cycle_index {
-            self.cycles.spawn_at(index, cycle).unwrap()
+            self.gs.cycles.spawn_at(index, cycle).unwrap()
         } else {
-            self.cycles.spawn(cycle)
+            self.gs.cycles.spawn(cycle)
         };
 
-        self.players[player_handle].cycle_handle = Some(cycle_handle);
+        self.gs.players[player_handle].cycle_handle = Some(cycle_handle);
 
         cycle_handle
     }
@@ -234,18 +263,19 @@ impl GameState {
     ///   the direction of the arrow to the direction as text.
     ///
     /// The rotation is clockwise when looking in the forward direction.
-    pub(crate) fn debug_engine_updates(&self, cvars: &Cvars, pos: Vec3) {
-        if !cvars.d_draw || !cvars.d_draw_frame_timings {
+    pub(crate) fn debug_engine_updates(&self, pos: Vec3) {
+        if !self.cvars.d_draw || !self.cvars.d_draw_frame_timings {
             return;
         }
 
-        let step = (self.frame_number % cvars.d_draw_frame_timings_steps) as f32;
-        let angle = 2.0 * std::f32::consts::PI / cvars.d_draw_frame_timings_steps as f32 * step;
+        let step = (self.gs.frame_number % self.cvars.d_draw_frame_timings_steps) as f32;
+        let angle =
+            2.0 * std::f32::consts::PI / self.cvars.d_draw_frame_timings_steps as f32 * step;
         let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);
-        if cvars.d_draw_frame_timings_text {
-            dbg_textd!(self.frame_number, pos, angle.to_degrees());
+        if self.cvars.d_draw_frame_timings_text {
+            dbg_textd!(self.gs.frame_number, pos, angle.to_degrees());
         }
     }
 }

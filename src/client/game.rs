@@ -5,7 +5,8 @@
 use std::{io::ErrorKind, thread, time::Duration};
 
 use fyrox::{
-    gui::{message::MessageDirection, text::TextMessage, UiNode},
+    gui::{message::MessageDirection, text::TextMessage, UiNode, UserInterface},
+    renderer::Renderer,
     scene::camera::{CameraBuilder, Projection, SkyBoxBuilder},
 };
 
@@ -32,10 +33,21 @@ use crate::{
 /// which might not be entirely accurate due to network lag and packet loss.
 pub(crate) struct ClientGame {
     debug_text: Handle<UiNode>,
-    pub(crate) gs: GameState,
     pub(crate) lp: LocalPlayer,
     pub(crate) camera_handle: Handle<Node>,
     conn: Box<dyn Connection>,
+}
+
+/// All data necessary to run a frame of client-side game logic in one convenient package.
+///
+/// See also `ServerFrameData` and `FrameData`.
+pub(crate) struct ClientFrameData<'a> {
+    pub(crate) cvars: &'a Cvars,
+    pub(crate) scene: &'a mut Scene,
+    pub(crate) gs: &'a mut GameState,
+    pub(crate) cg: &'a mut ClientGame,
+    pub(crate) renderer: &'a mut Renderer,
+    pub(crate) ui: &'a mut UserInterface,
 }
 
 impl ClientGame {
@@ -44,15 +56,13 @@ impl ClientGame {
         engine: &mut Engine,
         debug_text: Handle<UiNode>,
         mut conn: Box<dyn Connection>,
+        gs: &mut GameState,
     ) -> Self {
-        let mut gs = GameState::new(cvars, engine).await;
+        let scene = &mut engine.scenes[gs.scene_handle];
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
         let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
-
-        let scene = &mut engine.scenes[gs.scene_handle];
-
         let camera_handle =
             CameraBuilder::new(BaseBuilder::new().with_local_transform(
                 TransformBuilder::new().with_local_position(v!(0 1 -3)).build(),
@@ -71,47 +81,20 @@ impl ClientGame {
             )
             .build(&mut scene.graph);
 
+        let mut data = FrameData { cvars, scene, gs };
+
         let mut init_attempts = 0;
-        let lp = loop {
+        let local_player_handle = loop {
             init_attempts += 1;
             let (msg, closed) = conn.receive_one_sm();
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
             if let Some(msg) = msg {
-                if let ServerMessage::Init(Init {
-                    player_indices,
-                    local_player_index,
-                    player_cycles,
-                    player_projectiles,
-                }) = msg
-                {
-                    for player_index in player_indices {
-                        let player = Player::new(None);
-                        gs.players.spawn_at(player_index, player).unwrap();
-                    }
-                    let local_player_handle = gs.players.handle_from_index(local_player_index);
-                    let lp = LocalPlayer::new(local_player_handle);
-
-                    for PlayerCycle {
-                        player_index,
-                        cycle_index,
-                    } in player_cycles
-                    {
-                        let player_handle = gs.players.handle_from_index(player_index);
-                        gs.spawn_cycle(scene, player_handle, Some(cycle_index));
-                    }
-
-                    for PlayerProjectile {
-                        player_index: _,
-                        projectile_index: _,
-                    } in player_projectiles
-                    {
-                        todo!("init projectiles");
-                    }
-
+                if let ServerMessage::Init(init) = msg {
+                    let local_player_handle = data.init(init);
                     dbg_logf!("init attempts: {}", init_attempts);
-                    break lp;
+                    break local_player_handle;
                 } else {
                     panic!("First message wasn't init"); // LATER Don't crash
                 }
@@ -121,87 +104,109 @@ impl ClientGame {
             }
             thread::sleep(Duration::from_millis(10));
         };
-        dbg_logf!("local_player_index is {}", lp.player_handle.index());
+        dbg_logf!("local_player_index is {}", local_player_handle.index());
 
+        let lp = LocalPlayer::new(local_player_handle);
         Self {
             debug_text,
-            gs,
             lp,
             camera_handle,
             conn,
         }
     }
 
-    pub(crate) fn update(&mut self, cvars: &Cvars, engine: &mut Engine, game_time_target: f32) {
-        // LATER read these (again), verify what works best in practise:
-        // https://gafferongames.com/post/fix_your_timestep/
-        // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
-
-        let dt = 1.0 / 60.0;
-        while self.gs.game_time + dt < game_time_target {
-            self.gs.game_time_prev = self.gs.game_time;
-            self.gs.game_time += dt;
-            self.gs.frame_number += 1;
-
-            self.tick_begin_frame(cvars, engine);
-
-            self.gs.tick_before_physics(cvars, engine, dt);
-
-            self.tick_before_physics(cvars, engine, dt);
-
-            // Update animations, transformations, physics, ...
-            // There's currently no need to split this into pre_ and post_update like on the client.
-            // Dummy control flow and lag since we don't use fyrox plugins.
-            let mut cf = fyrox::event_loop::ControlFlow::Poll;
-            let mut lag = 0.0;
-            engine.pre_update(dt, &mut cf, &mut lag);
-            // Sanity check - if the engine starts doing something with these, we'll know.
-            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
-            assert_eq!(lag, 0.0);
-
-            // `tick_after_physics` tells the engine to draw debug shapes and text.
-            // Any debug calls after it will show up next frame.
-            self.gs.debug_engine_updates(cvars, v!(-5 3 3));
-            self.tick_after_physics(cvars, engine, dt);
-            self.gs.debug_engine_updates(cvars, v!(-6 3 3));
-
-            // Update UI
-            engine.post_update(dt);
-        }
-
-        engine.get_window().request_redraw();
-    }
-
     pub(crate) fn send_input(&mut self) {
         self.network_send(ClientMessage::Input(self.lp.input));
     }
 
+    fn network_send(&mut self, msg: ClientMessage) {
+        let network_msg = net::serialize(msg);
+        let res = self.conn.send(&network_msg);
+        if let Err(ref e) = res {
+            if e.kind() == ErrorKind::ConnectionReset {
+                dbg_logf!("Server disconnected, exitting");
+                std::process::exit(0);
+            }
+        }
+        res.unwrap();
+    }
+}
+
+impl FrameData<'_> {
+    pub(crate) fn init(&mut self, init: Init) -> Handle<Player> {
+        if self.gs.gs_type == GameStateType::Shared {
+            // The player has already been spawned when running server logic.
+            // LATER Deduplicate this line. Maybe don't even return the handle?
+            return self.gs.players.handle_from_index(init.local_player_index);
+        }
+
+        for player_index in init.player_indices {
+            let player = Player::new(None);
+            self.gs.players.spawn_at(player_index, player).unwrap();
+        }
+        let local_player_handle = self.gs.players.handle_from_index(init.local_player_index);
+
+        for PlayerCycle {
+            player_index,
+            cycle_index,
+        } in init.player_cycles
+        {
+            let player_handle = self.gs.players.handle_from_index(player_index);
+            self.spawn_cycle(player_handle, Some(cycle_index));
+        }
+
+        for PlayerProjectile {
+            player_index: _,
+            projectile_index: _,
+        } in init.player_projectiles
+        {
+            todo!("init projectiles");
+        }
+
+        local_player_handle
+    }
+}
+
+impl ClientFrameData<'_> {
+    pub(crate) fn fd(&mut self) -> FrameData<'_> {
+        FrameData {
+            cvars: self.cvars,
+            scene: self.scene,
+            gs: self.gs,
+        }
+    }
+
     /// All once-per-frame networking.
-    fn tick_begin_frame(&mut self, cvars: &Cvars, engine: &mut Engine) {
+    pub(crate) fn tick_begin_frame(&mut self) {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
-        self.lp.input_prev = self.lp.input;
+        self.cg.lp.input_prev = self.cg.lp.input;
 
-        self.lp.input.yaw.0 += self.lp.delta_yaw; // LATER Normalize to [0, 360°) or something
-        self.lp.input.pitch.0 = (self.lp.input.pitch.0 + self.lp.delta_pitch)
-            .clamp(cvars.m_pitch_min, cvars.m_pitch_max);
+        self.cg.lp.input.yaw.0 += self.cg.lp.delta_yaw; // LATER Normalize to [0, 360°) or something
+        self.cg.lp.input.pitch.0 = (self.cg.lp.input.pitch.0 + self.cg.lp.delta_pitch)
+            .clamp(self.cvars.m_pitch_min, self.cvars.m_pitch_max);
 
         let delta_time = self.gs.game_time - self.gs.game_time_prev;
         soft_assert!(delta_time > 0.0);
-        self.lp.input.yaw_speed.0 = self.lp.delta_yaw / delta_time;
-        self.lp.input.pitch_speed.0 = self.lp.delta_pitch / delta_time;
+        self.cg.lp.input.yaw_speed.0 = self.cg.lp.delta_yaw / delta_time;
+        self.cg.lp.input.pitch_speed.0 = self.cg.lp.delta_pitch / delta_time;
 
-        self.lp.delta_yaw = 0.0;
-        self.lp.delta_pitch = 0.0;
+        self.cg.lp.delta_yaw = 0.0;
+        self.cg.lp.delta_pitch = 0.0;
 
-        self.send_input();
+        self.cg.send_input();
 
-        let scene = &mut engine.scenes[self.gs.scene_handle];
+        self.scene.drawing_context.clear_lines();
 
-        scene.drawing_context.clear_lines();
+        let (msgs, _) = self.cg.conn.receive_sm();
 
-        let (msgs, _) = self.conn.receive_sm();
+        if self.gs.gs_type == GameStateType::Shared {
+            // Shared mode ignores all messages that update game state
+            // since it's updated when running server logic.
+            return; // LATER Early return in the middle of a function is ugly
+        }
+
         for msg in msgs {
             match msg {
                 ServerMessage::Init(_) => {
@@ -215,7 +220,7 @@ impl ClientGame {
                 }
                 ServerMessage::RemovePlayer { player_index } => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
-                    self.gs.free_player(scene, player_handle);
+                    self.fd().free_player(player_handle);
                 }
                 ServerMessage::Observe { player_index } => {
                     self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Observing;
@@ -243,7 +248,7 @@ impl ClientGame {
                     cycle_index,
                 }) => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
-                    self.gs.spawn_cycle(scene, player_handle, Some(cycle_index));
+                    self.fd().spawn_cycle(player_handle, Some(cycle_index));
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
                     dbg_logd!(cycle_index);
@@ -271,7 +276,7 @@ impl ClientGame {
                     } in cycle_physics
                     {
                         let cycle = self.gs.cycles.at_mut(cycle_index).unwrap();
-                        let body = scene.graph[cycle.body_handle].as_rigid_body_mut();
+                        let body = self.scene.graph[cycle.body_handle].as_rigid_body_mut();
                         body.local_transform_mut().set_position(translation);
                         body.local_transform_mut().set_rotation(rotation);
                         body.set_lin_vel(velocity);
@@ -291,28 +296,26 @@ impl ClientGame {
         }
     }
 
-    fn tick_before_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
+    pub(crate) fn tick_before_physics(&mut self, dt: f32) {
         // Join / spec
-        let ps = self.gs.players[self.lp.player_handle].ps;
-        if ps == PlayerState::Observing && self.lp.input.fire1 {
-            self.network_send(ClientMessage::Join);
-        } else if ps == PlayerState::Playing && self.lp.input.fire2 {
-            self.network_send(ClientMessage::Observe);
+        let ps = self.gs.players[self.cg.lp.player_handle].ps;
+        if ps == PlayerState::Observing && self.cg.lp.input.fire1 {
+            self.cg.network_send(ClientMessage::Join);
+        } else if ps == PlayerState::Playing && self.cg.lp.input.fire2 {
+            self.cg.network_send(ClientMessage::Observe);
         }
 
-        let scene = &mut engine.scenes[self.gs.scene_handle];
-
-        let player_cycle_handle = self.gs.players[self.lp.player_handle].cycle_handle.unwrap();
+        let player_cycle_handle = self.gs.players[self.cg.lp.player_handle].cycle_handle.unwrap();
         let player_body_handle = self.gs.cycles[player_cycle_handle].body_handle;
-        let player_cycle_pos = **scene.graph[player_body_handle].local_transform().position();
+        let player_cycle_pos = **self.scene.graph[player_body_handle].local_transform().position();
 
-        let camera = &mut scene.graph[self.camera_handle];
+        let camera = &mut self.scene.graph[self.cg.camera_handle];
 
         // Camera turning
-        let yaw_angle = self.lp.input.yaw.0.to_radians();
+        let yaw_angle = self.cg.lp.input.yaw.0.to_radians();
         let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
 
-        let pitch_angle = self.lp.input.pitch.0.to_radians();
+        let pitch_angle = self.cg.lp.input.pitch.0.to_radians();
         let pitch_axis = yaw * LEFT_AXIS;
         let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
 
@@ -330,63 +333,67 @@ impl ClientGame {
             let left = camera.left_vec_normed();
             let up = camera.up_vec_normed();
             let mut delta = Vec3::zeros();
-            if self.lp.input.forward {
-                delta += forward * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.forward {
+                delta += forward * dt * self.cvars.cl_camera_speed;
             }
-            if self.lp.input.backward {
-                delta += -forward * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.backward {
+                delta += -forward * dt * self.cvars.cl_camera_speed;
             }
-            if self.lp.input.left {
-                delta += left * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.left {
+                delta += left * dt * self.cvars.cl_camera_speed;
             }
-            if self.lp.input.right {
-                delta += -left * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.right {
+                delta += -left * dt * self.cvars.cl_camera_speed;
             }
-            if self.lp.input.up {
-                delta += up * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.up {
+                delta += up * dt * self.cvars.cl_camera_speed;
             }
-            if self.lp.input.down {
-                delta += -up * dt * cvars.cl_camera_speed;
+            if self.cg.lp.input.down {
+                delta += -up * dt * self.cvars.cl_camera_speed;
             }
 
-            let hits = trace_line(scene, camera_pos_old, delta, trace_opts);
+            let hits = trace_line(self.scene, camera_pos_old, delta, trace_opts);
             let new_pos = hits[0].position.coords;
-            scene.graph[self.camera_handle].local_transform_mut().set_position(new_pos);
+            self.scene.graph[self.cg.camera_handle]
+                .local_transform_mut()
+                .set_position(new_pos);
         } else if ps == PlayerState::Playing {
-            let up = UP * cvars.cl_camera_3rd_person_up;
-            let back = cam_rot * BACK * cvars.cl_camera_3rd_person_back;
+            let up = UP * self.cvars.cl_camera_3rd_person_up;
+            let back = cam_rot * BACK * self.cvars.cl_camera_3rd_person_back;
 
-            let hits = trace_line(scene, player_cycle_pos, up, trace_opts);
-            let hits = trace_line(scene, hits[0].position, back, trace_opts);
+            let hits = trace_line(self.scene, player_cycle_pos, up, trace_opts);
+            let hits = trace_line(self.scene, hits[0].position, back, trace_opts);
             let new_pos = hits[0].position.coords;
-            scene.graph[self.camera_handle].local_transform_mut().set_position(new_pos);
+            self.scene.graph[self.cg.camera_handle]
+                .local_transform_mut()
+                .set_position(new_pos);
         } else {
             unreachable!(); // LATER Spectating
         }
 
         // Camera zoom
-        let camera = scene.graph[self.camera_handle].as_camera_mut();
+        let camera = self.scene.graph[self.cg.camera_handle].as_camera_mut();
         if let Projection::Perspective(perspective) = camera.projection_mut() {
-            let zoom_factor = if self.lp.input.zoom {
-                cvars.cl_zoom_factor
+            let zoom_factor = if self.cg.lp.input.zoom {
+                self.cvars.cl_zoom_factor
             } else {
                 1.0
             };
-            perspective.fov = cvars.cl_camera_fov.to_radians() / zoom_factor;
-            perspective.z_near = cvars.cl_camera_z_near;
-            perspective.z_far = cvars.cl_camera_z_far;
+            perspective.fov = self.cvars.cl_camera_fov.to_radians() / zoom_factor;
+            perspective.z_near = self.cvars.cl_camera_z_near;
+            perspective.z_far = self.cvars.cl_camera_z_far;
         } else {
             unreachable!();
         }
 
         // Testing
         for cycle in &self.gs.cycles {
-            let body_pos = scene.graph[cycle.body_handle].global_position();
+            let body_pos = self.scene.graph[cycle.body_handle].global_position();
             dbg_cross!(body_pos, 3.0);
         }
 
         // LATER Intersect with each pole (currently it probably assumes they're all one object)
-        let hits = trace_line(scene, 0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
+        let hits = trace_line(self.scene, 0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
         for hit in hits {
             dbg_cross!(hit.position.coords, 0.0);
         }
@@ -417,29 +424,28 @@ impl ClientGame {
         dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, GREEN);
     }
 
-    fn tick_after_physics(&mut self, cvars: &Cvars, engine: &mut Engine, dt: f32) {
-        let scene = &mut engine.scenes[self.gs.scene_handle];
-
-        if cvars.d_dbg {
-            scene.graph.update_hierarchical_data();
+    pub(crate) fn tick_after_physics(&mut self, dt: f32) {
+        if self.cvars.d_dbg {
+            self.scene.graph.update_hierarchical_data();
         }
 
         // Debug
         // LATER Warn when drawing text/shapes from prev frame.
 
         // Keep this first so it draws below other debug stuff.
-        if cvars.d_draw && cvars.d_draw_physics {
-            scene.graph.physics.draw(&mut scene.drawing_context);
+        if self.cvars.d_draw && self.cvars.d_draw_physics {
+            self.scene.graph.physics.draw(&mut self.scene.drawing_context);
         }
 
         // Testing
         for cycle in &self.gs.cycles {
-            let body_pos = scene.graph[cycle.body_handle].global_position();
+            let body_pos = self.scene.graph[cycle.body_handle].global_position();
             // Note: Drawing arrows here can reduce FPS in debug builds
             // to single digits if also using physics.draw(). No idea why.
-            // Drawing a cross hides that *sometimes* the normal red cross
-            // from before physics also appears here.
-            dbg_line!(body_pos, body_pos + UP, 0.0, BLUE2);
+            // Note2: We draw a line here because drawing a cross hides the fact
+            // that *sometimes* the normal red cross from before physics
+            // also appears in the same position.
+            dbg_line!(body_pos, body_pos + UP, 0.0);
         }
 
         DEBUG_SHAPES.with(|shapes| {
@@ -452,21 +458,21 @@ impl ClientGame {
             let mut shapes = shapes.borrow_mut();
             let mut lines = Lines::new();
             for shape in shapes.iter_mut() {
-                if cvars.d_draw {
-                    shape.to_lines(cvars, &mut lines);
+                if self.cvars.d_draw {
+                    shape.to_lines(self.cvars, &mut lines);
                 }
                 shape.time -= dt;
             }
             for (_, line) in lines.0 {
-                scene.drawing_context.add_line(line);
+                self.scene.drawing_context.add_line(line);
             }
         });
 
         let mut debug_string = String::new();
-        if cvars.d_draw_text {
-            if cvars.d_engine_stats {
-                debug_string.push_str(&engine.renderer.get_statistics().to_string());
-                debug_string.push_str(&scene.performance_statistics.to_string());
+        if self.cvars.d_draw_text {
+            if self.cvars.d_engine_stats {
+                debug_string.push_str(&self.renderer.get_statistics().to_string());
+                debug_string.push_str(&self.scene.performance_statistics.to_string());
                 debug_string.push('\n');
                 debug_string.push('\n');
             }
@@ -480,25 +486,13 @@ impl ClientGame {
         }
 
         // We send an empty string to clear the previous text if printing is disabled.
-        engine.user_interface.send_message(TextMessage::text(
-            self.debug_text,
+        self.ui.send_message(TextMessage::text(
+            self.cg.debug_text,
             MessageDirection::ToWidget,
             debug_string,
         ));
 
         debug::details::clear_expired();
-    }
-
-    fn network_send(&mut self, msg: ClientMessage) {
-        let network_msg = net::serialize(msg);
-        let res = self.conn.send(&network_msg);
-        if let Err(ref e) = res {
-            if e.kind() == ErrorKind::ConnectionReset {
-                dbg_logf!("Server disconnected, exitting");
-                std::process::exit(0);
-            }
-        }
-        res.unwrap();
     }
 }
 

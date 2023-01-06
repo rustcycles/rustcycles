@@ -30,9 +30,8 @@ use fyrox::{
 };
 
 use crate::{
-    client::game::ClientGame,
+    client::game::{ClientFrameData, ClientGame},
     common::net::{LocalConnection, LocalListener, TcpConnection},
-    debug,
     prelude::*,
     server::game::ServerGame,
 };
@@ -46,8 +45,13 @@ pub(crate) struct ClientProcess {
     pub(crate) engine: Engine,
     console: FyroxConsole,
     debug_text: Handle<UiNode>,
-    sg: Option<ServerGame>,
+    gs: GameState,
     cg: ClientGame,
+    /// Optional server-side game data when playing in local mode (with shared or LATER separate game state).
+    sg: Option<ServerGame>,
+    // LATER Optional server-side game state when playing in local mode with separate game states.
+    //  This will likely also require separate scenes.
+    //sgs: Option<GameState>,
     pub(crate) exit: bool,
 }
 
@@ -82,6 +86,13 @@ impl ClientProcess {
         // https://github.com/FyroxEngine/Fyrox/issues/356
         let console = FyroxConsole::new(&mut engine.user_interface);
 
+        let gs_type = if local_game {
+            GameStateType::Shared
+        } else {
+            GameStateType::Client
+        };
+        let mut gs = GameState::new(&cvars, &mut engine, gs_type).await;
+
         let (sg, cg) = if local_game {
             // LATER Multithreading would be sweet but we can't use threads in WASM.
 
@@ -92,15 +103,22 @@ impl ClientProcess {
 
             // Init server first, otherwise the client has nothing to connect to.
             let listener = LocalListener::new(conn1);
-            let mut sg = ServerGame::new(&cvars, &mut engine, Box::new(listener)).await;
+            let mut sg = ServerGame::new(Box::new(listener)).await;
 
             // Make the server accept the local connection
             // and send init data into it so the client can read it during creation.
             // Otherwise the client would remain stuck.
             // Yes, this is really ugly.
-            sg.accept_new_connections(&mut engine);
+            let mut data = ServerFrameData {
+                cvars: &cvars,
+                scene: &mut engine.scenes[gs.scene_handle],
+                gs: &mut gs,
+                sg: &mut sg,
+            };
+            data.accept_new_connections();
 
-            let cg = ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn2)).await;
+            let cg =
+                ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn2), &mut gs).await;
 
             (Some(sg), cg)
         } else {
@@ -124,7 +142,8 @@ impl ClientProcess {
             stream.set_nonblocking(true).unwrap();
 
             let conn = TcpConnection::new(stream, addr);
-            let cg = ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn)).await;
+            let cg =
+                ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn), &mut gs).await;
 
             (None, cg)
         };
@@ -139,8 +158,9 @@ impl ClientProcess {
             engine,
             console,
             debug_text,
-            sg,
+            gs,
             cg,
+            sg,
             exit,
         }
     }
@@ -292,7 +312,7 @@ impl ClientProcess {
         }
 
         self.cg.lp.input.real_time = self.real_time();
-        self.cg.lp.input.game_time = self.cg.gs.game_time;
+        self.cg.lp.input.game_time = self.gs.game_time;
         self.cg.send_input();
     }
 
@@ -332,7 +352,7 @@ impl ClientProcess {
             }
 
             self.cg.lp.input.real_time = self.real_time();
-            self.cg.lp.input.game_time = self.cg.gs.game_time;
+            self.cg.lp.input.game_time = self.gs.game_time;
             self.cg.send_input();
         }
     }
@@ -451,41 +471,83 @@ impl ClientProcess {
     }
 
     pub(crate) fn update(&mut self) {
-        // This is a hack.
-        // Both ClientGame and ServerGame call Engine::pre_update() to update physics
-        // which means their scenes would both get updated twice.
-        // So when running client update, we disable the server scene and vice versa.
-        // It's still ugly because pre_update does more than just updating physics
-        // and post_update also gets called twice which means a lot of work is done
-        // twice per frame unnecessarily but at least those other things don't affect gameplay.
+        // LATER read these (again), verify what works best in practise:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
-        let old_name = debug::details::endpoint_name();
+        let game_time_target = self.real_time();
 
-        let target = self.real_time();
-        if let Some(sg) = &mut self.sg {
-            debug::details::set_endpoint("locl");
-            self.engine.scenes[sg.gs.scene_handle].enabled = false;
+        // LATER Abstract game loop logic and merge with server
+        let dt = 1.0 / 60.0;
+        while self.gs.game_time + dt < game_time_target {
+            self.gs.game_time_prev = self.gs.game_time;
+            self.gs.game_time += dt;
+            self.gs.frame_number += 1;
+
+            // LATER Check order of cl and sv stuff for minimum latency.
+            // LATER change endpoint name for parts to locl/losv?
+
+            self.cfd().tick_begin_frame();
+            self.sfd().map(|mut sfd| sfd.tick_begin_frame());
+
+            self.fd().tick_before_physics(dt);
+
+            self.cfd().tick_before_physics(dt);
+
+            // Update animations, transformations, physics, ...
+            // Dummy control flow and lag since we don't use fyrox plugins.
+            let mut cf = fyrox::event_loop::ControlFlow::Poll;
+            let mut lag = 0.0;
+            self.engine.pre_update(dt, &mut cf, &mut lag);
+            // Sanity check - if the engine starts doing something with these, we'll know.
+            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
+            assert_eq!(lag, 0.0);
+
+            // `tick_after_physics` tells the engine to draw debug shapes and text.
+            // Any debug calls after it will show up next frame.
+            self.fd().debug_engine_updates(v!(-5 3 3));
+            self.cfd().tick_after_physics(dt);
+            self.fd().debug_engine_updates(v!(-6 3 3));
+
+            // `sys_send_update` sends debug shapes and text to client.
+            // Any debug calls after it will show up next frame.
+            self.fd().debug_engine_updates(v!(-5 5 3));
+            self.sfd().map(|mut sfd| sfd.sys_send_update());
+            self.fd().debug_engine_updates(v!(-6 5 3));
+
+            // Update UI
+            self.engine.post_update(dt);
         }
 
-        self.cg.update(&self.cvars, &mut self.engine, target);
+        self.engine.get_window().request_redraw();
+    }
 
-        // New target time because:
-        //  - We want to run as much forward as we can.
-        //  - When using separate processes, cl and sv need to synchronize their game_time.
-        //    This forces us to do it even locally and therefore test that it works properly.
-        let target = self.real_time();
-        if let Some(sg) = &mut self.sg {
-            debug::details::set_endpoint("losv");
-            self.engine.scenes[self.cg.gs.scene_handle].enabled = false;
-            self.engine.scenes[sg.gs.scene_handle].enabled = true;
-            sg.update(&self.cvars, &mut self.engine, target);
+    fn sfd(&mut self) -> Option<ServerFrameData> {
+        self.sg.as_mut().map(|sg| ServerFrameData {
+            cvars: &self.cvars,
+            scene: &mut self.engine.scenes[self.gs.scene_handle],
+            gs: &mut self.gs,
+            sg,
+        })
+    }
 
-            // The client scene has to be reenabled here, not before running `cg.update()`,
-            // so that it gets rendered.
-            self.engine.scenes[self.cg.gs.scene_handle].enabled = true;
+    fn cfd(&mut self) -> ClientFrameData {
+        ClientFrameData {
+            cvars: &self.cvars,
+            scene: &mut self.engine.scenes[self.gs.scene_handle],
+            gs: &mut self.gs,
+            cg: &mut self.cg,
+            renderer: &mut self.engine.renderer,
+            ui: &mut self.engine.user_interface,
         }
+    }
 
-        debug::details::set_endpoint(old_name);
+    fn fd(&mut self) -> FrameData {
+        FrameData {
+            cvars: &self.cvars,
+            scene: &mut self.engine.scenes[self.gs.scene_handle],
+            gs: &mut self.gs,
+        }
     }
 
     pub(crate) fn loop_destroyed(&self) {

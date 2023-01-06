@@ -36,8 +36,13 @@ pub(crate) use fyrox::{
 pub(crate) use inline_tweak::tweak;
 
 pub(crate) use crate::{
-    common::trace::{trace_line, TraceOptions},
+    client::game::ClientFrameData,
+    common::{
+        trace::{trace_line, TraceOptions},
+        FrameData, GameState, GameStateType,
+    },
     cvars::Cvars,
+    server::game::ServerFrameData,
 };
 
 // Visibility of macros by example works diffrently from normal items,

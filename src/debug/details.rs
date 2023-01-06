@@ -233,7 +233,7 @@ fn endpoint_to_color(name: &'static str) -> Color {
     match name {
         "sv" | "losv" => GREEN,
         "cl" | "locl" => RED,
-        "lo" => BLUE2,
+        "lo" => CYAN,
         _ => WHITE,
     }
 }

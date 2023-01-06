@@ -1,6 +1,8 @@
 //! This file contains entry points and event loops for the native client and server.
 //! If you're looking for the main _game_ loops, it's in ClientProcess and ServerProcess.
 
+#![allow(clippy::option_map_unit_fn)] // Map is sometimes more readable.
+
 // Keep this first so the macros are available everywhere without having to import them.
 #[macro_use]
 pub(crate) mod debug;

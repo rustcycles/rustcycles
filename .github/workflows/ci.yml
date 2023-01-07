@@ -9,6 +9,8 @@ on:
     # Runs at 15:00 UTC on Fri
     - cron: "0 15 * * 5"
   workflow_dispatch:
+    # This allows running it on any branch manually:
+    # https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
 
 env:
   CARGO_TERM_COLOR: always
@@ -63,7 +65,7 @@ jobs:
       - run: cargo fmt --version
       - run: cargo fmt -- --check
 
-  clippy:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Install linux deps
@@ -75,8 +77,15 @@ jobs:
         # Use --all-targets to also check tests.
         # Note that --all-features doesn't check all code when something is *disabled* by a feature.
       - run: cargo clippy --all-targets --all-features -- --deny warnings
-        # No fixmes allowed - they're to be fixed before committing or at least before merging to master.
-        # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).
+        # No fixmes allowed - they're to be fixed before committing
+        # or at least before merging to master so they can be used
+        # during development for things that must not be forgotten
+        # and grep's output is not littered with other people's fixmes.
+        #
         # Grep returns success when found and failure when not found, `!` inverts success/failure.
-        # The `[F]` is the usualy trick to avoid matching this line itself.
+        # The `[F]` is the usual trick to avoid matching this line itself
+        # while still matching other potential uses in this file.
       - run: "! ( grep --recursive --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )"
+        # Similar as above - cvars like d_dbg* should not be committed to master
+        # so they're available to be used by other devs.
+      - run: "! ( grep --recursive --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo 'The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?' )"

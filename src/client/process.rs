@@ -578,9 +578,10 @@ mod scan_codes {
     use fyrox::event::ScanCode;
 
     // Apparently there are different numbering schemes all called "scancodes".
-    // This image is the least inaccurate for the one in winit (on Kubuntu 22.04):
+    // This image is the least inaccurate for the one in winit (on Kubuntu 22.04 if that matters):
     // https://forum.thegamecreators.com/thread/145420
-    // Note that many keys are different (e.g. R_ALT, KP_ENTER, arrows, ...).
+    // Note that many keys are different (e.g. R_ALT, KP_ENTER, arrows, ...),
+    // this is just to get a vague idea how it looks.
 
     pub(crate) const ESC: ScanCode = 1;
     pub(crate) const NUM1: ScanCode = 2;

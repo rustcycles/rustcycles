@@ -218,20 +218,6 @@ impl ClientProcess {
         // NOTE: This event is repeated if the key is held, that means
         // there can be more `state: Pressed` events before a `state: Released`.
 
-        // Use scancodes, not virtual keys, because they don't depend on layout.
-        // This is problematic in other ways so here's a bunch of issues to follow:
-        // https://github.com/rust-windowing/winit/issues/732:
-        //  From my testing on Windows and Linux the letter/punctuation keys, number keys,
-        //  function keys, and escape, space, shift, enter, tab, backspace, and caps keys
-        //  are all identical across both platforms, but various other keys
-        //  (such as arrow keys) weren't consistent.
-        // https://github.com/rust-windowing/winit/issues/2436:
-        //  Expose ScanCode to VirtualKeyCode mapping
-        // https://github.com/bevyengine/bevy/discussions/2386:
-        //  Naming problems: KeyboardInput Scancodes/Virtual Scancodes
-        // https://github.com/bevyengine/bevy/issues/2052
-        //  Improve keyboard input with Input<ScanCode>
-
         if self.cvars.d_events && self.cvars.d_events_keyboard_input {
             dbg_logf!("{} keyboard_input: {:?}", self.real_time(), input);
         }
@@ -566,6 +552,26 @@ impl ClientProcess {
 /// Layout independant scancodes.
 ///
 /// This is a separate mod so you can glob-import it.
+///
+/// We use scancodes, not virtual key codes, because they don't depend on layout.
+/// This is problematic in other ways:
+/// - They might not be consistent across platforms and vendors.
+/// - We currently have no way to map scan codes to a layout _dependant_ key names
+///   for displaying in the UI.
+///
+/// Here's a bunch of issues to follow:
+/// - https://github.com/rust-windowing/winit/issues/732:
+///   - Improving Scan Code and General Keyboard Layout Handling
+///   - From my testing on Windows and Linux the letter/punctuation keys, number keys,
+///     function keys, and escape, space, shift, enter, tab, backspace, and caps keys
+///     are all identical across both platforms, but various other keys
+///     (such as arrow keys) weren't consistent.
+/// - https://github.com/rust-windowing/winit/issues/2436:
+///   - Expose ScanCode to VirtualKeyCode mapping
+/// - https://github.com/rust-windowing/winit/issues/1806
+///   - Meta Issue: Keyboard input
+/// - https://github.com/bevyengine/bevy/discussions/2386:
+///   - Naming problems: KeyboardInput Scancodes/Virtual Scancodes
 #[rustfmt::skip]
 // ...and also so I can stop rustfmt from mangling it.
 // Seriously, remove #[rustfmt::skip] and see what it does, I dare you.

@@ -82,6 +82,8 @@ pub struct Cvars {
     pub d_exit_after_one_frame: bool,
     pub d_exit_on_unknown_cvar: bool,
 
+    pub d_physics_extra_sync: bool,
+
     /// The seed to initialize the RNG.
     ///
     /// This is not very helpful by itself because by the time you can change cvars in the console,
@@ -173,6 +175,8 @@ impl Default for Cvars {
 
             d_exit_after_one_frame: false,
             d_exit_on_unknown_cvar: true,
+
+            d_physics_extra_sync: false,
 
             d_seed: 0,
 

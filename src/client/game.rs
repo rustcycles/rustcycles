@@ -425,7 +425,7 @@ impl ClientFrameData<'_> {
     }
 
     pub(crate) fn tick_after_physics(&mut self, dt: f32) {
-        if self.cvars.d_dbg {
+        if self.cvars.d_physics_extra_sync {
             self.scene.graph.update_hierarchical_data();
         }
 

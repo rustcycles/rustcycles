@@ -569,8 +569,8 @@ impl ClientProcess {
 #[rustfmt::skip]
 // ...and also so I can stop rustfmt from mangling it.
 // Seriously, remove #[rustfmt::skip] and see what it does, I dare you.
-// I've never seen anybody ever format comments like that
-// and rustfmt does it by default without a way to disable it.
+// I've never seen anybody *ever* format comments like that
+// and rustfmt does it *by default* without a way to disable it.
 // I. Just. Hate. It.
 mod scan_codes {
     #![allow(dead_code)]

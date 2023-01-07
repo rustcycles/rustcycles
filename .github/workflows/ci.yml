@@ -88,4 +88,4 @@ jobs:
       - run: "! ( grep --recursive --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' )"
         # Similar as above - cvars like d_dbg* should not be committed to master
         # so they're available to be used by other devs.
-      - run: "! ( grep --recursive --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo 'The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?' )"
+      - run: "! ( grep --recursive --exclude-dir=target --exclude=debug.rs 'cvars\.d_dbg' . && echo 'The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?' )"

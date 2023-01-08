@@ -218,6 +218,23 @@ pub(crate) const CYAN: Color = Color::opaque(0, 255, 255);
 pub(crate) const IG_ENTITIES: BitMask = BitMask(1 << 0);
 pub(crate) const IG_ALL: BitMask = BitMask(u32::MAX);
 
+pub(crate) trait PoolExt<T> {
+    /// Collect the handles into a `Vec`.
+    ///
+    /// This is a workaround for borrowck limitations so we can
+    /// iterate over the pool without keeping it borrowed.
+    /// You can reborrow each iteration of the loop by indexing the pool using the handle
+    /// and release the borrow if you need to pass the pool (or usually whole `FrameData`)
+    /// into another function.
+    fn iter_handles(&self) -> Vec<Handle<T>>;
+}
+
+impl<T: 'static> PoolExt<T> for Pool<T> {
+    fn iter_handles(&self) -> Vec<Handle<T>> {
+        self.pair_iter().map(|(h, _)| h).collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

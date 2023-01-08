@@ -166,7 +166,6 @@ impl FrameData<'_> {
         }
 
         // LATER Split into functions
-        // LATER iter_handles()?
         let mut free = None;
         'outer: for (proj_handle, proj) in self.gs.projectiles.pair_iter_mut() {
             if proj.time_fired + self.cvars.g_projectile_lifetime < self.gs.game_time {

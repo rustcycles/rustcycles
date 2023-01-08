@@ -166,10 +166,10 @@ impl FrameData<'_> {
         }
 
         // LATER Split into functions
-        let mut free = None;
-        'outer: for (proj_handle, proj) in self.gs.projectiles.pair_iter_mut() {
+        let mut free = Vec::new();
+        for (proj_handle, proj) in self.gs.projectiles.pair_iter_mut() {
             if proj.time_fired + self.cvars.g_projectile_lifetime < self.gs.game_time {
-                free = Some(proj_handle);
+                free.push(proj_handle);
                 continue;
             }
 
@@ -186,8 +186,8 @@ impl FrameData<'_> {
 
                 // Free projectile
                 dbg_cross!(hit.position.coords, 0.5);
-                free = Some(proj_handle);
-                break 'outer;
+                free.push(proj_handle);
+                break;
             }
 
             let step_norm = step.normalize();
@@ -195,7 +195,7 @@ impl FrameData<'_> {
 
             proj.pos += step;
         }
-        if let Some(handle) = free {
+        for handle in free {
             self.gs.projectiles.free(handle);
         }
 

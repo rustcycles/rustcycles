@@ -15,7 +15,7 @@ use crate::{
     prelude::*,
 };
 
-/// A game server. Could be dedicated or a listen server.
+/// A game server. Could be a dedicated or a listen server.
 ///
 /// Lets clients connect to play.
 pub(crate) struct ServerGame {

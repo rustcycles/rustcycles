@@ -352,7 +352,7 @@ impl ClientFrameData<'_> {
                 delta += -up * dt * self.cvars.cl_camera_speed;
             }
 
-            let hits = trace_line(self.scene, camera_pos_old, delta, trace_opts);
+            let hits = self.fd().trace_line(camera_pos_old, delta, trace_opts);
             let new_pos = hits[0].position.coords;
             self.scene.graph[self.cg.camera_handle]
                 .local_transform_mut()
@@ -361,8 +361,8 @@ impl ClientFrameData<'_> {
             let up = UP * self.cvars.cl_camera_3rd_person_up;
             let back = cam_rot * BACK * self.cvars.cl_camera_3rd_person_back;
 
-            let hits = trace_line(self.scene, player_cycle_pos, up, trace_opts);
-            let hits = trace_line(self.scene, hits[0].position, back, trace_opts);
+            let hits = self.fd().trace_line(player_cycle_pos, up, trace_opts);
+            let hits = self.fd().trace_line(hits[0].position, back, trace_opts);
             let new_pos = hits[0].position.coords;
             self.scene.graph[self.cg.camera_handle]
                 .local_transform_mut()
@@ -393,7 +393,7 @@ impl ClientFrameData<'_> {
         }
 
         // LATER Intersect with each pole (currently it probably assumes they're all one object)
-        let hits = trace_line(self.scene, 0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
+        let hits = self.fd().trace_line(0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
         for hit in hits {
             dbg_cross!(hit.position.coords, 0.0);
         }

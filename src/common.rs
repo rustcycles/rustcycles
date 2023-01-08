@@ -175,7 +175,7 @@ impl FrameData<'_> {
 
             let step = proj.vel * dt;
 
-            let hits = trace_line(self.scene, proj.pos, step, Default::default());
+            let hits = trace_line(self.cvars, self.scene, proj.pos, step, Default::default());
             for hit in hits {
                 let cycle_handle = self.gs.players[proj.player_handle].cycle_handle.unwrap();
                 let cycle_collider_handle = self.gs.cycles[cycle_handle].collider_handle;

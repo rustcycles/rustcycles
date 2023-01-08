@@ -104,6 +104,11 @@ pub struct Cvars {
     /// 2 is very noticeable, 5 is better, 10 is only noticeable at high speeds.
     /// It never completely goes away, even with 100.
     pub g_physics_max_ccd_substeps: u32,
+    /// How far to go back when doing raycasts to avoid entering objects
+    /// due to floating point errors.
+    ///
+    /// Nudging should enabled by default because it's easy to forget
+    /// and usually this is what we want for most traces anyway.
     pub g_physics_nudge: f32,
 
     pub g_projectile_lifetime: f32,

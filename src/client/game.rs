@@ -414,14 +414,14 @@ impl ClientFrameData<'_> {
 
         dbg_cross!(v!(15 5 5), 0.0, CYAN);
 
-        dbg_rot!(v!(10 5 5), UnitQuaternion::default());
-
         dbg_arrow!(v!(15 10 5), v!(0 0 2), 0.0, GREEN);
         dbg_arrow!(v!(15 10 5), v!(0 0.01 2), 0.0, RED);
         dbg_arrow!(v!(15 11 5), v!(0 0 2), 0.0, RED);
         dbg_arrow!(v!(15 11 5), v!(0 0.01 2), 0.0, GREEN);
         dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, RED);
         dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, GREEN);
+
+        dbg_rot!(v!(10 5 5), UnitQuaternion::default());
     }
 
     pub(crate) fn tick_after_physics(&mut self, dt: f32) {

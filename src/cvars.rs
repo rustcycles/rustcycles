@@ -197,7 +197,7 @@ impl Default for Cvars {
 
             g_projectile_lifetime: 60.0,
             g_projectile_refire: 0.05,
-            g_projectile_speed: 50.0,
+            g_projectile_speed: 75.0,
             g_projectile_spread: 0.2,
 
             g_wheel_acceleration: 20.0,

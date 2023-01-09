@@ -262,7 +262,7 @@ impl ClientProcess {
 
     fn open_console(&mut self) {
         self.console.open(&mut self.engine.user_interface, self.mouse_grabbed);
-        self.cg.lp.input.release_all_keys();
+        self.cg.input.release_all_keys();
         self.set_mouse_grab(false);
     }
 
@@ -278,27 +278,27 @@ impl ClientProcess {
         let pressed = input.state == ElementState::Pressed;
 
         match input.scancode {
-            W => self.cg.lp.input.forward = pressed,
-            A => self.cg.lp.input.left = pressed,
-            S => self.cg.lp.input.backward = pressed,
-            D => self.cg.lp.input.right = pressed,
-            SPACE => self.cg.lp.input.up = pressed,
-            L_SHIFT => self.cg.lp.input.down = pressed,
-            Q => self.cg.lp.input.prev_weapon = pressed,
-            E => self.cg.lp.input.next_weapon = pressed,
-            R => self.cg.lp.input.reload = pressed,
-            F => self.cg.lp.input.flag = pressed,
-            G => self.cg.lp.input.grenade = pressed,
-            M => self.cg.lp.input.map = pressed,
-            TAB => self.cg.lp.input.score = pressed,
-            ENTER => self.cg.lp.input.chat = pressed,
-            PAUSE => self.cg.lp.input.pause = pressed,
-            F12 => self.cg.lp.input.screenshot = pressed,
+            W => self.cg.input.forward = pressed,
+            A => self.cg.input.left = pressed,
+            S => self.cg.input.backward = pressed,
+            D => self.cg.input.right = pressed,
+            SPACE => self.cg.input.up = pressed,
+            L_SHIFT => self.cg.input.down = pressed,
+            Q => self.cg.input.prev_weapon = pressed,
+            E => self.cg.input.next_weapon = pressed,
+            R => self.cg.input.reload = pressed,
+            F => self.cg.input.flag = pressed,
+            G => self.cg.input.grenade = pressed,
+            M => self.cg.input.map = pressed,
+            TAB => self.cg.input.score = pressed,
+            ENTER => self.cg.input.chat = pressed,
+            PAUSE => self.cg.input.pause = pressed,
+            F12 => self.cg.input.screenshot = pressed,
             _ => (),
         }
 
-        self.cg.lp.input.real_time = self.real_time();
-        self.cg.lp.input.game_time = self.gs.game_time;
+        self.cg.input.real_time = self.real_time();
+        self.cg.input.game_time = self.gs.game_time;
         self.cg.send_input();
     }
 
@@ -312,9 +312,9 @@ impl ClientProcess {
         // if let MouseScrollDelta::LineDelta(_, y) = delta {
         //     // Scrolling seems to always produce only 1 or -1.
         //     if y == 1.0 {
-        //         // self.cg.lp.input.next_weapon
+        //         // self.cg.input.next_weapon
         //     } else if y == -1.0 {
-        //         // self.cg.lp.input.prev_weapon
+        //         // self.cg.input.prev_weapon
         //     }
         // }
     }
@@ -329,16 +329,16 @@ impl ClientProcess {
 
             let pressed = state == ElementState::Pressed;
             match button {
-                MouseButton::Left => self.cg.lp.input.fire1 = pressed,
-                MouseButton::Right => self.cg.lp.input.fire2 = pressed,
-                MouseButton::Middle => self.cg.lp.input.zoom = pressed,
-                MouseButton::Other(8) => self.cg.lp.input.marker1 = pressed,
-                MouseButton::Other(9) => self.cg.lp.input.marker2 = pressed,
+                MouseButton::Left => self.cg.input.fire1 = pressed,
+                MouseButton::Right => self.cg.input.fire2 = pressed,
+                MouseButton::Middle => self.cg.input.zoom = pressed,
+                MouseButton::Other(8) => self.cg.input.marker1 = pressed,
+                MouseButton::Other(9) => self.cg.input.marker2 = pressed,
                 MouseButton::Other(_) => {}
             }
 
-            self.cg.lp.input.real_time = self.real_time();
-            self.cg.lp.input.game_time = self.gs.game_time;
+            self.cg.input.real_time = self.real_time();
+            self.cg.input.game_time = self.gs.game_time;
             self.cg.send_input();
         }
     }
@@ -406,7 +406,7 @@ impl ClientProcess {
         // based on real time from last event. Instead, save the cumulative delta
         // and update angles/speeds once per frame.
 
-        let zoom_factor = if self.cg.lp.input.zoom {
+        let zoom_factor = if self.cg.input.zoom {
             self.cvars.cl_zoom_factor
         } else {
             1.0
@@ -418,8 +418,8 @@ impl ClientProcess {
         let delta_yaw = -delta.0 as f32 * sens_h / zoom_factor;
         let delta_pitch = delta.1 as f32 * sens_v / zoom_factor;
 
-        self.cg.lp.delta_yaw += delta_yaw;
-        self.cg.lp.delta_pitch += delta_pitch;
+        self.cg.delta_yaw += delta_yaw;
+        self.cg.delta_pitch += delta_pitch;
     }
 
     pub(crate) fn ui_message(&mut self, msg: &UiMessage) {

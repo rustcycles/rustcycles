@@ -33,9 +33,13 @@ use crate::{
 /// which might not be entirely accurate due to network lag and packet loss.
 pub(crate) struct ClientGame {
     debug_text: Handle<UiNode>,
-    pub(crate) lp: LocalPlayer,
-    pub(crate) camera_handle: Handle<Node>,
     conn: Box<dyn Connection>,
+    pub(crate) camera_handle: Handle<Node>,
+    pub(crate) player_handle: Handle<Player>,
+    pub(crate) delta_yaw: f32,
+    pub(crate) delta_pitch: f32,
+    pub(crate) input: Input,
+    pub(crate) input_prev: Input,
 }
 
 /// All data necessary to run a frame of client-side game logic in one convenient package.
@@ -84,7 +88,7 @@ impl ClientGame {
         let mut data = FrameData { cvars, scene, gs };
 
         let mut init_attempts = 0;
-        let local_player_handle = loop {
+        let player_handle = loop {
             init_attempts += 1;
             let (msg, closed) = conn.receive_one_sm();
             if closed {
@@ -104,19 +108,22 @@ impl ClientGame {
             }
             thread::sleep(Duration::from_millis(10));
         };
-        dbg_logf!("local_player_index is {}", local_player_handle.index());
+        dbg_logf!("local player_index is {}", player_handle.index());
 
-        let lp = LocalPlayer::new(local_player_handle);
         Self {
             debug_text,
-            lp,
-            camera_handle,
             conn,
+            camera_handle,
+            player_handle,
+            delta_yaw: 0.0,
+            delta_pitch: 0.0,
+            input: Input::default(),
+            input_prev: Input::default(),
         }
     }
 
     pub(crate) fn send_input(&mut self) {
-        self.network_send(ClientMessage::Input(self.lp.input));
+        self.network_send(ClientMessage::Input(self.input));
     }
 
     fn network_send(&mut self, msg: ClientMessage) {
@@ -181,19 +188,19 @@ impl ClientFrameData<'_> {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
-        self.cg.lp.input_prev = self.cg.lp.input;
+        self.cg.input_prev = self.cg.input;
 
-        self.cg.lp.input.yaw.0 += self.cg.lp.delta_yaw; // LATER Normalize to [0, 360°) or something
-        self.cg.lp.input.pitch.0 = (self.cg.lp.input.pitch.0 + self.cg.lp.delta_pitch)
+        self.cg.input.yaw.0 += self.cg.delta_yaw; // LATER Normalize to [0, 360°) or something
+        self.cg.input.pitch.0 = (self.cg.input.pitch.0 + self.cg.delta_pitch)
             .clamp(self.cvars.m_pitch_min, self.cvars.m_pitch_max);
 
         let delta_time = self.gs.game_time - self.gs.game_time_prev;
         soft_assert!(delta_time > 0.0);
-        self.cg.lp.input.yaw_speed.0 = self.cg.lp.delta_yaw / delta_time;
-        self.cg.lp.input.pitch_speed.0 = self.cg.lp.delta_pitch / delta_time;
+        self.cg.input.yaw_speed.0 = self.cg.delta_yaw / delta_time;
+        self.cg.input.pitch_speed.0 = self.cg.delta_pitch / delta_time;
 
-        self.cg.lp.delta_yaw = 0.0;
-        self.cg.lp.delta_pitch = 0.0;
+        self.cg.delta_yaw = 0.0;
+        self.cg.delta_pitch = 0.0;
 
         self.cg.send_input();
 
@@ -298,24 +305,24 @@ impl ClientFrameData<'_> {
 
     pub(crate) fn tick_before_physics(&mut self, dt: f32) {
         // Join / spec
-        let ps = self.gs.players[self.cg.lp.player_handle].ps;
-        if ps == PlayerState::Observing && self.cg.lp.input.fire1 {
+        let ps = self.gs.players[self.cg.player_handle].ps;
+        if ps == PlayerState::Observing && self.cg.input.fire1 {
             self.cg.network_send(ClientMessage::Join);
-        } else if ps == PlayerState::Playing && self.cg.lp.input.fire2 {
+        } else if ps == PlayerState::Playing && self.cg.input.fire2 {
             self.cg.network_send(ClientMessage::Observe);
         }
 
-        let player_cycle_handle = self.gs.players[self.cg.lp.player_handle].cycle_handle.unwrap();
+        let player_cycle_handle = self.gs.players[self.cg.player_handle].cycle_handle.unwrap();
         let player_body_handle = self.gs.cycles[player_cycle_handle].body_handle;
         let player_cycle_pos = **self.scene.graph[player_body_handle].local_transform().position();
 
         let camera = &mut self.scene.graph[self.cg.camera_handle];
 
         // Camera turning
-        let yaw_angle = self.cg.lp.input.yaw.0.to_radians();
+        let yaw_angle = self.cg.input.yaw.0.to_radians();
         let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
 
-        let pitch_angle = self.cg.lp.input.pitch.0.to_radians();
+        let pitch_angle = self.cg.input.pitch.0.to_radians();
         let pitch_axis = yaw * LEFT_AXIS;
         let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
 
@@ -333,22 +340,22 @@ impl ClientFrameData<'_> {
             let left = camera.left_vec_normed();
             let up = camera.up_vec_normed();
             let mut delta = Vec3::zeros();
-            if self.cg.lp.input.forward {
+            if self.cg.input.forward {
                 delta += forward * dt * self.cvars.cl_camera_speed;
             }
-            if self.cg.lp.input.backward {
+            if self.cg.input.backward {
                 delta += -forward * dt * self.cvars.cl_camera_speed;
             }
-            if self.cg.lp.input.left {
+            if self.cg.input.left {
                 delta += left * dt * self.cvars.cl_camera_speed;
             }
-            if self.cg.lp.input.right {
+            if self.cg.input.right {
                 delta += -left * dt * self.cvars.cl_camera_speed;
             }
-            if self.cg.lp.input.up {
+            if self.cg.input.up {
                 delta += up * dt * self.cvars.cl_camera_speed;
             }
-            if self.cg.lp.input.down {
+            if self.cg.input.down {
                 delta += -up * dt * self.cvars.cl_camera_speed;
             }
 
@@ -374,7 +381,7 @@ impl ClientFrameData<'_> {
         // Camera zoom
         let camera = self.scene.graph[self.cg.camera_handle].as_camera_mut();
         if let Projection::Perspective(perspective) = camera.projection_mut() {
-            let zoom_factor = if self.cg.lp.input.zoom {
+            let zoom_factor = if self.cg.input.zoom {
                 self.cvars.cl_zoom_factor
             } else {
                 1.0
@@ -493,30 +500,5 @@ impl ClientFrameData<'_> {
         ));
 
         debug::details::clear_expired();
-    }
-}
-
-/// State of the local player
-///
-/// LATER maybe just merge into ClientGame?
-#[derive(Debug)]
-pub(crate) struct LocalPlayer {
-    pub(crate) player_handle: Handle<Player>,
-    pub(crate) delta_yaw: f32,
-    pub(crate) delta_pitch: f32,
-    pub(crate) input: Input,
-    pub(crate) input_prev: Input,
-}
-
-impl LocalPlayer {
-    pub(crate) fn new(player_handle: Handle<Player>) -> Self {
-        Self {
-            player_handle,
-            delta_yaw: 0.0,
-            delta_pitch: 0.0,
-            // LATER real_time should not be 0 if it's not the first match in the same process?
-            input: Input::default(),
-            input_prev: Input::default(),
-        }
     }
 }

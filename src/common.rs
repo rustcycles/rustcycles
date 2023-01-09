@@ -283,6 +283,8 @@ impl FrameData<'_> {
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub(crate) struct Input {
     /// LATER This should probably never be networked, since cl and sv have different time.
+    /// LATER Default impl - should not be 0 if it's not the first match
+    ///       in the same process - remove this entirely?
     pub(crate) real_time: f32,
 
     /// LATER specify whether this is the current or prev or next frame,

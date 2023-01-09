@@ -45,6 +45,7 @@ pub(crate) struct Cycle {
     pub(crate) player_handle: Handle<Player>,
     pub(crate) body_handle: Handle<Node>,
     pub(crate) collider_handle: Handle<Node>,
+    pub(crate) time_last_fired: f32,
 }
 
 #[derive(Debug)]

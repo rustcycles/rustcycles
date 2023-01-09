@@ -121,7 +121,7 @@ impl FrameData<'_> {
         self.scene.graph.physics.integration_parameters.max_ccd_substeps =
             self.cvars.g_physics_max_ccd_substeps;
 
-        for cycle in &self.gs.cycles {
+        for cycle in &mut self.gs.cycles {
             let player = &self.gs.players[cycle.player_handle];
 
             let playing = player.ps == PlayerState::Playing;
@@ -158,7 +158,9 @@ impl FrameData<'_> {
             //  https://www.rapier.rs/docs/user_guides/rust/rigid_bodies/#forces-and-impulses
             body.local_transform_mut().set_rotation(rot);
 
-            if input.fire1 {
+            if input.fire1
+                && cycle.time_last_fired + self.cvars.g_projectile_refire < self.gs.game_time
+            {
                 let forward = dir * self.cvars.g_projectile_speed;
                 let rand = Vec3::new(
                     self.gs.rng.sample(StandardNormal),
@@ -173,6 +175,8 @@ impl FrameData<'_> {
                     vel: forward + spread,
                     time_fired: self.gs.game_time,
                 });
+
+                cycle.time_last_fired = self.gs.game_time;
             }
         }
 
@@ -251,6 +255,7 @@ impl FrameData<'_> {
             player_handle,
             body_handle,
             collider_handle,
+            time_last_fired: 0.0,
         };
         let cycle_handle = if let Some(index) = cycle_index {
             self.gs.cycles.spawn_at(index, cycle).unwrap()

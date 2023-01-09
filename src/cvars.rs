@@ -112,6 +112,7 @@ pub struct Cvars {
     pub g_physics_nudge: f32,
 
     pub g_projectile_lifetime: f32,
+    pub g_projectile_refire: f32,
     pub g_projectile_speed: f32,
     pub g_projectile_spread: f32,
 
@@ -195,6 +196,7 @@ impl Default for Cvars {
             g_physics_nudge: 0.01,
 
             g_projectile_lifetime: 60.0,
+            g_projectile_refire: 0.05,
             g_projectile_speed: 50.0,
             g_projectile_spread: 0.2,
 

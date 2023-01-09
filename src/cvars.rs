@@ -113,6 +113,7 @@ pub struct Cvars {
 
     pub g_projectile_lifetime: f32,
     pub g_projectile_speed: f32,
+    pub g_projectile_spread: f32,
 
     pub g_wheel_acceleration: f32,
 
@@ -195,6 +196,7 @@ impl Default for Cvars {
 
             g_projectile_lifetime: 60.0,
             g_projectile_speed: 50.0,
+            g_projectile_spread: 0.2,
 
             g_wheel_acceleration: 20.0,
 

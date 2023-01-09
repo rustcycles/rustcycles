@@ -44,6 +44,7 @@ pub(crate) struct GameState {
 
     pub(crate) scene_handle: Handle<Scene>,
     cycle_model: Model,
+
     pub(crate) players: Pool<Player>,
     pub(crate) cycles: Pool<Cycle>,
     pub(crate) projectiles: Pool<Projectile>,
@@ -158,10 +159,18 @@ impl FrameData<'_> {
             body.local_transform_mut().set_rotation(rot);
 
             if input.fire1 {
+                let forward = dir * self.cvars.g_projectile_speed;
+                let rand = Vec3::new(
+                    self.gs.rng.sample(StandardNormal),
+                    self.gs.rng.sample(StandardNormal),
+                    self.gs.rng.sample(StandardNormal),
+                );
+                let spread = rand * self.cvars.g_projectile_spread;
+
                 let _ = self.gs.projectiles.spawn(Projectile {
                     player_handle: cycle.player_handle,
                     pos: **body.local_transform().position(),
-                    vel: dir * self.cvars.g_projectile_speed,
+                    vel: forward + spread,
                     time_fired: self.gs.game_time,
                 });
             }

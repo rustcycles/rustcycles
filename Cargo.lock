@@ -1980,6 +1980,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rand_distr"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32cb0b9bc82b0a0876c2dd994a7e7a2683d3e7390ca40e6886785ef0c7e3ee31"
+dependencies = [
+ "num-traits 0.2.15",
+ "rand",
+]
+
+[[package]]
 name = "rand_xoshiro"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2155,6 +2165,7 @@ dependencies = [
  "fyrox",
  "inline_tweak",
  "rand",
+ "rand_distr",
  "rand_xoshiro",
  "serde",
  "strum",

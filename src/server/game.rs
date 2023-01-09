@@ -30,7 +30,7 @@ pub(crate) struct ServerGame {
 ///
 /// Note that this struct can't just _contain_ FrameData and deref into it
 /// because Deref borrows self as a whole so it would be impossible
-/// to access multiple ields mutable at the same time.
+/// to access multiple fields mutably at the same time.
 ///
 /// LATER Unsafe Deref? Same on client.
 pub(crate) struct ServerFrameData<'a> {

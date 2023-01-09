@@ -60,6 +60,8 @@ pub(crate) enum GameStateType {
 ///
 /// It could be all passed as separate arguments to the functions that need it,
 /// but this is more ergonomic.
+///
+/// This struct and {Client,Server}FrameData are meant to have impl blocks throughout the codebase.
 pub(crate) struct FrameData<'a> {
     pub(crate) cvars: &'a Cvars,
     // We have two choices here:

@@ -124,7 +124,7 @@ impl FrameData<'_> {
         P: Into<Point3>,
     {
         let ray_origin = ray_origin.into();
-        trace_line_inner(&self.cvars, &self.scene, ray_origin, ray_direction, options)
+        trace_line_inner(self.cvars, self.scene, ray_origin, ray_direction, options)
     }
 }
 

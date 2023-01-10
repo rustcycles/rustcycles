@@ -7,10 +7,13 @@ resolver = "2"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 
 [profile.dev]
-# Abort on panic might be a better default:
-# https://vorner.github.io/2018/07/22/dont_panic.html
+# Abort on panic might be a better default: https://vorner.github.io/2018/07/22/dont_panic.html
 # This makes backtraces useless, see .cargo/config-example.toml for a fix.
-panic = "abort"
+# It also means that tests need a separate build of all deps because they use unwinding,
+# though at least cargo build and test can coexist so alternating between them won't cause a full build each time.
+# Seems to have no impact on incremental compile times.
+# Keep "unwind" in debug mode so we can use tests more easily.
+#panic = "abort"
 opt-level = 1 # Can be changed without recompiling all deps
 
 [profile.dev.package."*"]
@@ -22,6 +25,8 @@ codegen-units = 1
 debug = false
 
 [profile.release]
+# Using "abort" in release mode might be better because otherwise the program can get stuck
+# if we use threads wrong and crashing is slightly better than getting stuck.
 panic = "abort"
 
 # https://doc.rust-lang.org/cargo/reference/profiles.html#build-dependencies

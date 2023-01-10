@@ -36,11 +36,16 @@ pub(crate) struct GameState {
     pub(crate) frame_number: usize,
 
     /// The RNG for all gamelogic
-    pub rng: Xoshiro256PlusPlus,
+    ///
+    /// TODO Should this even be here? Cl and sv will always desync
+    /// because cl shouldn't run logic for all players (invisible should be culled).
+    /// Even now they desdync because they can shoot for a different number of frames
+    /// (e.g. i think if input arrives a frame late to the server).
+    pub(crate) rng: Xoshiro256PlusPlus,
 
     /// Inclusive range [-1.0, 1.0].
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
-    pub range_uniform11: Uniform<f64>,
+    pub(crate) range_uniform11: Uniform<f64>,
 
     pub(crate) scene_handle: Handle<Scene>,
     cycle_model: Model,
@@ -167,6 +172,7 @@ impl FrameData<'_> {
                     self.gs.rng.sample(StandardNormal),
                     self.gs.rng.sample(StandardNormal),
                 );
+                dbg_logd!(rand);
                 let spread = rand * self.cvars.g_projectile_spread;
 
                 let _ = self.gs.projectiles.spawn(Projectile {
@@ -239,6 +245,7 @@ impl FrameData<'_> {
             .build(&mut self.scene.graph);
         // Slightly randomize spawn pos just to use the RNG
         let left = 3.0 * self.gs.rng.sample(self.gs.range_uniform11);
+        dbg_logd!(left);
         let body_handle = RigidBodyBuilder::new(
             BaseBuilder::new()
                 .with_local_transform(

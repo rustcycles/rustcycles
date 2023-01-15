@@ -484,7 +484,7 @@ impl ClientProcess {
             // Dummy control flow and lag since we don't use fyrox plugins.
             let mut cf = fyrox::event_loop::ControlFlow::Poll;
             let mut lag = 0.0;
-            self.engine.pre_update(dt, &mut cf, &mut lag);
+            self.engine.pre_update(dt, &mut cf, &mut lag, FxHashMap::default());
             // Sanity check - if the engine starts doing something with these, we'll know.
             assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
             assert_eq!(lag, 0.0);

@@ -485,25 +485,32 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cvars"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f38e0641d1103148828aef276ca249d50a905812a7e70f54cc62ccf877a6a53"
 dependencies = [
- "quote",
- "syn",
+ "cvars-macros",
 ]
 
 [[package]]
 name = "cvars-console"
 version = "0.1.0"
-source = "git+https://github.com/martin-t/cvars?rev=ae2e3e59ff06d61c9038f33237ea49d05f91e3b5#ae2e3e59ff06d61c9038f33237ea49d05f91e3b5"
+dependencies = [
+ "cvars",
+]
 
 [[package]]
 name = "cvars-console-fyrox"
 version = "0.1.0"
-source = "git+https://github.com/martin-t/cvars?rev=ae2e3e59ff06d61c9038f33237ea49d05f91e3b5#ae2e3e59ff06d61c9038f33237ea49d05f91e3b5"
 dependencies = [
+ "cvars",
  "cvars-console",
  "fyrox-ui",
+]
+
+[[package]]
+name = "cvars-macros"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -880,8 +887,9 @@ dependencies = [
 
 [[package]]
 name = "fyrox"
-version = "0.28.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c24d77e686d5a87b487dc9bbd95007ba7eab676db697e73817328e613dfab63"
 dependencies = [
  "bitflags",
  "clap",
@@ -912,8 +920,9 @@ dependencies = [
 
 [[package]]
 name = "fyrox-core"
-version = "0.22.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bcc256a059144df15ff61c72a18b57d069bfede95ce342c7a68ee61c3585407"
 dependencies = [
  "arrayvec 0.7.2",
  "base64 0.20.0",
@@ -938,8 +947,9 @@ dependencies = [
 
 [[package]]
 name = "fyrox-core-derive"
-version = "0.17.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf705d096b44cd5a6ceba305220a106ea30042c66b4509192d0de084688397a4"
 dependencies = [
  "convert_case",
  "darling 0.14.2",
@@ -951,16 +961,18 @@ dependencies = [
 
 [[package]]
 name = "fyrox-resource"
-version = "0.6.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83e5ea428a4bf46a8fc0e48bb4c91d0d0f7f34915bb84f1159b06777a6b042df"
 dependencies = [
  "fyrox-core",
 ]
 
 [[package]]
 name = "fyrox-sound"
-version = "0.29.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab745dcacd71f087fb8d2bb64c6031ad3f13fed5e85cccb0ae2ec86fa15db152"
 dependencies = [
  "alsa-sys",
  "core-foundation-sys",
@@ -977,8 +989,9 @@ dependencies = [
 
 [[package]]
 name = "fyrox-ui"
-version = "0.19.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=2537fc1bf5a03dd55c0a2e54bc14a5458d45e724#2537fc1bf5a03dd55c0a2e54bc14a5458d45e724"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "136171abc53b094cbd1c4d0abaaa6f90ea5a29757590a26153391f520312414f"
 dependencies = [
  "copypasta",
  "fontdue",
@@ -986,6 +999,7 @@ dependencies = [
  "fyrox-core",
  "lazy_static",
  "notify",
+ "serde",
  "strum",
  "strum_macros",
  "sysinfo",
@@ -2159,7 +2173,6 @@ version = "0.0.0"
 dependencies = [
  "bincode",
  "cvars",
- "cvars-console",
  "cvars-console-fyrox",
  "fxhash",
  "fyrox",

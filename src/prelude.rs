@@ -11,6 +11,8 @@
 
 use fyrox::{core::algebra::Point, scene::collider::BitMask};
 
+pub(crate) use fxhash::{FxHashMap, FxHashSet};
+
 // Make the most commonly used types available.
 // Criteria for inclusion: used in a lot of files and unlikely to collide.
 pub(crate) use fyrox::{

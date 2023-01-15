@@ -227,7 +227,7 @@ impl FrameData<'_> {
         let player = self.gs.players.free(player_handle);
         if let Some(handle) = player.cycle_handle {
             let cycle = self.gs.cycles.free(handle);
-            self.scene.remove_node(cycle.body_handle);
+            self.scene.graph.remove_node(cycle.body_handle);
         }
     }
 

@@ -37,6 +37,7 @@ pub(crate) use fyrox::{
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub(crate) use inline_tweak::tweak;
 
+pub(crate) use rand::prelude::*;
 pub(crate) use rand_distr::StandardNormal;
 
 pub(crate) use crate::{

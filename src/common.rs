@@ -8,7 +8,7 @@ pub(crate) mod trace;
 use std::fmt::{self, Debug, Display, Formatter};
 
 use fyrox::scene::collider::InteractionGroups;
-use rand::{distributions::Uniform, Rng, SeedableRng};
+use rand::distributions::Uniform;
 use rand_xoshiro::Xoshiro256PlusPlus;
 use serde::{Deserialize, Serialize};
 

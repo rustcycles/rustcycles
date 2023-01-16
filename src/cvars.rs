@@ -212,13 +212,3 @@ impl Default for Cvars {
         }
     }
 }
-
-impl SetGet for Cvars {
-    fn get_string(&self, cvar_name: &str) -> Result<String, String> {
-        self.get_string(cvar_name)
-    }
-
-    fn set_str(&mut self, cvar_name: &str, cvar_value: &str) -> Result<(), String> {
-        self.set_str(cvar_name, cvar_value)
-    }
-}

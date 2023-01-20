@@ -9,7 +9,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use fyrox::{core::algebra::Point, scene::collider::BitMask};
+use fyrox::{core::algebra, scene::collider::BitMask};
 
 pub(crate) use fxhash::{FxHashMap, FxHashSet};
 
@@ -97,7 +97,7 @@ macro_rules! v {
 ///
 /// X, Y, Z is left, up, forward.
 pub(crate) type Vec3 = Vector3<f32>;
-pub(crate) type Point3 = Point<f32, 3>;
+pub(crate) type Point3 = algebra::Point3<f32>;
 
 // Consts take less typing than using an extension trait - e.g. `Vec3::up()`
 // even though it's less explicit we're talking about 3D vectors.

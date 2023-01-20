@@ -9,12 +9,17 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+// Some private imports that are intentionally *not* re-exported.
 use fyrox::{core::algebra, scene::collider::BitMask};
 
+// Public re-exports.
+// Make the most commonly used types available without importing manually.
+// Criteria for inclusion: used in a lot of files and unlikely to collide.
+
+// This should generally be used instead of std's HashMap and HashSet
+// because we usually don't need HashDoS protection but do need determinism.
 pub(crate) use fxhash::{FxHashMap, FxHashSet};
 
-// Make the most commonly used types available.
-// Criteria for inclusion: used in a lot of files and unlikely to collide.
 pub(crate) use fyrox::{
     core::{
         algebra::{Unit, UnitQuaternion, Vector2, Vector3, Vector4},

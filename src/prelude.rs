@@ -43,7 +43,10 @@ pub(crate) use fyrox::{
 pub(crate) use inline_tweak::tweak;
 
 pub(crate) use rand::prelude::*;
-pub(crate) use rand_distr::StandardNormal;
+// `rng.sample(Normal::new(mean, std_dev))` gives exactly the same results as
+// `rng.sample(StandardNormal) * std_dev + mean`.
+// The latter sometimes requires type annotations.
+pub(crate) use rand_distr::{Normal, StandardNormal};
 
 pub(crate) use crate::{
     client::game::ClientFrameData,

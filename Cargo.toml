@@ -55,7 +55,7 @@ strum = "0.24.0"
 strum_macros = "0.24.3"
 
 [patch.crates-io]
-cvars = { path = "../cvars/cvars" }
+#cvars = { path = "../cvars/cvars" }
 cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
 #fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "2537fc1bf5a03dd55c0a2e54bc14a5458d45e724" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }

@@ -484,45 +484,25 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 
 [[package]]
 name = "cvars"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac2dba2a3a8885655a03b60ed47a2172f4671ed6a9da988e6e6a7b7c5b479d10"
-dependencies = [
- "cvars-macros 0.1.1",
-]
-
-[[package]]
-name = "cvars"
 version = "0.3.0"
 dependencies = [
- "cvars-macros 0.2.0",
+ "cvars-macros",
 ]
 
 [[package]]
 name = "cvars-console"
 version = "0.1.0"
 dependencies = [
- "cvars 0.3.0",
+ "cvars",
 ]
 
 [[package]]
 name = "cvars-console-fyrox"
 version = "0.1.0"
 dependencies = [
- "cvars 0.3.0",
+ "cvars",
  "cvars-console",
  "fyrox-ui",
-]
-
-[[package]]
-name = "cvars-macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b9bde259606a57b884d29284f5dcaee58666cabac6ea1ee9c67a49c4002c34c"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -2223,7 +2203,7 @@ name = "rustcycles"
 version = "0.0.0"
 dependencies = [
  "bincode",
- "cvars 0.2.0",
+ "cvars",
  "cvars-console-fyrox",
  "fxhash",
  "fyrox",

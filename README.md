@@ -9,11 +9,12 @@
 [![Audit](https://github.com/rustcycles/rustcycles/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/rustcycles/rustcycles/status.svg)](https://deps.rs/repo/github/rustcycles/rustcycles)
 [![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/cXU5HzDXM5)
+<!-- These keep getting broken and then they show 0 which looks bad
 [![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)
-[![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
+[![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles) -->
 
-<!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
-<!-- Also check https://github.com/topics/tron to make sure it doesn't look blurry -->
+<!-- Note to my future OCD: The ideal image width for a github readme is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). The recommended size for the social preview is higher, likely best to use a different image. -->
+<!-- Check https://github.com/topics/tron to make sure it doesn't look blurry. -->
 ![Gameplay](media/screenshot.png)
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.

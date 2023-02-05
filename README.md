@@ -19,7 +19,7 @@
 
 RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
 
-_**This is not even a prototype yet. Don't be disappointed, bookmark it and come back a few months later ;)**_
+_**This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking.**_
 
 ## Development
 

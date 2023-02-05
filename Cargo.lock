@@ -485,6 +485,8 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cvars"
 version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "555f46f9595791bd62ea41a610b353ee40681f5686d6e69c8759583fa1aeab45"
 dependencies = [
  "cvars-macros",
 ]
@@ -492,6 +494,8 @@ dependencies = [
 [[package]]
 name = "cvars-console"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ba8817e19912e8807edbf0df3e7660d159cfcbe06461f40cf07617799ba3083"
 dependencies = [
  "cvars",
 ]
@@ -499,6 +503,8 @@ dependencies = [
 [[package]]
 name = "cvars-console-fyrox"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3ff1e0ccfe777e8c684c10b8294e3302f7da31d512dbc4ba385ecb6edf3f974"
 dependencies = [
  "cvars",
  "cvars-console",
@@ -508,6 +514,8 @@ dependencies = [
 [[package]]
 name = "cvars-macros"
 version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9dc44a481474c75aae491fdef0c21bc033b7f021930d7b2cafcd7d279b3a2b7"
 dependencies = [
  "proc-macro2",
  "quote",

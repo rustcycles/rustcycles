@@ -42,7 +42,7 @@ codegen-units = 1
 
 [dependencies]
 bincode = "1.3.3"
-cvars = "0.3.0"
+cvars = "0.3.1"
 cvars-console-fyrox = "0.1.0"
 fxhash = "0.2.1"
 fyrox = "0.29.0"

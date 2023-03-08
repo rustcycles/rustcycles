@@ -50,7 +50,7 @@ inline_tweak = "1.0.8"
 rand = { version = "0.8.5", default-features = false }
 rand_distr = { version = "0.4.3", default-features = false }
 rand_xoshiro = "0.6.0"
-serde = { version = "1.0.152", features = ["derive"] }
+serde = { version = "1.0.153", features = ["derive"] }
 strum = "0.24.0"
 strum_macros = "0.24.3"
 

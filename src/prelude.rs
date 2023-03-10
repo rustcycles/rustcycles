@@ -84,6 +84,8 @@ pub(crate) use crate::v;
 /// (e.g. `v!(-s.x, 0, a + b)`), you need to use commas
 /// because expressions can contain spaces so they wouldn't work as a separator.
 ///
+/// LATER Check f32 represents the input value exactly, log warn if not, rate limit it.
+///
 /// # Usage
 ///
 /// ```rust

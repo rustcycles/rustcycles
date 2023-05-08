@@ -39,7 +39,7 @@ pub(crate) struct GameState {
     ///
     /// TODO Should this even be here? Cl and sv will always desync
     /// because cl shouldn't run logic for all players (invisible should be culled).
-    /// Even now they desdync because they can shoot for a different number of frames
+    /// Even now they desync because they can shoot for a different number of frames
     /// (e.g. i think if input arrives a frame late to the server).
     pub(crate) rng: Xoshiro256PlusPlus,
 

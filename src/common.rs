@@ -47,8 +47,9 @@ pub(crate) struct GameState {
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
     pub(crate) range_uniform11: Uniform<f64>,
 
-    pub(crate) scene_handle: Handle<Scene>,
     cycle_model: Model,
+
+    pub(crate) scene_handle: Handle<Scene>,
 
     pub(crate) players: Pool<Player>,
     pub(crate) cycles: Pool<Cycle>,
@@ -112,8 +113,8 @@ impl GameState {
             frame_number: 0,
             rng: Xoshiro256PlusPlus::seed_from_u64(cvars.d_seed),
             range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
-            scene_handle,
             cycle_model,
+            scene_handle,
             players: Pool::new(),
             cycles: Pool::new(),
             projectiles: Pool::new(),

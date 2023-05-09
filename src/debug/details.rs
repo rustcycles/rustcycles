@@ -158,6 +158,10 @@ impl Lines {
     /// Insert the line into the hashmap, merging colors if a line already exists
     /// in the exact same place.
     fn insert(&mut self, begin: Vec3, end: Vec3, color: Color) {
+        // It might be tempting to add a tiny bit of tolerance
+        // so lines close enough get merged
+        // but it would make it hard to notice cl/sv desyncs.
+        // At least it should be off by default.
         let bits_begin = begin.map(|v| v.to_bits());
         let bits_end = end.map(|v| v.to_bits());
 

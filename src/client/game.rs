@@ -455,6 +455,7 @@ impl ClientFrameData<'_> {
             dbg_line!(body_pos, body_pos + UP, 0.0);
         }
 
+        // Deduplicate and draw debug shapes
         DEBUG_SHAPES.with(|shapes| {
             // Sometimes debug shapes overlap and only the last one gets drawn.
             // This is especially common when both client and server wanna draw.
@@ -475,6 +476,7 @@ impl ClientFrameData<'_> {
             }
         });
 
+        // Compose per-frame debug string
         let mut debug_string = String::new();
         if self.cvars.d_draw_text {
             if self.cvars.d_engine_stats {
@@ -492,13 +494,15 @@ impl ClientFrameData<'_> {
             });
         }
 
-        // We send an empty string to clear the previous text if printing is disabled.
+        // Draw per-frame debug string.
+        // Do this even if printing is disabled - we still need to clear the previous text.
         self.ui.send_message(TextMessage::text(
             self.cg.debug_text,
             MessageDirection::ToWidget,
             debug_string,
         ));
 
+        // Cleanup
         debug::details::clear_expired();
     }
 }

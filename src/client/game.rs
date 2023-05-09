@@ -67,23 +67,22 @@ impl ClientGame {
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
         let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
-        let camera_handle =
-            CameraBuilder::new(BaseBuilder::new().with_local_transform(
-                TransformBuilder::new().with_local_position(v!(0 1 -3)).build(),
-            ))
-            .with_skybox(
-                SkyBoxBuilder {
-                    front: None,
-                    back: None,
-                    left: None,
-                    right: None,
-                    top,
-                    bottom: None,
-                }
-                .build()
-                .unwrap(),
-            )
-            .build(&mut scene.graph);
+        let camera_handle = CameraBuilder::new(BaseBuilder::new().with_local_transform(
+            TransformBuilder::new().with_local_position(v!(0 5 -15)).build(),
+        ))
+        .with_skybox(
+            SkyBoxBuilder {
+                front: None,
+                back: None,
+                left: None,
+                right: None,
+                top,
+                bottom: None,
+            }
+            .build()
+            .unwrap(),
+        )
+        .build(&mut scene.graph);
 
         let mut data = FrameData { cvars, scene, gs };
 
@@ -407,7 +406,7 @@ impl ClientFrameData<'_> {
 
         // Examples of all the debug shapes
 
-        dbg_line!(v!(25 5 5), v!(25 5 7));
+        dbg_line!(v!(25 5 5), v!(25 5 6));
 
         dbg_arrow!(v!(20 5 5), v!(0 0 2)); // Forward
         dbg_arrow!(v!(20 5 5), v!(0 0 -1)); // Back
@@ -416,19 +415,32 @@ impl ClientFrameData<'_> {
         dbg_arrow!(v!(20 5 5), v!(0 1 0)); // Up
         dbg_arrow!(v!(20 5 5), v!(0 -1 0)); // Down
 
+        dbg_cross!(v!(15 5 5), 0.0, CYAN);
+
+        dbg_rot!(v!(10 5 5), UnitQuaternion::default());
+
         dbg_arrow!(v!(20 10 5), v!(1 1 1), 0.0, BLUE);
         dbg_arrow!(v!(20 10 6), v!(2 2 2), 0.0, BLUE2);
 
-        dbg_cross!(v!(15 5 5), 0.0, CYAN);
+        dbg_arrow!(v!(15 10 5), v!(0 0 2), 0.0, RED);
+        dbg_arrow!(v!(15 10 5), v!(0 0.01 2), 0.0, GREEN);
+        dbg_arrow!(v!(15 11 5), v!(0 0 2), 0.0, GREEN);
+        dbg_arrow!(v!(15 11 5), v!(0 0.01 2), 0.0, RED);
 
-        dbg_arrow!(v!(15 10 5), v!(0 0 2), 0.0, GREEN);
-        dbg_arrow!(v!(15 10 5), v!(0 0.01 2), 0.0, RED);
-        dbg_arrow!(v!(15 11 5), v!(0 0 2), 0.0, RED);
-        dbg_arrow!(v!(15 11 5), v!(0 0.01 2), 0.0, GREEN);
-        dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, RED);
-        dbg_arrow!(v!(15 12 5), v!(0 0 2), 0.0, GREEN);
+        // The smallest possible difference in the up direction
+        // that doesn't get rounded to nothing.
+        // This doesn't really test anything,
+        // it just gives interesting results sometimes
+        // like changing colors when you move the camera.
+        dbg_arrow!(v!(14 10 5), v!(0 0 2), 0.0, RED);
+        dbg_arrow!(v!(14 10 5), v!(0 0.000001 2), 0.0, GREEN);
+        dbg_arrow!(v!(14 11 5), v!(0 0 2), 0.0, GREEN);
+        dbg_arrow!(v!(14 11 5), v!(0 0.000001 2), 0.0, RED);
 
-        dbg_rot!(v!(10 5 5), UnitQuaternion::default());
+        dbg_arrow!(v!(13 10 5), v!(0 0 2), 0.0, RED);
+        dbg_arrow!(v!(13 10 5), v!(0 0 2), 0.0, GREEN);
+        dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, GREEN);
+        dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, RED);
     }
 
     pub(crate) fn tick_after_physics(&mut self, dt: f32) {

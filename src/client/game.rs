@@ -437,6 +437,26 @@ impl ClientFrameData<'_> {
 
         // TODO Why is this rotated around axis?
         dbg_arrow!(v!(20 15 5), v!(-0.01 0.03 -1));
+
+        // For understanding the difference between global and local pitch.
+        let yaw_angle = self.cg.input.yaw.to_radians();
+        let pitch_angle = self.cg.input.pitch.to_radians();
+        let yaw_rot = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
+        let pitch_rot1 = UnitQuaternion::from_axis_angle(&LEFT_AXIS, pitch_angle);
+        let pitch_axis = yaw_rot * LEFT_AXIS;
+        let pitch_rot2 = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
+
+        dbg_rot!(v!(52 7 5), yaw_rot);
+        dbg_rot!(v!(51 7 5), pitch_rot1);
+        dbg_rot!(v!(50 7 5), pitch_rot2);
+        dbg_rot!(v!(51 7 7), pitch_rot1 * yaw_rot);
+        dbg_rot!(v!(50 7 7), pitch_rot2 * yaw_rot);
+
+        dbg_arrow!(v!(52 5 5), yaw_rot * FORWARD);
+        dbg_arrow!(v!(51 5 5), pitch_rot1 * FORWARD);
+        dbg_arrow!(v!(50 5 5), pitch_rot2 * FORWARD);
+        dbg_arrow!(v!(51 5 7), pitch_rot1 * yaw_rot * FORWARD);
+        dbg_arrow!(v!(50 5 7), pitch_rot2 * yaw_rot * FORWARD);
     }
 
     pub(crate) fn tick_after_physics(&mut self, dt: f32) {

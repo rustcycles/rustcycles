@@ -132,7 +132,7 @@ impl FrameData<'_> {
 
             let playing = player.ps == PlayerState::Playing;
             let input = player.input;
-            let rot = UnitQuaternion::from_axis_angle(&UP_AXIS, input.yaw.to_radians());
+            let rot = input.yaw_rotation();
             let body = self.scene.graph[cycle.body_handle].as_rigid_body_mut();
             if playing {
                 let forward = rot * FORWARD;
@@ -156,8 +156,6 @@ impl FrameData<'_> {
                 lin_vel += wheel_accel;
                 body.set_lin_vel(lin_vel);
             }
-            let dir = rot * FORWARD;
-            dbg_arrow!(v!(0 3 0), dir.normalize(), 0.5);
 
             // LATER Does this allow clipping into geometry? Yes.
             //  Use an impulse proportional to mouse movement instead?
@@ -167,13 +165,14 @@ impl FrameData<'_> {
             if input.fire1
                 && cycle.time_last_fired + self.cvars.g_projectile_refire < self.gs.game_time
             {
+                let dir = input.look_rotation() * FORWARD;
                 let forward = dir * self.cvars.g_projectile_speed;
                 let rand = Vec3::new(
                     self.gs.rng.sample(StandardNormal),
                     self.gs.rng.sample(StandardNormal),
                     self.gs.rng.sample(StandardNormal),
                 );
-                dbg_logd!(rand);
+                dbg_logd!(rand); // To showcase desyncs between cl and sv
                 let spread = rand * self.cvars.g_projectile_spread;
 
                 let _ = self.gs.projectiles.spawn(Projectile {
@@ -222,6 +221,16 @@ impl FrameData<'_> {
         }
 
         dbg_textf!("Projectiles: {}", self.gs.projectiles.total_count());
+
+        // Testing
+        for player in &self.gs.players {
+            let look_rot = player.input.look_rotation();
+            dbg_rot!(v!(0 7 0), look_rot);
+            dbg_arrow!(v!(0 5 0), look_rot * FORWARD, 0.5);
+
+            let yaw_rot = player.input.yaw_rotation();
+            dbg_arrow!(v!(0 3 0), yaw_rot * FORWARD, 0.5);
+        }
     }
 
     pub(crate) fn free_player(&mut self, player_handle: Handle<Player>) {
@@ -381,14 +390,16 @@ impl Input {
     }
 
     pub(crate) fn look_rotation(&self) -> UnitQuaternion<f32> {
-        let yaw_angle = self.yaw.0.to_radians();
-        let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
+        let yaw = self.yaw_rotation();
 
-        let pitch_angle = self.pitch.0.to_radians();
         let pitch_axis = yaw * LEFT_AXIS;
-        let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
+        let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, self.pitch.to_radians());
 
         pitch * yaw
+    }
+
+    pub(crate) fn yaw_rotation(&self) -> UnitQuaternion<f32> {
+        UnitQuaternion::from_axis_angle(&UP_AXIS, self.yaw.to_radians())
     }
 }
 

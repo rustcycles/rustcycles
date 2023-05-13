@@ -98,7 +98,7 @@ impl DebugShape {
                 // no weird rotations around the axis.
 
                 // Make sure dir and up are not colinear.
-                let up = if dir.x.abs() < f32::EPSILON && dir.z.abs() < f32::EPSILON {
+                let up = if dir.left().abs() < f32::EPSILON && dir.forward().abs() < f32::EPSILON {
                     FORWARD
                 } else {
                     UP

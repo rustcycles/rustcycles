@@ -138,6 +138,45 @@ pub(crate) const DOWN_AXIS: Unit<Vec3> = Unit::new_unchecked(DOWN);
 /// The unit column vector with a -1 as its third (Z) component, and zero elsewhere.
 pub(crate) const BACK_AXIS: Unit<Vec3> = Unit::new_unchecked(BACK);
 
+/// QoL methods for Vec3
+///
+/// Should be imported along with the rest of the prelude using a glob.
+pub(crate) trait Vec3Ext {
+    /// The X component of the vector.
+    fn left(&self) -> f32;
+    /// The Y component of the vector.
+    fn up(&self) -> f32;
+    /// The Z component of the vector.
+    fn forward(&self) -> f32;
+    /// The negative X component of the vector.
+    fn right(&self) -> f32;
+    /// The negative Y component of the vector.
+    fn down(&self) -> f32;
+    /// The negative Z component of the vector.
+    fn back(&self) -> f32;
+}
+
+impl Vec3Ext for Vec3 {
+    fn left(&self) -> f32 {
+        self.x
+    }
+    fn up(&self) -> f32 {
+        self.y
+    }
+    fn forward(&self) -> f32 {
+        self.z
+    }
+    fn right(&self) -> f32 {
+        -self.x
+    }
+    fn down(&self) -> f32 {
+        -self.y
+    }
+    fn back(&self) -> f32 {
+        -self.z
+    }
+}
+
 /// QoL methods for fyrox's Node.
 ///
 /// Should be imported along with the rest of the prelude using a glob.

@@ -23,13 +23,13 @@ _**This is just barely a prototype. There's no real gameplay yet, just the engin
 
 ## Development
 
-Install [git LFS](https://git-lfs.github.com/) before cloning this repo.
+- Install [git LFS](https://git-lfs.github.com/) **before** cloning this repo.
 
-Linux (debian) dependencies: `sudo apt install libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libfontconfig1-dev`
-
+- Install dependencies if on Linux (debian): `sudo apt install libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libfontconfig1-dev`
 <!-- libfontconfig1-dev is not needed on CI for some reason but I couldn't compile without it on Kubuntu 22.04 -->
 
-After that, just use `cargo run`.
+- After that, just use `cargo run`.
+  - No need to use `--release` it should run fast enough in debug mode because deps are optimized even in debug mode (see Cargo.toml).
 
 ### Fast compiles (optional)
 

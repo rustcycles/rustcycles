@@ -67,7 +67,7 @@ pub(crate) use crate::v;
 ///
 /// Short name, no decimal point (casts to f32), no commas between numbers.
 ///
-/// X, Y, Z is left, up, forward.
+/// X, Y, Z is **left, up, forward**.
 ///
 /// Nalgebra's coordinate system is right-handed:
 /// index finger is X, middle finger is Y, thumb is Z.

@@ -5,3 +5,6 @@ mandelbrot explorers
 
 http://www.paulbourke.net/fractals/mandelbrot/
     http://www.paulbourke.net/fractals/mandelbrot/m1.9401573530_0.0000000000_600000_1000_20a.jpg
+
+https://old.reddit.com/r/rust/comments/xgid9l/media_nebulabrot_rendered_with_rust_explanations/
+    really nice buddhabrot, need to ask for permission, sounce code not included

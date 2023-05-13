@@ -135,7 +135,7 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             cl_camera_3rd_person_back: 2.0,
-            cl_camera_3rd_person_up: 0.5,
+            cl_camera_3rd_person_up: 1.0,
             cl_camera_fov: 75.0,
             cl_camera_speed: 10.0,
             cl_camera_z_near: 0.001,

@@ -17,7 +17,7 @@
 <!-- Check https://github.com/topics/tron to make sure it doesn't look blurry. -->
 ![Gameplay](media/screenshot.png)
 
-RustCycles is a third person shooter that's about movement, not aim. You have to be smart and think fast.
+RustCycles is a third person arena shooter that's about movement, not aim. You have to be smart and think fast.
 
 _**This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking.**_
 

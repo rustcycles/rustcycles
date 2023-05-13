@@ -21,7 +21,13 @@ RustCycles is a third person arena shooter that's about movement, not aim. You h
 
 _**This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking.**_
 
-## Development
+This is currently the only open source fyrox game which uses networking. If you're also writing a multiplayer game in fyrox, feel free to ping me on Fyrox's or RustCycles' discord to exchange notes and ideas.
+
+Multiplayer shooters are large and complex projects and 80% of the code is not game specific. I am looking to collaborate with anyone making a similar game. The plan is to identify generic parts and build RustCycles into a FPS-specific fyrox "subengine" that provides a solid foundation for first/third person shooters so everyone can focus on the parts that make their game unique.
+
+## Building
+
+There are no prebuilt binaries yet, you have to build it yourself.
 
 - Install [git LFS](https://git-lfs.github.com/) **before** cloning this repo.
 
@@ -30,6 +36,8 @@ _**This is just barely a prototype. There's no real gameplay yet, just the engin
 
 - After that, just use `cargo run`.
   - No need to use `--release` it should run fast enough in debug mode because deps are optimized even in debug mode (see Cargo.toml).
+
+## Development
 
 ### Fast compiles (optional)
 

@@ -19,9 +19,9 @@
 
 RustCycles is a third person arena shooter that's about movement, not aim. You have to be smart and think fast.
 
-_**This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking.**_
+_This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking._
 
-This is currently the only open source fyrox game which uses networking. If you're also writing a multiplayer game in fyrox, feel free to ping me on Fyrox's or RustCycles' discord to exchange notes and ideas.
+Currently RustCycles is the only open source fyrox game which uses networking. If you're also writing a multiplayer game in fyrox, feel free to ping me on Fyrox's or RustCycles' discord to exchange notes and ideas.
 
 Multiplayer shooters are large and complex projects and 80% of the code is not game specific. I am looking to collaborate with anyone making a similar game. The plan is to identify generic parts and build RustCycles into a FPS-specific fyrox "subengine" that provides a solid foundation for first/third person shooters so everyone can focus on the parts that make their game unique.
 

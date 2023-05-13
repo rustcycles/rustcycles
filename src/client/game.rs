@@ -435,7 +435,6 @@ impl ClientFrameData<'_> {
         dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, GREEN);
         dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, RED);
 
-        // TODO Why is this rotated around axis?
         dbg_arrow!(v!(20 15 5), v!(-0.01 0.03 -1));
 
         // For understanding the difference between global and local pitch.

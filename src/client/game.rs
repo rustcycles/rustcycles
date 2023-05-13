@@ -318,15 +318,7 @@ impl ClientFrameData<'_> {
         let camera = &mut self.scene.graph[self.cg.camera_handle];
 
         // Camera turning
-        // TODO method on Input? Use for projectiles
-        let yaw_angle = self.cg.input.yaw.0.to_radians();
-        let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
-
-        let pitch_angle = self.cg.input.pitch.0.to_radians();
-        let pitch_axis = yaw * LEFT_AXIS;
-        let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
-
-        let cam_rot = pitch * yaw;
+        let cam_rot = self.cg.input.look_rotation();
         camera.local_transform_mut().set_rotation(cam_rot);
 
         dbg_rot!(v!(0 7 0), cam_rot);
@@ -444,7 +436,7 @@ impl ClientFrameData<'_> {
         dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, RED);
 
         // TODO Why is this rotated around axis?
-        dbg_arrow!(v!(15 15 5), v!(-0.01 0.03 -1));
+        dbg_arrow!(v!(20 15 5), v!(-0.01 0.03 -1));
     }
 
     pub(crate) fn tick_after_physics(&mut self, dt: f32) {

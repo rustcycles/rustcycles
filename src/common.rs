@@ -379,6 +379,17 @@ impl Input {
         self.pause = false;
         self.screenshot = false;
     }
+
+    pub(crate) fn look_rotation(&self) -> UnitQuaternion<f32> {
+        let yaw_angle = self.yaw.0.to_radians();
+        let yaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);
+
+        let pitch_angle = self.pitch.0.to_radians();
+        let pitch_axis = yaw * LEFT_AXIS;
+        let pitch = UnitQuaternion::from_axis_angle(&pitch_axis, pitch_angle);
+
+        pitch * yaw
+    }
 }
 
 impl Debug for Input {

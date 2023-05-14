@@ -1,6 +1,14 @@
 //! Console variables - configuration options for anything and everything.
 
+use std::{
+    fmt::{self, Display, Formatter},
+    num::ParseFloatError,
+    str::FromStr,
+};
+
 use cvars::SetGet;
+
+use crate::prelude::*;
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -27,7 +35,7 @@ pub struct Cvars {
     ///
     /// LATER What do other games use? Horiz/vert, what values?
     pub cl_camera_fov: f32,
-    //pub cl_camera_initial_position: Vec3, TODO CVec3
+    pub cl_camera_initial_position: CVec3,
     pub cl_camera_speed: f32,
     pub cl_camera_z_near: f32,
     pub cl_camera_z_far: f32,
@@ -137,6 +145,7 @@ impl Default for Cvars {
             cl_camera_3rd_person_back: 2.0,
             cl_camera_3rd_person_up: 1.0,
             cl_camera_fov: 75.0,
+            cl_camera_initial_position: v!(0 5 -15).into(),
             cl_camera_speed: 10.0,
             cl_camera_z_near: 0.001,
             cl_camera_z_far: 2048.0,
@@ -211,5 +220,64 @@ impl Default for Cvars {
 
             r_quality: 0,
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CVec3 {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+impl CVec3 {
+    fn new(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z }
+    }
+}
+
+impl FromStr for CVec3 {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_cvec3(s).map_err(|e| {
+            if let Some(e) = e {
+                format!("Expected format `'x y z'`, got `{}`: {}", s, e)
+            } else {
+                format!("Expected format `'x y z'`, got `{}`", s)
+            }
+        })
+    }
+}
+
+fn parse_cvec3(mut s: &str) -> Result<CVec3, Option<ParseFloatError>> {
+    if s.starts_with('\'') && s.ends_with('\'') {
+        s = &s[1..s.len() - 1];
+    }
+    let mut parts = s.split(' ');
+    let x = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
+    let y = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
+    let z = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
+    if parts.next().is_some() {
+        return Err(None);
+    }
+    Ok(CVec3::new(x, y, z))
+}
+
+impl Display for CVec3 {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "'{:?} {:?} {:?}'", self.x, self.y, self.z)
+    }
+}
+
+impl From<CVec3> for Vec3 {
+    fn from(v: CVec3) -> Self {
+        Vec3::new(v.x, v.y, v.z)
+    }
+}
+
+impl From<Vec3> for CVec3 {
+    fn from(v: Vec3) -> Self {
+        CVec3::new(v.x, v.y, v.z)
     }
 }

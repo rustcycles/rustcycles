@@ -72,9 +72,13 @@ impl ClientGame {
         let right = engine.resource_manager.request_texture("data/skybox/right.png").await.ok();
         let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
         let bottom = engine.resource_manager.request_texture("data/skybox/bottom.png").await.ok();
-        let camera_handle = CameraBuilder::new(BaseBuilder::new().with_local_transform(
-            TransformBuilder::new().with_local_position(v!(0 5 -15)).build(),
-        ))
+        let camera_handle = CameraBuilder::new(
+            BaseBuilder::new().with_local_transform(
+                TransformBuilder::new()
+                    .with_local_position(cvars.cl_camera_initial_position.into())
+                    .build(),
+            ),
+        )
         .with_skybox(
             SkyBoxBuilder {
                 front,

@@ -57,6 +57,8 @@ pub(crate) struct ClientProcess {
 
 impl ClientProcess {
     pub(crate) async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
+        let clock = Instant::now();
+
         let quality = match cvars.r_quality {
             0 => QualitySettings::low(),
             1 => QualitySettings::medium(),
@@ -150,9 +152,12 @@ impl ClientProcess {
 
         let exit = cvars.d_exit_after_one_frame;
 
+        let elapsed = clock.elapsed();
+        dbg_logf!("ClientProcess::new() took {} ms", elapsed.as_millis());
+
         Self {
             cvars,
-            clock: Instant::now(),
+            clock,
             mouse_grabbed: false,
             shift_pressed: false,
             engine,

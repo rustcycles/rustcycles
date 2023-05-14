@@ -20,6 +20,8 @@ pub(crate) struct ServerProcess {
 
 impl ServerProcess {
     pub(crate) async fn new(cvars: Cvars, mut engine: Engine) -> Self {
+        let clock = Instant::now();
+
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
         listener.set_nonblocking(true).unwrap();
 
@@ -27,9 +29,12 @@ impl ServerProcess {
         let gs = GameState::new(&cvars, &mut engine, gs_type).await;
         let sg = ServerGame::new(Box::new(listener)).await;
 
+        let elapsed = clock.elapsed();
+        dbg_logf!("ServerProcess::new() took {} ms", elapsed.as_millis());
+
         Self {
             cvars,
-            clock: Instant::now(),
+            clock,
             engine,
             gs,
             sg,

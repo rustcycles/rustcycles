@@ -255,9 +255,9 @@ fn parse_cvec3(mut s: &str) -> Result<CVec3, Option<ParseFloatError>> {
         s = &s[1..s.len() - 1];
     }
     let mut parts = s.split(' ');
-    let x = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
-    let y = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
-    let z = parts.next().ok_or(None)?.parse().map_err(|e| Some(e))?;
+    let x = parts.next().ok_or(None)?.parse().map_err(Some)?;
+    let y = parts.next().ok_or(None)?.parse().map_err(Some)?;
+    let z = parts.next().ok_or(None)?.parse().map_err(Some)?;
     if parts.next().is_some() {
         return Err(None);
     }

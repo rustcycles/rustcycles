@@ -54,6 +54,7 @@ serde = { version = "1.0.162", features = ["derive"] }
 strum = "0.24.0"
 strum_macros = "0.24.3"
 
+# Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
 #cvars = { path = "../cvars/cvars" }
 #cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }

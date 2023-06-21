@@ -45,7 +45,7 @@ bincode = "1.3.3"
 cvars = "0.3.2"
 cvars-console-fyrox = "0.1.0"
 fxhash = "0.2.1"
-fyrox = "0.29.0"
+fyrox = "0.30.0"
 inline_tweak = "1.0.9"
 rand = { version = "0.8.5", default-features = false }
 rand_distr = { version = "0.4.3", default-features = false }

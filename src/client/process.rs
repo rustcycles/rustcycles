@@ -69,7 +69,12 @@ impl ClientProcess {
             }
         };
         // LATER Allow changing quality at runtime
-        engine.renderer.set_quality_settings(&quality).unwrap();
+        engine
+            .graphics_context
+            .as_initialized_mut()
+            .renderer
+            .set_quality_settings(&quality)
+            .unwrap();
 
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
@@ -357,7 +362,7 @@ impl ClientProcess {
         // It's possible to get into weird states (e.g. when opening KDE's Klipper tool by a shortcut)
         // where self.mouse_grabbed is incorrect and we'd need to press ESC and then click to regrab.
 
-        let window = self.engine.get_window();
+        let window = &self.engine.graphics_context.as_initialized_ref().window;
         if grab {
             #[cfg(target_os = "macos")]
             let mode = CursorGrabMode::Locked;
@@ -510,7 +515,7 @@ impl ClientProcess {
             self.engine.post_update(dt);
         }
 
-        self.engine.get_window().request_redraw();
+        self.engine.graphics_context.as_initialized_ref().window.request_redraw();
     }
 
     fn sfd(&mut self) -> Option<ServerFrameData> {
@@ -528,7 +533,7 @@ impl ClientProcess {
             scene: &mut self.engine.scenes[self.gs.scene_handle],
             gs: &mut self.gs,
             cg: &mut self.cg,
-            renderer: &mut self.engine.renderer,
+            renderer: &mut self.engine.graphics_context.as_initialized_mut().renderer,
             ui: &mut self.engine.user_interface,
         }
     }

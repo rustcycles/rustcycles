@@ -66,12 +66,12 @@ impl ClientGame {
 
         // LATER Load everything in parallel (i.e. with GameState)
         // LATER Report error if loading fails
-        let front = engine.resource_manager.request_texture("data/skybox/front.png").await.ok();
-        let back = engine.resource_manager.request_texture("data/skybox/back.png").await.ok();
-        let left = engine.resource_manager.request_texture("data/skybox/left.png").await.ok();
-        let right = engine.resource_manager.request_texture("data/skybox/right.png").await.ok();
-        let top = engine.resource_manager.request_texture("data/skybox/top.png").await.ok();
-        let bottom = engine.resource_manager.request_texture("data/skybox/bottom.png").await.ok();
+        let front = engine.resource_manager.request("data/skybox/front.png").await.ok();
+        let back = engine.resource_manager.request("data/skybox/back.png").await.ok();
+        let left = engine.resource_manager.request("data/skybox/left.png").await.ok();
+        let right = engine.resource_manager.request("data/skybox/right.png").await.ok();
+        let top = engine.resource_manager.request("data/skybox/top.png").await.ok();
+        let bottom = engine.resource_manager.request("data/skybox/bottom.png").await.ok();
         let camera_handle = CameraBuilder::new(
             BaseBuilder::new().with_local_transform(
                 TransformBuilder::new()

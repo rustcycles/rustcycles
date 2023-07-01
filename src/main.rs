@@ -16,15 +16,16 @@ mod server;
 use std::{env, error::Error, panic, process::Command, sync::Arc};
 
 use fyrox::{
-    core::futures::executor,
+    asset::manager::ResourceManager,
+    core::{
+        futures::executor,
+        log::{Log, MessageKind},
+    },
     dpi::{LogicalSize, PhysicalSize},
-    engine::{resource_manager::ResourceManager, Engine, EngineInitParams, SerializationContext},
+    engine::{Engine, EngineInitParams, GraphicsContextParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    utils::{
-        log::{Log, MessageKind},
-        translate_event,
-    },
+    utils::translate_event,
     window::{Fullscreen, WindowBuilder},
 };
 use strum_macros::EnumString;
@@ -413,19 +414,19 @@ fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
         // Using PhysicalSize seems more ... logical, if we let users configure it in pixels.
         window_builder = window_builder.with_inner_size(PhysicalSize::new(width, height));
     }
-    let serialization_context = Arc::new(SerializationContext::new());
-    let resource_manager = ResourceManager::new(serialization_context.clone());
 
     // LATER no vsync
-    Engine::new(EngineInitParams {
-        window_builder,
-        serialization_context,
-        resource_manager,
-        events_loop: event_loop,
-        vsync: true,
-        headless: cvars.cl_headless,
+    let mut engine = Engine::new(EngineInitParams {
+        graphics_context_params: GraphicsContextParams {
+            window_attributes: window_builder.window_attributes().clone(),
+            vsync: true,
+        },
+        serialization_context: Arc::new(SerializationContext::new()),
+        resource_manager: ResourceManager::new(),
     })
-    .unwrap()
+    .unwrap();
+    engine.initialize_graphics_context(event_loop).unwrap();
+    engine
 }
 
 fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
@@ -433,17 +434,18 @@ fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles server")
         .with_inner_size(LogicalSize::new(400, 100));
-    let serialization_context = Arc::new(SerializationContext::new());
-    let resource_manager = ResourceManager::new(serialization_context.clone());
 
     // LATER Does vsync have any effect here?
-    Engine::new(EngineInitParams {
-        window_builder,
-        serialization_context,
-        resource_manager,
-        events_loop: event_loop,
-        vsync: true,
-        headless: true,
+    // LATER No window at all (currently bugged)
+    let mut engine = Engine::new(EngineInitParams {
+        graphics_context_params: GraphicsContextParams {
+            window_attributes: window_builder.window_attributes().clone(),
+            vsync: true,
+        },
+        serialization_context: Arc::new(SerializationContext::new()),
+        resource_manager: ResourceManager::new(),
     })
-    .unwrap()
+    .unwrap();
+    engine.initialize_graphics_context(event_loop).unwrap();
+    engine
 }

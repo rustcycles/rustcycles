@@ -7,7 +7,9 @@ pub(crate) mod trace;
 
 use std::fmt::{self, Debug, Display, Formatter};
 
-use fyrox::scene::collider::InteractionGroups;
+use fyrox::{
+    asset::Resource, resource::model::ModelResourceExtension, scene::collider::InteractionGroups,
+};
 use rand::distributions::Uniform;
 use rand_xoshiro::Xoshiro256PlusPlus;
 use serde::{Deserialize, Serialize};
@@ -47,7 +49,7 @@ pub(crate) struct GameState {
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
     pub(crate) range_uniform11: Uniform<f64>,
 
-    cycle_model: Model,
+    cycle_model: Resource<Model>,
 
     pub(crate) scene_handle: Handle<Scene>,
 
@@ -91,14 +93,14 @@ impl GameState {
 
         engine
             .resource_manager
-            .request_model("data/arena/arena.rgs")
+            .request::<Model, _>("data/arena/arena.rgs")
             .await
             .unwrap()
             .instantiate(&mut scene);
 
         let cycle_model = engine
             .resource_manager
-            .request_model("data/rustcycle/rustcycle.fbx")
+            .request::<Model, _>("data/rustcycle/rustcycle.fbx")
             .await
             .unwrap();
 

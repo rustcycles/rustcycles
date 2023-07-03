@@ -287,6 +287,7 @@ fn client_server_main(opts: Opts) {
 fn client_main(cvars: Cvars, local_server: bool) {
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&cvars);
+    let use_graphics = !cvars.cl_headless;
 
     let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
     event_loop.run(move |event, window_target, control_flow| {
@@ -340,8 +341,16 @@ fn client_main(cvars: Cvars, local_server: bool) {
             },
             Event::UserEvent(_) => {}
             // LATER test suspend/resume
-            Event::Suspended => client.engine.destroy_graphics_context().unwrap(),
-            Event::Resumed => client.engine.initialize_graphics_context(window_target).unwrap(),
+            Event::Suspended => {
+                if use_graphics {
+                    client.engine.destroy_graphics_context().unwrap();
+                }
+            }
+            Event::Resumed => {
+                if use_graphics {
+                    client.engine.initialize_graphics_context(window_target).unwrap();
+                }
+            }
             Event::MainEventsCleared => {
                 while let Some(msg) = client.engine.user_interface.poll_message() {
                     client.ui_message(&msg);

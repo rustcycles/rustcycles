@@ -50,7 +50,7 @@ pub(crate) struct ClientFrameData<'a> {
     pub(crate) scene: &'a mut Scene,
     pub(crate) gs: &'a mut GameState,
     pub(crate) cg: &'a mut ClientGame,
-    pub(crate) renderer: &'a mut Renderer,
+    pub(crate) renderer: Option<&'a mut Renderer>,
     pub(crate) ui: &'a mut UserInterface,
 }
 
@@ -516,7 +516,9 @@ impl ClientFrameData<'_> {
         let mut debug_string = String::new();
         if self.cvars.d_draw_text {
             if self.cvars.d_engine_stats {
-                debug_string.push_str(&self.renderer.get_statistics().to_string());
+                if let Some(renderer) = &self.renderer {
+                    debug_string.push_str(&renderer.get_statistics().to_string());
+                }
                 debug_string.push_str(&self.scene.performance_statistics.to_string());
                 debug_string.push('\n');
                 debug_string.push('\n');

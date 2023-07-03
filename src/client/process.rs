@@ -16,6 +16,7 @@ use cvars_console_fyrox::FyroxConsole;
 use fyrox::{
     core::instant::Instant,
     dpi::PhysicalSize,
+    engine::GraphicsContext,
     event::{ElementState, KeyboardInput, MouseButton, MouseScrollDelta, TouchPhase},
     gui::{
         brush::Brush,
@@ -347,7 +348,10 @@ impl ClientProcess {
         // It's possible to get into weird states (e.g. when opening KDE's Klipper tool by a shortcut)
         // where self.mouse_grabbed is incorrect and we'd need to press ESC and then click to regrab.
 
-        let window = &self.engine.graphics_context.as_initialized_ref().window;
+        let window = match &self.engine.graphics_context {
+            GraphicsContext::Initialized(ctx) => &ctx.window,
+            _ => return, // LATER soft_unreachable - return Default::default()?
+        };
         if grab {
             #[cfg(target_os = "macos")]
             let mode = CursorGrabMode::Locked;
@@ -452,26 +456,6 @@ impl ClientProcess {
     }
 
     pub(crate) fn update(&mut self) {
-        if self.cvars.r_quality != self.r_quality {
-            self.r_quality = self.cvars.r_quality;
-
-            let quality = match self.cvars.r_quality {
-                0 => QualitySettings::low(),
-                1 => QualitySettings::medium(),
-                2 => QualitySettings::high(),
-                _ => {
-                    dbg_logf!("Invalid r_quality value: {}", self.cvars.r_quality);
-                    QualitySettings::low()
-                }
-            };
-            self.engine
-                .graphics_context
-                .as_initialized_mut()
-                .renderer
-                .set_quality_settings(&quality)
-                .unwrap();
-        }
-
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -520,7 +504,31 @@ impl ClientProcess {
             self.engine.post_update(dt);
         }
 
-        self.engine.graphics_context.as_initialized_ref().window.request_redraw();
+        self.update_graphics();
+    }
+
+    fn update_graphics(&mut self) {
+        let ctx = match &mut self.engine.graphics_context {
+            GraphicsContext::Initialized(ctx) => ctx,
+            _ => return,
+        };
+
+        if self.cvars.r_quality != self.r_quality {
+            self.r_quality = self.cvars.r_quality;
+
+            let quality = match self.cvars.r_quality {
+                0 => QualitySettings::low(),
+                1 => QualitySettings::medium(),
+                2 => QualitySettings::high(),
+                _ => {
+                    dbg_logf!("Invalid r_quality value: {}", self.cvars.r_quality);
+                    QualitySettings::low()
+                }
+            };
+            ctx.renderer.set_quality_settings(&quality).unwrap();
+        }
+
+        ctx.window.request_redraw();
     }
 
     fn sfd(&mut self) -> Option<ServerFrameData> {
@@ -533,12 +541,17 @@ impl ClientProcess {
     }
 
     fn cfd(&mut self) -> ClientFrameData {
+        let renderer = match &mut self.engine.graphics_context {
+            GraphicsContext::Initialized(ctx) => Some(&mut ctx.renderer),
+            _ => None,
+        };
+
         ClientFrameData {
             cvars: &self.cvars,
             scene: &mut self.engine.scenes[self.gs.scene_handle],
             gs: &mut self.gs,
             cg: &mut self.cg,
-            renderer: &mut self.engine.graphics_context.as_initialized_mut().renderer,
+            renderer,
             ui: &mut self.engine.user_interface,
         }
     }

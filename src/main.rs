@@ -286,10 +286,10 @@ fn client_server_main(opts: Opts) {
 /// client and server in one thread? Update docs on Endpoint or wherever.
 fn client_main(cvars: Cvars, local_server: bool) {
     let event_loop = EventLoop::new();
-    let engine = init_engine_client(&event_loop, &cvars);
+    let engine = init_engine_client(&cvars);
 
     let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
-    event_loop.run(move |event, _, control_flow| {
+    event_loop.run(move |event, window_target, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
         // This is great because we get events almost immediately,
@@ -340,8 +340,8 @@ fn client_main(cvars: Cvars, local_server: bool) {
             },
             Event::UserEvent(_) => {}
             // LATER test suspend/resume
-            Event::Suspended => {}
-            Event::Resumed => {}
+            Event::Suspended => client.engine.destroy_graphics_context().unwrap(),
+            Event::Resumed => client.engine.initialize_graphics_context(window_target).unwrap(),
             Event::MainEventsCleared => {
                 while let Some(msg) = client.engine.user_interface.poll_message() {
                     client.ui_message(&msg);
@@ -365,10 +365,10 @@ fn client_main(cvars: Cvars, local_server: bool) {
 
 fn server_main(cvars: Cvars) {
     let event_loop = EventLoop::new();
-    let engine = init_engine_server(&event_loop);
+    let engine = init_engine_server();
 
     let mut server = executor::block_on(ServerProcess::new(cvars, engine));
-    event_loop.run(move |event, _, control_flow| {
+    event_loop.run(move |event, window_target, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;
 
@@ -390,8 +390,8 @@ fn server_main(cvars: Cvars) {
             }
             Event::DeviceEvent { .. } => {}
             Event::UserEvent(_) => {}
-            Event::Suspended => {}
-            Event::Resumed => {}
+            Event::Suspended => server.engine.destroy_graphics_context().unwrap(),
+            Event::Resumed => server.engine.initialize_graphics_context(window_target).unwrap(),
             Event::MainEventsCleared => {
                 server.update();
                 while let Some(_msg) = server.engine.user_interface.poll_message() {}
@@ -403,7 +403,7 @@ fn server_main(cvars: Cvars) {
     });
 }
 
-fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
+fn init_engine_client(cvars: &Cvars) -> Engine {
     let mut window_builder = WindowBuilder::new().with_title("RustCycles");
     if cvars.cl_fullscreen {
         // Borderless is preferred on macOS.
@@ -416,7 +416,7 @@ fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
     }
 
     // LATER no vsync
-    let mut engine = Engine::new(EngineInitParams {
+    Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
             vsync: true,
@@ -424,12 +424,10 @@ fn init_engine_client(event_loop: &EventLoop<()>, cvars: &Cvars) -> Engine {
         serialization_context: Arc::new(SerializationContext::new()),
         resource_manager: ResourceManager::new(),
     })
-    .unwrap();
-    engine.initialize_graphics_context(event_loop).unwrap();
-    engine
+    .unwrap()
 }
 
-fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
+fn init_engine_server() -> Engine {
     // LATER Headless - do all this without creating a window.
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles server")
@@ -437,7 +435,7 @@ fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
 
     // LATER Does vsync have any effect here?
     // LATER No window at all (currently bugged)
-    let mut engine = Engine::new(EngineInitParams {
+    Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
             vsync: true,
@@ -445,7 +443,5 @@ fn init_engine_server(event_loop: &EventLoop<()>) -> Engine {
         serialization_context: Arc::new(SerializationContext::new()),
         resource_manager: ResourceManager::new(),
     })
-    .unwrap();
-    engine.initialize_graphics_context(event_loop).unwrap();
-    engine
+    .unwrap()
 }

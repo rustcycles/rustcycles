@@ -43,6 +43,7 @@ pub(crate) struct ClientProcess {
     mouse_grabbed: bool,
     shift_pressed: bool,
     pub(crate) engine: Engine,
+    r_quality: i32,
     console: FyroxConsole,
     debug_text: Handle<UiNode>,
     gs: GameState,
@@ -58,23 +59,6 @@ pub(crate) struct ClientProcess {
 impl ClientProcess {
     pub(crate) async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
         let clock = Instant::now();
-
-        let quality = match cvars.r_quality {
-            0 => QualitySettings::low(),
-            1 => QualitySettings::medium(),
-            2 => QualitySettings::high(),
-            _ => {
-                dbg_logf!("Invalid r_quality value: {}", cvars.r_quality);
-                QualitySettings::low()
-            }
-        };
-        // LATER Allow changing quality at runtime
-        engine
-            .graphics_context
-            .as_initialized_mut()
-            .renderer
-            .set_quality_settings(&quality)
-            .unwrap();
 
         let debug_text =
             TextBuilder::new(WidgetBuilder::new().with_foreground(Brush::Solid(Color::RED)))
@@ -166,6 +150,7 @@ impl ClientProcess {
             mouse_grabbed: false,
             shift_pressed: false,
             engine,
+            r_quality: -1, // Initialize this on the first frame, after graphics_context
             console,
             debug_text,
             gs,
@@ -467,6 +452,26 @@ impl ClientProcess {
     }
 
     pub(crate) fn update(&mut self) {
+        if self.cvars.r_quality != self.r_quality {
+            self.r_quality = self.cvars.r_quality;
+
+            let quality = match self.cvars.r_quality {
+                0 => QualitySettings::low(),
+                1 => QualitySettings::medium(),
+                2 => QualitySettings::high(),
+                _ => {
+                    dbg_logf!("Invalid r_quality value: {}", self.cvars.r_quality);
+                    QualitySettings::low()
+                }
+            };
+            self.engine
+                .graphics_context
+                .as_initialized_mut()
+                .renderer
+                .set_quality_settings(&quality)
+                .unwrap();
+        }
+
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75

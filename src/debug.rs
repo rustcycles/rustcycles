@@ -47,31 +47,6 @@
 
 pub(crate) mod details;
 
-/// Same as `assert!` but only prints a message without crashing.
-#[macro_export]
-macro_rules! soft_assert {
-    // The matchers are the same as in stdlib's assert.
-    // The rest is an approximation of the same message format.
-    ($cond:expr $(,)?) => {
-        soft_assert!($cond, stringify!($cond))
-    };
-    ($cond:expr, $($arg:tt)+) => {
-        {
-            // Using a temporary variable to avoid triggering clippy::neg_cmp_op_on_partial_ord.
-            // Can't use `#[allow(...)]` here because attributes on expressions are unstable.
-            // (The `if` can become an expression depending on how the macro is used.)
-            // NANs are handled correctly - any comparison with them returns `false`
-            // which turns into `true` here and prints the message.
-            let tmp = $cond;
-            if !tmp {
-                // LATER Proper logging
-                // LATER client vs server
-                dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
-            }
-        }
-    };
-}
-
 /// Print text into stdout. Uses `println!(..)`-style formatting.
 #[macro_export]
 macro_rules! dbg_logf {
@@ -190,6 +165,31 @@ macro_rules! dbg_rot {
     };
 }
 
+/// Same as `assert!` but only prints a message without crashing.
+#[macro_export]
+macro_rules! soft_assert {
+    // The matchers are the same as in stdlib's assert.
+    // The rest is an approximation of the same message format.
+    ($cond:expr $(,)?) => {
+        soft_assert!($cond, stringify!($cond))
+    };
+    ($cond:expr, $($arg:tt)+) => {
+        {
+            // Using a temporary variable to avoid triggering clippy::neg_cmp_op_on_partial_ord.
+            // Can't use `#[allow(...)]` here because attributes on expressions are unstable.
+            // (The `if` can become an expression depending on how the macro is used.)
+            // NANs are handled correctly - any comparison with them returns `false`
+            // which turns into `true` here and prints the message.
+            let tmp = $cond;
+            if !tmp {
+                // LATER Proper logging
+                // LATER client vs server
+                dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+            }
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unit_cmp)] // https://github.com/rust-lang/rust-clippy/issues/4661
@@ -199,38 +199,6 @@ mod tests {
 
     // LATER Test these do what they should, not just that they compile.
     //          At least check the globals.
-
-    #[test]
-    fn test_soft_assert() {
-        #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
-
-        // Identity function which counts how many times it's executed
-        // to make sure macros only evaluate each input once.
-        let mut execution_count = 0;
-        let mut id = |x| {
-            execution_count += 1;
-            x
-        };
-
-        soft_assert!(2 + 2 == id(4));
-        soft_assert!(2 + 2 == id(5));
-
-        soft_assert!(2 + 2 == id(4), "custom message {}", 42);
-        soft_assert!(2 + 2 == id(5), "custom message {}", 42);
-
-        // Test the macros in expression position
-        #[allow(unreachable_patterns)]
-        let nothing = match 0 {
-            _ => soft_assert!(2 + 2 == id(4)),
-            _ => soft_assert!(2 + 2 == id(5)),
-
-            _ => soft_assert!(2 + 2 == id(4), "custom message {}", 42),
-            _ => soft_assert!(2 + 2 == id(5), "custom message {}", 42),
-        };
-        assert_eq!(nothing, ());
-
-        assert_eq!(execution_count, 4 + 1); // +1 because only one match arm runs
-    }
 
     #[test]
     fn test_logging_compiles() {
@@ -328,5 +296,37 @@ mod tests {
             _ => dbg_rot!(v!(1 2 3), rot, 5.0),
         };
         assert_eq!(nothing, ());
+    }
+
+    #[test]
+    fn test_soft_assert() {
+        #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
+
+        // Identity function which counts how many times it's executed
+        // to make sure macros only evaluate each input once.
+        let mut execution_count = 0;
+        let mut id = |x| {
+            execution_count += 1;
+            x
+        };
+
+        soft_assert!(2 + 2 == id(4));
+        soft_assert!(2 + 2 == id(5));
+
+        soft_assert!(2 + 2 == id(4), "custom message {}", 42);
+        soft_assert!(2 + 2 == id(5), "custom message {}", 42);
+
+        // Test the macros in expression position
+        #[allow(unreachable_patterns)]
+        let nothing = match 0 {
+            _ => soft_assert!(2 + 2 == id(4)),
+            _ => soft_assert!(2 + 2 == id(5)),
+
+            _ => soft_assert!(2 + 2 == id(4), "custom message {}", 42),
+            _ => soft_assert!(2 + 2 == id(5), "custom message {}", 42),
+        };
+        assert_eq!(nothing, ());
+
+        assert_eq!(execution_count, 4 + 1); // +1 because only one match arm runs
     }
 }

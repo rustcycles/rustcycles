@@ -190,6 +190,29 @@ macro_rules! soft_assert {
     };
 }
 
+/// Simiar to `unreachable!` but only prints a message and returns without crashing.
+///
+/// Control flow must not go past this macro but it must not panic either,
+/// so the solution is to return from the function.
+/// The value returned is `Default::default()`
+/// so it'll only work in functions that return a type implementing `Default`
+/// (this includes functions returning `()`).
+#[macro_export]
+macro_rules! soft_unreachable {
+    () => {
+        {
+            dbg_logf!("soft error: entered unreachable code, {}:{}:{}", file!(), line!(), column!());
+            return Default::default();
+        }
+    };
+    ($($arg:tt)+) => {
+        {
+            dbg_logf!("soft error: entered unreachable code: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+            return Default::default();
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unit_cmp)] // https://github.com/rust-lang/rust-clippy/issues/4661
@@ -328,5 +351,33 @@ mod tests {
         assert_eq!(nothing, ());
 
         assert_eq!(execution_count, 4 + 1); // +1 because only one match arm runs
+    }
+
+    #[test]
+    fn test_sort_unreachable() {
+        (|| soft_unreachable!())();
+        (|| soft_unreachable!("custom message {}", 42))();
+
+        fn int1(option: Option<i32>) -> i32 {
+            let Some(x) = option else { soft_unreachable!() };
+            x
+        }
+        int1(None);
+        fn int2(option: Option<i32>) -> i32 {
+            let Some(x) = option else {
+                soft_unreachable!("custom message {}", 42)
+            };
+            x
+        }
+        int2(None);
+
+        fn void1() {
+            soft_unreachable!()
+        }
+        void1();
+        fn void2() {
+            soft_unreachable!("custom message {}", 42)
+        }
+        void2();
     }
 }

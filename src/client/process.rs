@@ -350,7 +350,7 @@ impl ClientProcess {
 
         let window = match &self.engine.graphics_context {
             GraphicsContext::Initialized(ctx) => &ctx.window,
-            _ => return, // LATER soft_unreachable - return Default::default()?
+            _ => soft_unreachable!(),
         };
         if grab {
             #[cfg(target_os = "macos")]

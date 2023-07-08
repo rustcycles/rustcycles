@@ -10,7 +10,8 @@ authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 # Abort on panic might be a better default: https://vorner.github.io/2018/07/22/dont_panic.html
 # This makes backtraces useless, see .cargo/config-example.toml for a fix.
 # It also means that tests need a separate build of all deps because they use unwinding,
-# though at least cargo build and test can coexist so alternating between them won't cause a full build each time.
+# though at least the artifacts from build and test can coexist
+# so alternating between them won't cause a full build each time.
 # Seems to have no impact on incremental compile times.
 # Keep "unwind" in debug mode so we can use tests more easily.
 #panic = "abort"

@@ -137,6 +137,7 @@ cvars! {
     r_quality: i32 = 0,
 }
 
+/// Vec3 with support for cvars. Should be converted to Vec3 before use in gamecode.
 #[derive(Debug, Clone, Copy)]
 pub struct CVec3 {
     x: f32,

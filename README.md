@@ -4,14 +4,15 @@
 </div>
 <br />
 
-[![License (AGPL3)](https://img.shields.io/github/license/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles/blob/master/LICENSE)
+[![GitHub](https://img.shields.io/badge/github-rustcycles/rustcycles-8da0cb?logo=github)](https://github.com/rustcycles/rustcycles)
+[![License (AGPLv3)](https://img.shields.io/github/license/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles/blob/master/LICENSE)
 [![CI](https://github.com/rustcycles/rustcycles/workflows/CI/badge.svg)](https://github.com/rustcycles/rustcycles/actions)
 [![Audit](https://github.com/rustcycles/rustcycles/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/rustcycles/rustcycles/status.svg)](https://deps.rs/repo/github/rustcycles/rustcycles)
-[![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/cXU5HzDXM5)
-<!-- These keep getting broken and then they show 0 which looks bad
+[![Discord](https://img.shields.io/badge/-Discord-7389d8?logo=discord&label=&logoColor=ffffff&labelColor=6A7EC2)](https://discord.gg/cXU5HzDXM5)
+<!-- These keep getting broken and then they show 0 which looks bad, comment out when that happens. -->
 [![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)
-[![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles) -->
+[![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
 
 <!-- Note to my future OCD: The ideal image width for a github readme is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). The recommended size for the social preview is higher, likely best to use a different image. -->
 <!-- Check https://github.com/topics/tron to make sure it doesn't look blurry. -->

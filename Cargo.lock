@@ -555,9 +555,9 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
 name = "cvars"
-version = "0.4.0"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa38756dacaafa558ba52fcb2181e8d06799804274c1678359cffe3b39402850"
+checksum = "05ab28b58a0d519c24ea023a45939e8ab8a4ed712dee012878246e4e1dfb7efb"
 dependencies = [
  "cvars-macros",
 ]

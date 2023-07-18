@@ -51,7 +51,7 @@ use crate::{client::process::ClientProcess, prelude::*, server::process::ServerP
 //  - [x] Readme
 //  - [x] GH social preview (screenshot)
 //  - [x] CI, audit, badges
-//      - [ ] Check all paths are lowercase (or we might have issues on windows)
+//      - [x] Check all paths are lowercase (or we might have issues on windows)
 //  - [ ] CI artifacts - allow downloading from GH
 //  - [ ] Trimesh colliders
 //      - [ ] Poles - there's many - check perf

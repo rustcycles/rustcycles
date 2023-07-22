@@ -444,6 +444,13 @@ impl ClientFrameData<'_> {
         dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, GREEN);
         dbg_arrow!(v!(13 11 5), v!(0 0 2), 0.0, RED);
 
+        // Depending whether overlap detection is done on shapes or individual lines,
+        // the arrows' centers will be red/green or yellow.
+        dbg_arrow!(v!(12 10 5), v!(0 0 2), 0.0, RED);
+        dbg_line!(v!(12 10 5), v!(12 10 7), 0.0, GREEN);
+        dbg_arrow!(v!(12 11 5), v!(0 0 2), 0.0, GREEN);
+        dbg_line!(v!(12 11 5), v!(12 11 7), 0.0, RED);
+
         dbg_arrow!(v!(20 15 5), v!(-0.01 0.03 -1));
 
         // An example of why euler angles cause issues with interpolation.

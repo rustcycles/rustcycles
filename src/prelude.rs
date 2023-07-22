@@ -177,6 +177,36 @@ impl Vec3Ext for Vec3 {
     }
 }
 
+/// QoL methods for UnitQuaternion
+///
+/// Should be imported along with the rest of the prelude using a glob.
+pub(crate) trait UnitQuaternionExt {
+    /// Create a unit quaternion from yaw, pitch and roll in that order.
+    fn from_ypr(yaw: f32, pitch: f32, roll: f32) -> Self;
+    /// Create a unit quaternion from yaw, pitch and roll in that order.
+    fn from_ypr_extrinsic(yaw: f32, pitch: f32, roll: f32) -> Self;
+}
+
+impl UnitQuaternionExt for UnitQuaternion<f32> {
+    fn from_ypr(yaw: f32, pitch: f32, roll: f32) -> Self {
+        let mut quat = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw);
+
+        let local_left = quat * LEFT_AXIS;
+        quat = UnitQuaternion::from_axis_angle(&local_left, pitch) * quat;
+        let local_forward = quat * FORWARD_AXIS;
+        quat = UnitQuaternion::from_axis_angle(&local_forward, roll) * quat;
+
+        quat
+    }
+
+    fn from_ypr_extrinsic(yaw: f32, pitch: f32, roll: f32) -> Self {
+        let qyaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw);
+        let qpitch = UnitQuaternion::from_axis_angle(&LEFT_AXIS, pitch);
+        let qroll = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, roll);
+        qroll * qpitch * qyaw
+    }
+}
+
 /// QoL methods for fyrox's Node.
 ///
 /// Should be imported along with the rest of the prelude using a glob.

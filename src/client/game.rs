@@ -459,7 +459,8 @@ impl ClientFrameData<'_> {
         let pitch = tpitch * pi;
         let roll = troll * pi;
 
-        let pos_rot = v!(30 5 5);
+        // This is off to the side because it's hard to see above the map.
+        let pos_rot = v!(40 5 5);
         let mut pos_indicator = pos_rot + 1.1 * BACK;
         dbg_line!(pos_indicator, pos_indicator + tyaw * UP, 0, GREEN);
         pos_indicator += 0.1 * RIGHT;
@@ -467,13 +468,19 @@ impl ClientFrameData<'_> {
         pos_indicator += 0.1 * RIGHT;
         dbg_line!(pos_indicator, pos_indicator + troll * UP, 0, BLUE2);
 
-        // LATER Add UnitQuaternion::from_yaw_pitch_roll?
-        let qyaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw);
-        let qpitch = UnitQuaternion::from_axis_angle(&LEFT_AXIS, pitch);
-        let qroll = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, roll);
-        let rot = qroll * qpitch * qyaw;
+        let rot = UnitQuaternion::from_ypr(yaw, pitch, roll);
         dbg_rot!(pos_rot, rot);
         dbg_rot!(pos_rot, Default::default(), 0, 0.25);
+
+        // Show the difference between intrinsic and extrinsic rotations
+        // (easier to see with just 45° instead of 180°).
+        let yaw45 = tyaw * pi / 4.0;
+        let pitch45 = tpitch * pi / 4.0;
+        let roll45 = troll * pi / 4.0;
+        let rot45_intrinsic = UnitQuaternion::from_ypr(yaw45, pitch45, roll45);
+        dbg_rot!(pos_rot + 4.0 * FORWARD, rot45_intrinsic);
+        let rot45_extrinsic = UnitQuaternion::from_ypr_extrinsic(yaw45, pitch45, roll45);
+        dbg_rot!(pos_rot + 6.0 * FORWARD, rot45_extrinsic);
 
         // For understanding the difference between global and local pitch.
 

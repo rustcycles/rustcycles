@@ -75,6 +75,38 @@ pub struct ColorDef {
     pub a: u8,
 }
 
+/// Helper function, prefer `dbg_line!()` instead.
+pub(crate) fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
+    let shape = Shape::Line { begin, end };
+    debug_shape(shape, time, color);
+}
+
+/// Helper function, prefer `dbg_arrow!()` instead.
+pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
+    let shape = Shape::Arrow { begin, dir };
+    debug_shape(shape, time, color);
+}
+
+/// Helper function, prefer `dbg_cross!()` instead.
+pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
+    let shape = Shape::Cross { point };
+    debug_shape(shape, time, color);
+}
+
+/// Helper function, prefer `dbg_rot!()` instead.
+pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, size: f32) {
+    let shape = Shape::Rot { point, rot, size };
+    // Color is not used
+    debug_shape(shape, time, Color::WHITE);
+}
+
+fn debug_shape(shape: Shape, time: f32, color: Color) {
+    DEBUG_SHAPES.with(|shapes| {
+        let shape = DebugShape { shape, time, color };
+        shapes.borrow_mut().push(shape);
+    });
+}
+
 impl DebugShape {
     pub(crate) fn to_lines(&self, cvars: &Cvars, lines: &mut Lines) {
         match self.shape {
@@ -171,38 +203,6 @@ impl Lines {
             .and_modify(|line| line.color += color)
             .or_insert(Line { begin, end, color });
     }
-}
-
-/// Helper function, prefer `dbg_line!()` instead.
-pub(crate) fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
-    let shape = Shape::Line { begin, end };
-    debug_shape(shape, time, color);
-}
-
-/// Helper function, prefer `dbg_arrow!()` instead.
-pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
-    let shape = Shape::Arrow { begin, dir };
-    debug_shape(shape, time, color);
-}
-
-/// Helper function, prefer `dbg_cross!()` instead.
-pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
-    let shape = Shape::Cross { point };
-    debug_shape(shape, time, color);
-}
-
-/// Helper function, prefer `dbg_rot!()` instead.
-pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, size: f32) {
-    let shape = Shape::Rot { point, rot, size };
-    // Color is not used
-    debug_shape(shape, time, Color::WHITE);
-}
-
-fn debug_shape(shape: Shape, time: f32, color: Color) {
-    DEBUG_SHAPES.with(|shapes| {
-        let shape = DebugShape { shape, time, color };
-        shapes.borrow_mut().push(shape);
-    });
 }
 
 #[derive(Debug, Clone)]

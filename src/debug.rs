@@ -223,7 +223,7 @@ mod tests {
     use crate::prelude::*;
 
     // LATER Test these do what they should, not just that they compile.
-    //          At least check the globals.
+    //  At least check the globals. Or better yet, test them by running the game and comparing output.
 
     #[test]
     fn test_logging_compiles() {
@@ -271,7 +271,7 @@ mod tests {
     }
 
     #[test]
-    fn test_drawing_compiles_no_import() {
+    fn test_drawing_compiles() {
         #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
 
         dbg_line!(v!(1 2 3), v!(4 5 6));

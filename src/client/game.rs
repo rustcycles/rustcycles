@@ -446,7 +446,37 @@ impl ClientFrameData<'_> {
 
         dbg_arrow!(v!(20 15 5), v!(-0.01 0.03 -1));
 
+        // An example of why euler angles cause issues with interpolation.
+        // Start with no rotation, then rotate 180° around each axis.
+        // The result is visually the same as no rotation but the euler angles are different.
+
+        let pi = std::f32::consts::PI;
+        let t = self.gs.game_time % 7.0;
+        let tyaw = t.clamp(1.0, 2.0) - 1.0;
+        let tpitch = t.clamp(3.0, 4.0) - 3.0;
+        let troll = t.clamp(5.0, 6.0) - 5.0;
+        let yaw = tyaw * pi;
+        let pitch = tpitch * pi;
+        let roll = troll * pi;
+
+        let pos_rot = v!(30 5 5);
+        let mut pos_indicator = pos_rot + 1.1 * BACK;
+        dbg_line!(pos_indicator, pos_indicator + tyaw * UP, 0, GREEN);
+        pos_indicator += 0.1 * RIGHT;
+        dbg_line!(pos_indicator, pos_indicator + tpitch * UP, 0, RED);
+        pos_indicator += 0.1 * RIGHT;
+        dbg_line!(pos_indicator, pos_indicator + troll * UP, 0, BLUE2);
+
+        // LATER Add UnitQuaternion::from_yaw_pitch_roll?
+        let qyaw = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw);
+        let qpitch = UnitQuaternion::from_axis_angle(&LEFT_AXIS, pitch);
+        let qroll = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, roll);
+        let rot = qroll * qpitch * qyaw;
+        dbg_rot!(pos_rot, rot);
+        dbg_rot!(pos_rot, Default::default(), 0, 0.25);
+
         // For understanding the difference between global and local pitch.
+
         let yaw_angle = self.cg.input.yaw.to_radians();
         let pitch_angle = self.cg.input.pitch.to_radians();
         let yaw_rot = UnitQuaternion::from_axis_angle(&UP_AXIS, yaw_angle);

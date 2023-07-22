@@ -31,7 +31,6 @@
 //!
 //! LATER soft_unwrap
 //!
-//! LATER Gamecode will be sandboxed using WASM.
 //! LATER Offer a way for servers and clients to autoreport errors.
 //!
 //! LATER How does sending logs from sv to cl interact with cl vs sv framerates?
@@ -157,8 +156,11 @@ macro_rules! dbg_cross {
 /// Draw RGB basis vectors at `point`, rotated by `rot`.
 #[macro_export]
 macro_rules! dbg_rot {
+    ($point:expr, $rot:expr, $time:expr, $size:expr) => {
+        $crate::debug::details::debug_rot($point, $rot, $time as f32, $size as f32)
+    };
     ($point:expr, $rot:expr, $time:expr) => {
-        $crate::debug::details::debug_rot($point, $rot, $time as f32)
+        $crate::dbg_rot!($point, $rot, 0.0, 1.0)
     };
     ($point:expr, $rot:expr) => {
         $crate::dbg_rot!($point, $rot, 0.0)
@@ -292,7 +294,12 @@ mod tests {
 
         let rot = UnitQuaternion::from_euler_angles(0.1, 0.2, 0.3);
         dbg_rot!(v!(1 2 3), rot);
+        dbg_rot!(v!(1 2 3), rot, 5);
         dbg_rot!(v!(1 2 3), rot, 5.0);
+        dbg_rot!(v!(1 2 3), rot, 5, 2);
+        dbg_rot!(v!(1 2 3), rot, 5, 2.0);
+        dbg_rot!(v!(1 2 3), rot, 5.0, 2);
+        dbg_rot!(v!(1 2 3), rot, 5.0, 2.0);
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]

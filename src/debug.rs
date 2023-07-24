@@ -171,22 +171,84 @@ macro_rules! dbg_rot {
 #[macro_export]
 macro_rules! soft_assert {
     // The matchers are the same as in stdlib's assert.
-    // The rest is an approximation of the same message format.
+    // The message format is similar but not identical.
+    // Examples from regular asserts:
+    // assert!(false);
+    // assert!(false, "test");
+    // thread 'main' panicked at 'assertion failed: false', src/main.rs:2:5
+    // thread 'main' panicked at 'test', src/main.rs:3:5
     ($cond:expr $(,)?) => {
         soft_assert!($cond, stringify!($cond))
     };
     ($cond:expr, $($arg:tt)+) => {
-        {
-            // Using a temporary variable to avoid triggering clippy::neg_cmp_op_on_partial_ord.
-            // Can't use `#[allow(...)]` here because attributes on expressions are unstable.
-            // (The `if` can become an expression depending on how the macro is used.)
-            // NANs are handled correctly - any comparison with them returns `false`
-            // which turns into `true` here and prints the message.
-            let tmp = $cond;
-            if !tmp {
-                // LATER Proper logging
-                // LATER client vs server
-                dbg_logf!("soft assertion failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+        // Using a match to extend lifetimes, see soft_assert_eq for more details.
+        match (&$cond) {
+            cond_val => {
+                if !*cond_val {
+                    dbg_logf!("soft_assert failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+                }
+            }
+        }
+    };
+}
+
+/// Same as `assert_eq!` but only prints a message without crashing.
+#[macro_export]
+macro_rules! soft_assert_eq {
+    // The matchers are the same as in stdlib's assert.
+    // The message format is similar but not identical, we want to fit on one line.
+    // Examples from regular asserts:
+    // assert_eq!(1, 2);
+    // assert_eq!(1, 2, "test");
+    // thread 'main' panicked at 'assertion failed: `(left == right)`
+    //   left: `1`,
+    //  right: `2`', src/main.rs:4:5
+    // thread 'main' panicked at 'assertion failed: `(left == right)`
+    //   left: `1`,
+    //  right: `2`: test', src/main.rs:5:5
+    ($left:expr, $right:expr $(,)?) => {
+        soft_assert_eq!($left, $right, "`{} == {}`", stringify!($left), stringify!($right))
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        // This is based on the impl of `assert_eq!` in stdlib.
+        // https://stackoverflow.com/questions/48732263/why-is-rusts-assert-eq-implemented-using-a-match/54855986#54855986
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    dbg_logf!("soft_assert_eq failed: {}, left: {:?}, right {:?}, {}:{}:{}",
+                        format!($($arg)+), &*left_val, &*right_val, file!(), line!(), column!()
+                    )
+                }
+            }
+        }
+    };
+}
+
+/// Same as `assert_ne!` but only prints a message without crashing.
+#[macro_export]
+macro_rules! soft_assert_ne {
+    // The matchers are the same as in stdlib's assert.
+    // The message format is similar but not identical, we want to fit on one line.
+    // Examples from regular asserts:
+    // assert_ne!(1, 1);
+    // assert_ne!(1, 1, "test");
+    // thread 'main' panicked at 'assertion failed: `(left != right)`
+    //   left: `1`,
+    //  right: `1`', src/main.rs:6:5
+    // thread 'main' panicked at 'assertion failed: `(left != right)`
+    //   left: `1`,
+    //  right: `1`: test', src/main.rs:7:5
+    ($left:expr, $right:expr $(,)?) => {
+        soft_assert_ne!($left, $right, "`{} != {}`", stringify!($left), stringify!($right))
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !(*left_val != *right_val) {
+                    dbg_logf!("soft_assert_ne failed: {}, left: {:?}, right {:?}, {}:{}:{}",
+                        format!($($arg)+), &*left_val, &*right_val, file!(), line!(), column!()
+                    )
+                }
             }
         }
     };
@@ -331,33 +393,90 @@ mod tests {
     #[test]
     fn test_soft_assert() {
         #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
+        #![allow(clippy::nonminimal_bool)]
+        #![allow(clippy::redundant_clone)]
 
         // Identity function which counts how many times it's executed
         // to make sure macros only evaluate each input once.
         let mut execution_count = 0;
-        let mut id = |x| {
+        let mut id_cnt = |x| {
             execution_count += 1;
             x
         };
 
-        soft_assert!(2 + 2 == id(4));
-        soft_assert!(2 + 2 == id(5));
+        soft_assert!(2 + 2 == id_cnt(4));
+        soft_assert!(2 + 2 == id_cnt(5));
+        soft_assert_eq!(2 + 2, id_cnt(4));
+        soft_assert_eq!(2 + 2, id_cnt(5));
+        soft_assert_ne!(2 + 2, id_cnt(4));
+        soft_assert_ne!(2 + 2, id_cnt(5));
 
-        soft_assert!(2 + 2 == id(4), "custom message {}", 42);
-        soft_assert!(2 + 2 == id(5), "custom message {}", 42);
+        soft_assert!(2 + 2 == id_cnt(4), "custom message {}", 42);
+        soft_assert!(2 + 2 == id_cnt(5), "custom message {}", 42);
+        soft_assert_eq!(2 + 2, id_cnt(4), "custom message {}", 42);
+        soft_assert_eq!(2 + 2, id_cnt(5), "custom message {}", 42);
+        soft_assert_ne!(2 + 2, id_cnt(4), "custom message {}", 42);
+        soft_assert_ne!(2 + 2, id_cnt(5), "custom message {}", 42);
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
-            _ => soft_assert!(2 + 2 == id(4)),
-            _ => soft_assert!(2 + 2 == id(5)),
+            _ => soft_assert!(2 + 2 == id_cnt(4)),
+            _ => soft_assert!(2 + 2 == id_cnt(5)),
+            _ => soft_assert_eq!(2 + 2, id_cnt(4)),
+            _ => soft_assert_eq!(2 + 2, id_cnt(5)),
+            _ => soft_assert_ne!(2 + 2, id_cnt(4)),
+            _ => soft_assert_ne!(2 + 2, id_cnt(5)),
 
-            _ => soft_assert!(2 + 2 == id(4), "custom message {}", 42),
-            _ => soft_assert!(2 + 2 == id(5), "custom message {}", 42),
+            _ => soft_assert!(2 + 2 == id_cnt(4), "custom message {}", 42),
+            _ => soft_assert!(2 + 2 == id_cnt(5), "custom message {}", 42),
+            _ => soft_assert_eq!(2 + 2, id_cnt(4), "custom message {}", 42),
+            _ => soft_assert_eq!(2 + 2, id_cnt(5), "custom message {}", 42),
+            _ => soft_assert_ne!(2 + 2, id_cnt(4), "custom message {}", 42),
+            _ => soft_assert_ne!(2 + 2, id_cnt(5), "custom message {}", 42),
         };
         assert_eq!(nothing, ());
+        assert_eq!(execution_count, 6 + 6 + 1); // +1 because only one match arm runs
 
-        assert_eq!(execution_count, 4 + 1); // +1 because only one match arm runs
+        // Unlike std's assert, we accept &bool. This is originally an accident but why not.
+        soft_assert!(&true);
+        soft_assert!(&false);
+
+        // Test everything lives long enough when using references to temporaries.
+        // This is slightly more complicated than it looks because rust appears to extend lifetimes in some cases.
+        // For example:
+        //
+        // let b1 = id(&(true && true));
+        // dbg!(b1);
+        //
+        // let b2 = &(true && true);
+        // dbg!(b2);
+        //
+        // dbg!(id(&(true && true)));
+        //
+        // let i1 = id(&(1 + 1));
+        // dbg!(i1);
+        //
+        // let idk = id(&id(&(1 + 1)));
+        // dbg!(idk);
+        //
+        // Only b1 and idk fail to compile and only if they're actually used.
+        // Trait based binary ops behae differently than logical && and ||.
+        // I don't fully understand these rules but the tests below are written so they fail
+        // if the macros don't extend lifetimes properly.
+        fn id<T>(t: T) -> T {
+            t
+        }
+        soft_assert!(id(&(true && true)));
+        soft_assert!(id(&(false && false)));
+        soft_assert_eq!(id(&id(2 + 2)), &4);
+        soft_assert_eq!(id(&id(2 + 2)), &5);
+        soft_assert_ne!(id(&id(2 + 2)), &4);
+        soft_assert_ne!(id(&id(2 + 2)), &5);
+
+        let vals = vec![1, 2, 3, 4].into_iter();
+        soft_assert_eq!(vals.clone().collect::<Vec<_>>().as_slice(), [1, 2, 3, 4]);
+        soft_assert_ne!(vals.clone().collect::<Vec<_>>().as_slice(), [1, 2, 3, 4]);
     }
 
     #[test]

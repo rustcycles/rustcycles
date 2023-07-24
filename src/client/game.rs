@@ -118,6 +118,13 @@ impl ClientGame {
         };
         dbg_logf!("local player_index is {}", player_handle.index());
 
+        soft_assert!(false);
+        soft_assert!(false, "test");
+        soft_assert_eq!(1, 2);
+        soft_assert_eq!(1, 2, "test");
+        soft_assert_ne!(1, 1);
+        soft_assert_ne!(1, 1, "test");
+
         Self {
             debug_text,
             conn,

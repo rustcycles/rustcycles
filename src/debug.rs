@@ -648,6 +648,8 @@ mod tests {
 
     #[test]
     fn test_soft_unwrap() {
+        #![allow(clippy::bool_assert_comparison)]
+
         assert_eq!(Some(42).soft_unwrap(), 42);
         assert_eq!(None::<i32>.soft_unwrap(), 0);
         assert_eq!(Ok::<i32, &str>(42).soft_unwrap(), 42);

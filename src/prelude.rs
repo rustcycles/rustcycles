@@ -55,6 +55,7 @@ pub(crate) use crate::{
         FrameData, GameState, GameStateType,
     },
     cvars::Cvars,
+    debug::{DbgIterator, SoftUnwrap},
     server::game::ServerFrameData,
 };
 

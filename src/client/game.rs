@@ -118,12 +118,29 @@ impl ClientGame {
         };
         dbg_logf!("local player_index is {}", player_handle.index());
 
-        soft_assert!(false);
-        soft_assert!(false, "test");
-        soft_assert_eq!(1, 2);
-        soft_assert_eq!(1, 2, "test");
-        soft_assert_ne!(1, 1);
-        soft_assert_ne!(1, 1, "test");
+        if cvars.d_testing {
+            let f = false;
+            soft_assert!(f);
+            soft_assert!(f, "test");
+            let one = 1;
+            let two = 2;
+            soft_assert_eq!(one, two);
+            soft_assert_eq!(one, two, "test");
+            soft_assert_ne!(one, one);
+            soft_assert_ne!(one, one, "test");
+
+            //for x in [1, 2, 3].iter().dbg_count(|cnt| dbg_logf!("element count: {}", cnt)) {}
+            for _ in [1, 2, 3, 4, 5, 6, 7].iter().dbg_count_log("element count full") {}
+            let limit = 5;
+            for _ in [1, 2, 3, 4, 5, 6, 7]
+                .iter()
+                .dbg_count_log(format!("element count before take({limit})"))
+                .take(limit)
+                .dbg_count_log(format!("element count after take({limit})"))
+                .filter(|&&x| x % 2 == 1)
+                .dbg_count_log("element count odd")
+            {}
+        }
 
         Self {
             debug_text,

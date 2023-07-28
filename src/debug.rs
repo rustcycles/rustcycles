@@ -29,10 +29,7 @@
 //! This should, of course, only be used in gamelogic code
 //! which is not concerned with security, doesn't save to disk, etc.
 //!
-//! LATER soft_unwrap
-//!
 //! LATER Offer a way for servers and clients to autoreport errors.
-//!
 //! LATER How does sending logs from sv to cl interact with cl vs sv framerates?
 //! LATER Add usage examples
 
@@ -185,7 +182,7 @@ macro_rules! soft_assert {
         match (&$cond) {
             cond_val => {
                 if !*cond_val {
-                    dbg_logf!("soft_assert failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+                    dbg_logf!("[ERROR]: soft_assert failed: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
                 }
             }
         }
@@ -215,7 +212,7 @@ macro_rules! soft_assert_eq {
         match (&$left, &$right) {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {
-                    dbg_logf!("soft_assert_eq failed: {}, left: {:?}, right {:?}, {}:{}:{}",
+                    dbg_logf!("[ERROR]: soft_assert_eq failed: {}, left: {:?}, right {:?}, {}:{}:{}",
                         format!($($arg)+), &*left_val, &*right_val, file!(), line!(), column!()
                     )
                 }
@@ -245,7 +242,7 @@ macro_rules! soft_assert_ne {
         match (&$left, &$right) {
             (left_val, right_val) => {
                 if !(*left_val != *right_val) {
-                    dbg_logf!("soft_assert_ne failed: {}, left: {:?}, right {:?}, {}:{}:{}",
+                    dbg_logf!("[ERROR]: soft_assert_ne failed: {}, left: {:?}, right {:?}, {}:{}:{}",
                         format!($($arg)+), &*left_val, &*right_val, file!(), line!(), column!()
                     )
                 }
@@ -265,16 +262,158 @@ macro_rules! soft_assert_ne {
 macro_rules! soft_unreachable {
     () => {
         {
-            dbg_logf!("soft error: entered unreachable code, {}:{}:{}", file!(), line!(), column!());
+            dbg_logf!("[ERROR]: soft_unreachable {}:{}:{}", file!(), line!(), column!());
             return Default::default();
         }
     };
     ($($arg:tt)+) => {
         {
-            dbg_logf!("soft error: entered unreachable code: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
+            dbg_logf!("[ERROR]: soft_unreachable: {}, {}:{}:{}", format!($($arg)+), file!(), line!(), column!());
             return Default::default();
         }
     };
+}
+
+pub(crate) trait SoftUnwrap {
+    type Inner;
+    fn soft_unwrap(self) -> Self::Inner;
+}
+
+impl<T: Default> SoftUnwrap for Option<T> {
+    type Inner = T;
+    fn soft_unwrap(self) -> Self::Inner {
+        match self {
+            Some(x) => x,
+            None => soft_unreachable!("Option::None"),
+        }
+    }
+}
+
+impl<T: Default, E> SoftUnwrap for Result<T, E> {
+    type Inner = T;
+    fn soft_unwrap(self) -> Self::Inner {
+        match self {
+            Ok(x) => x,
+            Err(_) => soft_unreachable!("soft_unwrap failed: Result::Err"),
+        }
+    }
+}
+
+// LATER soft accessors for Pool
+
+/// Extension trait for debugging iterators.
+///
+/// Note that if multiple debug methods are used in a single chain,
+/// the order in which they print their results will be reversed.
+pub(crate) trait DbgIterator: Iterator + Sized {
+    // This might not be useful very often,
+    // I just wanted to play with iterators instead of writing my game for a bit.
+    // But hey, at least I am not writing the 51st Rust game engine.
+
+    /// Count how many times an iterator returned `Some` and dbg_log it.
+    ///
+    /// # Examples
+    /// ```rust
+    /// for x in [1, 2, 3].iter().dbg_count_log("element count") {}
+    /// ```
+    fn dbg_count_log(self, msg: impl AsRef<str>) -> DbgCounter<Self, Box<dyn FnMut(usize, bool)>> {
+        let msg = msg.as_ref().to_owned();
+        let f = move |cnt, finished| {
+            if finished {
+                dbg_logf!("{}: {}", msg, cnt);
+            } else {
+                dbg_logf!("{}: {} (not finished)", msg, cnt);
+            }
+        };
+        DbgCounter {
+            iterator: self,
+            f: Box::new(f),
+            cnt: 0,
+            finished: false,
+        }
+    }
+
+    /// Count how many times an iterator returned `Some` and dbg_text it.
+    ///
+    /// # Examples
+    /// ```rust
+    /// for x in [1, 2, 3].iter().dbg_count_text("element count") {}
+    /// ```
+    fn dbg_count_text(self, msg: impl AsRef<str>) -> DbgCounter<Self, Box<dyn FnMut(usize, bool)>> {
+        let msg = msg.as_ref().to_owned();
+        let f = move |cnt, finished| {
+            if finished {
+                dbg_textf!("{}: {}", msg, cnt);
+            } else {
+                dbg_textf!("{}: {} (not finished)", msg, cnt);
+            }
+        };
+        DbgCounter {
+            iterator: self,
+            f: Box::new(f),
+            cnt: 0,
+            finished: false,
+        }
+    }
+
+    /// Count how many times an iterator returned `Some` and call `f` with the result.
+    fn dbg_count<F>(self, f: F) -> DbgCounter<Self, F>
+    where
+        F: FnMut(usize, bool),
+    {
+        DbgCounter {
+            iterator: self,
+            f,
+            cnt: 0,
+            finished: false,
+        }
+    }
+}
+
+impl<I> DbgIterator for I where I: Iterator {}
+
+pub(crate) struct DbgCounter<I, F>
+where
+    I: Iterator,
+    F: FnMut(usize, bool),
+{
+    iterator: I,
+    f: F,
+    cnt: usize,
+    finished: bool,
+}
+
+impl<I, F> Iterator for DbgCounter<I, F>
+where
+    I: Iterator,
+    F: FnMut(usize, bool),
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.iterator.next();
+        if next.is_some() {
+            self.cnt += 1;
+        } else {
+            self.finished = true;
+        }
+        next
+    }
+}
+
+// We could call the function in next() when the iterator returns None
+// but that would only work for iterators that are consumed to the end.
+// Instead, we call it when dropping so it works for all iterators.
+// The downside is that destructors run inside out
+// so the last debug function in a chain will print its result first.
+impl<I, F> Drop for DbgCounter<I, F>
+where
+    I: Iterator,
+    F: FnMut(usize, bool),
+{
+    fn drop(&mut self) {
+        (self.f)(self.cnt, self.finished);
+    }
 }
 
 #[cfg(test)]
@@ -480,7 +619,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sort_unreachable() {
+    fn test_soft_unreachable() {
         (|| soft_unreachable!())();
         (|| soft_unreachable!("custom message {}", 42))();
 
@@ -505,5 +644,20 @@ mod tests {
             soft_unreachable!("custom message {}", 42)
         }
         void2();
+    }
+
+    #[test]
+    fn test_soft_unwrap() {
+        assert_eq!(Some(42).soft_unwrap(), 42);
+        assert_eq!(None::<i32>.soft_unwrap(), 0);
+        assert_eq!(Ok::<i32, &str>(42).soft_unwrap(), 42);
+        assert_eq!(Err::<i32, &str>("abc").soft_unwrap(), 0);
+
+        assert_eq!("42".parse::<i32>().ok().soft_unwrap(), 42);
+        assert_eq!("abc".parse::<i32>().ok().soft_unwrap(), 0);
+        assert_eq!("42".parse::<bool>().ok().soft_unwrap(), false);
+        assert_eq!("42".parse::<i32>().soft_unwrap(), 42);
+        assert_eq!("abc".parse::<i32>().soft_unwrap(), 0);
+        assert_eq!("42".parse::<bool>().soft_unwrap(), false);
     }
 }

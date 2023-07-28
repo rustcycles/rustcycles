@@ -56,7 +56,13 @@ jobs:
         # LATER When fyrox has a headless mode, run the server on all OSes
         #       https://github.com/FyroxEngine/Fyrox/issues/222
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: RUST_BACKTRACE=1 xvfb-run cargo run --verbose --all-features -- local d_exit_after_one_frame true cl_headless true
+        run: RUST_BACKTRACE=1 xvfb-run cargo run --color=always --verbose --all-features -- local cl_headless 1 d_exit_after_one_frame 1 d_testing 1 2>&1 | tee output.log
+      - name: Detect errors
+        # There should be 6 errors in the output, those are printed on purpose.
+        # A different number means something is wrong.
+        # If the condition and therefore the echo succeed,
+        # invert the result with `!` to signal test failure.
+        run: ! ( [[ $(grep '\[ERROR\]:' output.log | wc -l) != 6 ]] && echo Wrong number of ERRORs in output )
 
   format:
     runs-on: ubuntu-latest

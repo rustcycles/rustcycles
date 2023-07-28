@@ -54,6 +54,7 @@ cvars! {
     /// Same as d_dbg but for ints.
     d_dbgi: i32 = 0,
 
+
     // TODO A lot of these cvars need to be synced to server when playing locally.
     /// Master switch for debug output - the d_draw_* group.
     d_draw: bool = true,
@@ -98,6 +99,9 @@ cvars! {
     /// LATER If the seed is 0 at match start, the cvar is changed to the current time and that is used as seed.
     /// This means you can look at the cvar's value later and know what seed you need to replay the same game.
     d_seed: u64 = 0,
+
+    /// Enable extra logging useful when testing the game, for example on CI.
+    d_testing: bool = false,
 
     /// Print UI messages or a subset of them.
     d_ui_msgs: bool = false,

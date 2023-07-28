@@ -53,9 +53,6 @@ jobs:
       - name: Run the client (headless)
         # LATER Look for ways to run the client on all OSes
         #       Maybe try this on windows: https://amiralizadeh9480.medium.com/how-to-run-opengl-based-tests-on-github-actions-60f270b1ea2c
-        # LATER When fyrox has a headless mode, run the server on all OSes
-        #       https://github.com/FyroxEngine/Fyrox/issues/222
-        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: RUST_BACKTRACE=1 xvfb-run cargo run --color=always --verbose --all-features -- local cl_headless 1 d_exit_after_one_frame 1 d_testing 1 2>&1 | tee output.log
       - name: Detect errors
         # There should be 6 errors in the output, those are printed on purpose.

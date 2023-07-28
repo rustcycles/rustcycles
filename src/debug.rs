@@ -660,4 +660,30 @@ mod tests {
         assert_eq!("abc".parse::<i32>().soft_unwrap(), 0);
         assert_eq!("42".parse::<bool>().soft_unwrap(), false);
     }
+
+    #[test]
+    fn test_dbg_iterator() {
+        let mut count = 0;
+        let mut finished = false;
+        [1, 2, 3, 4, 5]
+            .iter()
+            .dbg_count(|cnt, fin| {
+                count = cnt;
+                finished = fin;
+            })
+            .for_each(|_| {});
+        assert_eq!(count, 5);
+        assert!(finished);
+
+        [1, 2, 3, 4, 5]
+            .iter()
+            .dbg_count(|cnt, fin| {
+                count = cnt;
+                finished = fin;
+            })
+            .take(3)
+            .for_each(|_| {});
+        assert_eq!(count, 3);
+        assert!(!finished);
+    }
 }

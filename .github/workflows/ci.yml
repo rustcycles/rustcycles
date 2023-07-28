@@ -62,7 +62,7 @@ jobs:
         # A different number means something is wrong.
         # If the condition and therefore the echo succeed,
         # invert the result with `!` to signal test failure.
-        run: ! ( [[ $(grep '\[ERROR\]:' output.log | wc -l) != 6 ]] && echo Wrong number of ERRORs in output )
+        run: '! ( [[ $(grep "\[ERROR\]:" output.log | wc -l) != 6 ]] && echo Wrong number of ERRORs in output )'
 
   format:
     runs-on: ubuntu-latest

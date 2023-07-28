@@ -50,9 +50,12 @@ jobs:
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features
       - run: cargo test --verbose --all-features
-      - name: Run the client (headless)
-        # LATER Look for ways to run the client on all OSes
-        #       Maybe try this on windows: https://amiralizadeh9480.medium.com/how-to-run-opengl-based-tests-on-github-actions-60f270b1ea2c
+      - name: Run the game
+        # LATER We wanna run the server on all OSes to detect nondeterminism.
+        #   Client on all OSes would be nice too but the engine should shield us from platform differences mostly.
+        #   For now, just run local in headless mode as a compromise.
+        # LATER Look for ways to run the client on all OSes too
+        #   Maybe try this on windows: https://amiralizadeh9480.medium.com/how-to-run-opengl-based-tests-on-github-actions-60f270b1ea2c
         run: RUST_BACKTRACE=1 xvfb-run cargo run --color=always --verbose --all-features -- local cl_headless 1 d_exit_after_one_frame 1 d_testing 1 2>&1 | tee output.log
       - name: Detect errors
         # There should be 6 errors in the output, those are printed on purpose.

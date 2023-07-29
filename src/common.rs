@@ -71,6 +71,8 @@ pub(crate) enum GameStateType {
 /// but this is more ergonomic.
 ///
 /// This struct and {Client,Server}FrameData are meant to have impl blocks throughout the codebase.
+///
+/// Note there is no access to wallclock time here, all gamelogic must depend only on game time.
 pub(crate) struct FrameData<'a> {
     pub(crate) cvars: &'a Cvars,
     // We have two choices here:

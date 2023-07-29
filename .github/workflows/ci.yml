@@ -50,15 +50,22 @@ jobs:
       # Use build instead of check since it needs to be built for tests anyway
       - run: cargo build --verbose --all-features
       - run: cargo test --verbose --all-features
-      - name: Run the game
-        # We wanna run on all OSes to detect nondeterminism.
-        # LATER Also run separate client and server, test the output is the same as local mode.
-        # Headless mode is necessary:
-        # - On linux I could use xvfb-run but there would still be issues with ALSA.
-        #   I made a PR to Fyrox to allow disabling sound but eventually it got turned into a full headless mode
-        #   which disables graphics too, there's no way to disable just sound.
-        #   Adding a mode with graphics but without sound is probably not worth it, it wouldn't catch many more bugs.
-        # - Windows and macOS don't even have xvfb-run.
+
+      # We wanna run on all OSes to detect nondeterminism.
+      # LATER Also run separate client and server, test the output is the same as local mode.
+      # Headless mode is necessary:
+      # - On linux I could use xvfb-run but there would still be issues with ALSA.
+      #   I made a PR to Fyrox to allow disabling sound but eventually it got turned into a full headless mode
+      #   which disables graphics too, there's no way to disable just sound.
+      #   Adding a mode with graphics but without sound is probably not worth it, it wouldn't catch many more bugs.
+      # - Windows and macOS don't even have xvfb-run.
+      - name: Run the game (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        # Linux needs xvfb-run for now, otherwise we get this error, idk why, maybe winit bug?:
+        # thread 'main' panicked at 'Failed to initialize any backend! Wayland status: NoCompositorListening X11 status: XOpenDisplayFailed', /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/winit-0.28.6/src/platform_impl/linux/mod.rs:757:9
+        run: RUST_BACKTRACE=1 xvfb-run cargo run --color=always --verbose --all-features -- local cl_headless 1 d_exit_after_one_frame 1 d_testing 1 2>&1 | tee output.log
+      - name: Run the game (Windows and macOS)
+        if: ${{ matrix.os != 'ubuntu-latest' }}
         run: RUST_BACKTRACE=1 cargo run --color=always --verbose --all-features -- local cl_headless 1 d_exit_after_one_frame 1 d_testing 1 2>&1 | tee output.log
         shell: bash # Force bash even on Windows
       - name: Detect errors
@@ -66,7 +73,7 @@ jobs:
         # A different number means something is wrong.
         # If the condition and therefore the echo succeed,
         # invert the result with `!` to signal test failure.
-        run: '! ( [[ $(grep "\[ERROR\]:" output.log | wc -l) != 6 ]] && echo Wrong number of ERRORs in output )'
+        run: '! ( [[ $(grep "ERROR" output.log | wc -l) != 6 ]] && echo Wrong number of ERRORs in output && cat output.log && grep "ERROR" output.log )'
         shell: bash # Force bash even on Windows
 
   format:

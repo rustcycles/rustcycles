@@ -29,17 +29,19 @@ Multiplayer shooters are large and complex projects and 80% of the code is not g
 
 ## Building
 
-There are no prebuilt binaries yet, you have to build it yourself.
+There are no prebuilt binaries and no web version yet, you have to build the game yourself.
 
-- Install [git LFS](https://git-lfs.github.com/) **before** cloning this repo.
+- RustCycles uses git submodules for its assets. To clone the repo, use `git clone --recurse-submodules git@github.com:rustcycles/rustcycles.git`. If you already cloned it without submodules, use `git submodule update --init --recursive`.
 
-- Install dependencies if on Linux (debian): `sudo apt install libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libfontconfig1-dev`
+- If on linux, install dependencies (debian example): `sudo apt install libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libfontconfig1-dev`
 <!-- libfontconfig1-dev is not needed on CI for some reason but I couldn't compile without it on Kubuntu 22.04 -->
 
 - After that, just use `cargo run`.
   - No need to use `--release` it should run fast enough in debug mode because deps are optimized even in debug mode (see Cargo.toml).
 
 ## Development
+
+Currently using git submodules for assets because GitHub's LFS has a tiny 1 GB per month bandwidth limit that's not sufficient already with just a couple MB of data and won't scale. Committing assets into the main repo would cause its size to grow irreversibly. A separate repo as a submodule allows us to keep the main repo small without overwriting history. The data repo can then be either squashed or replaced with a fresh one if the history gets too large.
 
 ### Fast compiles (optional)
 

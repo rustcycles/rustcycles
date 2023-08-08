@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          lfs: true
+          submodules: recursive
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -110,7 +110,3 @@ jobs:
       # Similar as above - cvars like d_dbg* should not be committed to master
       # so they're available to be used by other devs.
       - run: '! ( grep --recursive --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo "The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?" )'
-
-      # All paths should be lowercase of we might have issues
-      # when switching between case-sensitive and case-insensitive filesystems.
-      - run: '! ( find data | grep [A-Z] && echo "Asset names/paths must be all lowercase" )'

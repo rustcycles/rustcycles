@@ -16,4 +16,4 @@ cargo fmt -- --check
 
 ! ( grep --recursive --color=auto --exclude-dir=.git --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo "The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?" )
 
-! ( find data | grep [A-Z] && echo "Asset names/paths must be all lowercase" )
+! ( find data ! -name README.md | grep [A-Z] && echo "Asset names/paths must be all lowercase" )

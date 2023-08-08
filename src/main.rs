@@ -97,6 +97,19 @@ enum Endpoint {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // Sometimes people clone the repo and try `cargo run` without reading the instructions.
+    // It has already happened back when using LFS, now it's the same with submodules.
+    // Try to detect it and provide a nice error message.
+    // LATER Would be nice to show a window with this message for people not using the terminal.
+    //  This might also happen on MacOS due to their treatement of unsigned programs
+    //  but we'll cross that bridge when we get there.
+    if std::fs::read_dir("data").unwrap().count() == 0 {
+        println!("The data directory is empty, this usually happens when the repository is cloned without submodules.");
+        println!("Make sure to initialize the git submodule after cloning - run `git submodule update --init --recursive`.");
+        println!("See README.md for details. Exiting...");
+        std::process::exit(1);
+    }
+
     let mut opts = Opts::default();
 
     // We are not using a derive-based library (anymore)

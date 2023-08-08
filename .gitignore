@@ -1,7 +1,5 @@
 /output.log
 
-*.blend1
-
 # Profiling
 /callgrind.out.*
 /flamegraph.svg

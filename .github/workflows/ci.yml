@@ -38,6 +38,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
+      - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
       - name: Install linux deps
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
@@ -91,6 +92,8 @@ jobs:
           sudo apt-get update # Run update first or install might start failing eventually
           sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
       - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
+
       - run: cargo clippy --version
 
       # Use --all-targets to also check tests.

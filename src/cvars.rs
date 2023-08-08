@@ -39,8 +39,10 @@ cvars! {
     cl_camera_z_far: f32 = 2048.0,
 
     cl_fullscreen: bool = true,
+    /// Run the game without a window. Useful for CI.
     cl_headless: bool = false,
     cl_mouse_grab_on_focus: bool = true,
+    cl_vsync: bool = true,
     cl_window_height: i32 = 540,
     cl_window_width: i32 = 960,
 
@@ -139,6 +141,11 @@ cvars! {
     m_sensitivity_vertical: f32 = 1.0,
 
     r_quality: i32 = 0,
+
+    /// Run the dedicated server without a window.
+    ///
+    /// Currently off by default because it seems to cause weird stuttering.
+    sv_headless: bool = false,
 }
 
 /// Vec3 with support for cvars. Should be converted to Vec3 before use in gamecode.

@@ -388,6 +388,7 @@ fn client_main(cvars: Cvars, local_server: bool) {
 fn server_main(cvars: Cvars) {
     let event_loop = EventLoop::new();
     let engine = init_engine_server();
+    let use_graphics = !cvars.sv_headless;
 
     let mut server = executor::block_on(ServerProcess::new(cvars, engine));
     event_loop.run(move |event, window_target, control_flow| {
@@ -412,8 +413,16 @@ fn server_main(cvars: Cvars) {
             }
             Event::DeviceEvent { .. } => {}
             Event::UserEvent(_) => {}
-            Event::Suspended => server.engine.destroy_graphics_context().unwrap(),
-            Event::Resumed => server.engine.initialize_graphics_context(window_target).unwrap(),
+            Event::Suspended => {
+                if use_graphics {
+                    server.engine.destroy_graphics_context().unwrap();
+                }
+            }
+            Event::Resumed => {
+                if use_graphics {
+                    server.engine.initialize_graphics_context(window_target).unwrap();
+                }
+            }
             Event::MainEventsCleared => {
                 server.update();
                 while let Some(_msg) = server.engine.user_interface.poll_message() {}
@@ -441,7 +450,7 @@ fn init_engine_client(cvars: &Cvars) -> Engine {
     Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
-            vsync: true,
+            vsync: cvars.cl_vsync,
         },
         serialization_context: Arc::new(SerializationContext::new()),
         resource_manager: ResourceManager::new(),
@@ -450,17 +459,14 @@ fn init_engine_client(cvars: &Cvars) -> Engine {
 }
 
 fn init_engine_server() -> Engine {
-    // LATER Headless - do all this without creating a window.
     let window_builder = WindowBuilder::new()
         .with_title("RustCycles server")
         .with_inner_size(LogicalSize::new(400, 100));
 
-    // LATER Does vsync have any effect here?
-    // LATER No window at all (currently bugged)
     Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
-            vsync: true,
+            vsync: false, // Must be off when headless or weird things happen.
         },
         serialization_context: Arc::new(SerializationContext::new()),
         resource_manager: ResourceManager::new(),

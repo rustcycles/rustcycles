@@ -285,6 +285,7 @@ impl ClientProcess {
             R => self.cg.input.reload = pressed,
             F => self.cg.input.flag = pressed,
             G => self.cg.input.grenade = pressed,
+            K => self.cg.input.kill = pressed,
             M => self.cg.input.map = pressed,
             TAB => self.cg.input.score = pressed,
             ENTER => self.cg.input.chat = pressed,

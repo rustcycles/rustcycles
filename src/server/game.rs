@@ -60,6 +60,7 @@ impl ServerFrameData<'_> {
 
     pub(crate) fn tick_begin_frame(&mut self) {
         self.accept_new_connections();
+        self.connect_bots();
         self.sys_receive();
     }
 
@@ -106,6 +107,11 @@ impl ServerFrameData<'_> {
                 },
             }
         }
+    }
+
+    fn connect_bots(&mut self) {
+        let _to_join = self.cvars.g_players_min - self.sg.clients.total_count();
+        // TODO
     }
 
     fn sys_receive(&mut self) {

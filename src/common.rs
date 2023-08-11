@@ -357,6 +357,7 @@ pub(crate) struct Input {
     pub(crate) reload: bool,
     pub(crate) flag: bool,
     pub(crate) grenade: bool,
+    pub(crate) kill: bool,
     pub(crate) map: bool,
     pub(crate) score: bool,
     pub(crate) chat: bool,
@@ -386,6 +387,7 @@ impl Input {
         self.reload = false;
         self.flag = false;
         self.grenade = false;
+        self.kill = false;
         self.map = false;
         self.score = false;
         self.chat = false;
@@ -462,6 +464,9 @@ impl Debug for Input {
         }
         if self.grenade {
             write!(f, "grenade ")?;
+        }
+        if self.kill {
+            write!(f, "kill ")?;
         }
         if self.map {
             write!(f, "map ")?;

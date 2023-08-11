@@ -123,6 +123,9 @@ cvars! {
     /// and usually this is what we want for most traces anyway.
     g_physics_nudge: f32 = 0.01,
 
+    /// If fewer human players are connected, bots will join.
+    g_players_min: u32 = 4, // TODO
+
     g_projectile_lifetime: f32 = 60.0,
     g_projectile_refire: f32 = 0.05,
     g_projectile_speed: f32 = 75.0,

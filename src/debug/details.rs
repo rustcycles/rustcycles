@@ -12,27 +12,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
-/// Private helper to print the name and value of each given variable.
-/// Not meant to be used directly.
-#[macro_export]
-macro_rules! __format_pairs {
-    ( ) => {
-        format!("")
-    };
-    ( $e:expr ) => {
-        // We use {:?} instead of {} here because it's more likely to stay on one line.
-        // E.g. nalgebra vectors get printed as columns when using {}.
-        format!("{}: {:.6?}", stringify!($e), $e)
-    };
-    ( $e:expr, $( $rest:expr ),+ ) => {
-        format!(
-            "{}, {}",
-            $crate::__format_pairs!($e),
-            $crate::__format_pairs!( $( $rest ),+ )
-        )
-    };
-}
-
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) struct DebugShape {

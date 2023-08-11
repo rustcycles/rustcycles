@@ -311,6 +311,13 @@ pub(crate) trait PoolExt<T> {
     /// You can reborrow each iteration of the loop by indexing the pool using the handle
     /// and release the borrow if you need to pass the pool (or usually whole `FrameData`)
     /// into another function.
+    ///
+    /// This is inefficient and ideally should be avoided
+    /// but contrary to everyone in Rust gamedev circles talking about performance,
+    /// most games are not limited by how fast their gamelogic runs.
+    /// When/if we have perf issues and profiling says this is the cause,
+    /// then we can restructure the code t oavoid it.
+    /// Until then writing code faster is more important than writing faster code.
     fn iter_handles(&self) -> Vec<Handle<T>>;
 }
 

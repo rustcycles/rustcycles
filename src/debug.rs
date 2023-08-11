@@ -48,6 +48,9 @@
 // or should be wrapped with an extra pair of curly braces.
 // They should evaluate to `()`.
 
+// This file is shared between RecWars and RustCycles
+// to keep their debug APIs the same.
+
 #![allow(dead_code)]
 
 pub(crate) mod details;
@@ -55,11 +58,14 @@ pub(crate) mod details;
 /// Print text into stdout. Uses `println!(..)`-style formatting.
 #[macro_export]
 macro_rules! dbg_logf {
-    ( $( $t:tt )* ) => {
+    () => {
+        dbg_logf!("")
+    };
+    ($($t:tt)*) => {
         {
-            let name = $crate::debug::details::endpoint_name();
-            print!("{} ", name);
-            println!( $( $t )* );
+            // TODO game_time, also below
+            let msg = format!($($t)*);
+            $crate::__println!("{} {}", $crate::debug::details::endpoint_name(), msg);
         }
     };
 }
@@ -67,7 +73,7 @@ macro_rules! dbg_logf {
 /// Print variables into stdout formatted as `[file:line] var1: value1, var2: value2`.
 #[macro_export]
 macro_rules! dbg_logd {
-    ( $( $e:expr ),* ) => {
+    ($($e:expr),*) => {
         {
             let s = $crate::__format_pairs!( $( $e ),* );
             dbg_logf!("[{}:{}] {}", file!(), line!(), s);
@@ -80,16 +86,15 @@ macro_rules! dbg_logd {
 /// Useful for printing debug info each frame.
 #[macro_export]
 macro_rules! dbg_textf {
-    ( ) => {
+    () => {
         dbg_textf!("")
     };
-    ( $( $t:tt )* ) => {
+    ($($t:tt)*) => {
         {
-            let name = $crate::debug::details::endpoint_name();
-            let mut s = format!("{} ", name);
-            s.push_str(&format!( $( $t )* ));
+            let msg = format!( $( $t )* );
+            let text = format!("{} {}", $crate::debug::details::endpoint_name(), msg);
             $crate::debug::details::DEBUG_TEXTS.with(|texts| {
-                texts.borrow_mut().push(s);
+                texts.borrow_mut().push(text);
             });
         }
     };
@@ -100,7 +105,7 @@ macro_rules! dbg_textf {
 /// Useful for printing debug info each frame.
 #[macro_export]
 macro_rules! dbg_textd {
-    ( $( $e:expr ),* ) => {
+    ($($e:expr),*) => {
         {
             let s = $crate::__format_pairs!( $( $e ),* );
             dbg_textf!("[{}:{}] {}", file!(), line!(), s);
@@ -112,15 +117,15 @@ macro_rules! dbg_textd {
 /// Not meant to be used directly.
 #[macro_export]
 macro_rules! __format_pairs {
-    ( ) => {
+    () => {
         format!("")
     };
-    ( $e:expr ) => {
+    ($e:expr) => {
         // We use {:?} instead of {} here because it's more likely to stay on one line.
         // E.g. nalgebra vectors get printed as columns when using {}.
         format!("{}: {:.6?}", stringify!($e), $e)
     };
-    ( $e:expr, $( $rest:expr ),+ ) => {
+    ($e:expr, $($rest:expr),+) => {
         format!(
             "{}, {}",
             $crate::__format_pairs!($e),

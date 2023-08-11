@@ -4,6 +4,9 @@
 //! but in normal usage you should prefer the `dbg_*` macros
 //! and other items from the parent mod.
 
+// Some items in this file could trivially be inlined into debug.rs.
+// Usually, they're here because they differ between RecWars and RustCycles.
+
 use std::cell::RefCell;
 
 use fxhash::FxHashMap;
@@ -11,6 +14,13 @@ use fyrox::{core::algebra::Vector3, scene::debug::Line};
 use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
+
+#[macro_export]
+macro_rules! __println {
+    ($($t:tt)*) => {
+        println!($($t)*)
+    }
+}
 
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]

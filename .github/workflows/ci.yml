@@ -29,15 +29,20 @@ jobs:
         rust: [stable, nightly]
         # For reference: https://github.com/actions/virtual-environments#available-environments
         os: [ubuntu-latest, windows-latest, macos-latest]
+        exclude:
+          # Each minute of MacOS CI counts as 10 minutes towards the limit
+          # (https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#minute-multipliers)
+          # and nightly doesn't benefit from caching much
+          # so this combination would take up the vast majority of the free CI limit.
+          - os: macos-latest
+            rust: nightly
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          profile: minimal
-          override: true
       - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
       - name: Install linux deps
         if: ${{ matrix.os == 'ubuntu-latest' }}

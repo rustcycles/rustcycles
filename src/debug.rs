@@ -55,7 +55,7 @@
 
 #![allow(dead_code)]
 
-pub(crate) mod details;
+pub mod details;
 
 use std::cell::RefCell;
 
@@ -339,7 +339,7 @@ macro_rules! soft_unreachable {
     };
 }
 
-pub(crate) trait SoftUnwrap {
+pub trait SoftUnwrap {
     type Inner;
     fn soft_unwrap(self) -> Self::Inner;
 }
@@ -370,7 +370,7 @@ impl<T: Default, E> SoftUnwrap for Result<T, E> {
 ///
 /// Note that if multiple debug methods are used in a single chain,
 /// the order in which they print their results will be reversed.
-pub(crate) trait DbgIterator: Iterator + Sized {
+pub trait DbgIterator: Iterator + Sized {
     // This might not be useful very often,
     // I just wanted to play with iterators instead of writing my game for a bit.
     // But hey, at least I am not writing the 51st Rust game engine.
@@ -437,7 +437,7 @@ pub(crate) trait DbgIterator: Iterator + Sized {
 
 impl<I> DbgIterator for I where I: Iterator {}
 
-pub(crate) struct DbgCounter<I, F>
+pub struct DbgCounter<I, F>
 where
     I: Iterator,
     F: FnMut(usize, bool),
@@ -494,18 +494,18 @@ thread_local! {
         default_color: WHITE,
     });
 
-    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
+    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
+    pub static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct DebugEndpoint {
-    pub(crate) name: &'static str,
-    pub(crate) default_color: Color,
+pub struct DebugEndpoint {
+    pub name: &'static str,
+    pub default_color: Color,
 }
 
-pub(crate) fn set_endpoint(name: &'static str) {
+pub fn set_endpoint(name: &'static str) {
     DEBUG_ENDPOINT.with(|endpoint| {
         let mut endpoint = endpoint.borrow_mut();
         endpoint.name = name;
@@ -522,15 +522,15 @@ fn endpoint_to_color(name: &'static str) -> Color {
     }
 }
 
-pub(crate) fn endpoint_name() -> &'static str {
+pub fn endpoint_name() -> &'static str {
     DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().name)
 }
 
-pub(crate) fn endpoint_color() -> Color {
+pub fn endpoint_color() -> Color {
     DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
 }
 
-pub(crate) fn clear_expired() {
+pub fn clear_expired() {
     DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
     DEBUG_TEXTS_WORLD.with(|texts| texts.borrow_mut().clear());
     DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));

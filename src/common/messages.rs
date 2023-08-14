@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) enum ClientMessage {
+pub enum ClientMessage {
     Input(Input),
     Chat(String), // LATER Allow sending this
     Join,
@@ -22,7 +22,7 @@ pub(crate) enum ClientMessage {
 
 /// Message sent from server to client
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) enum ServerMessage {
+pub enum ServerMessage {
     /// Initial game state that is sent to a new player upon connecting.
     ///
     /// This is intentionally separate from messages such as AddPlayer or SpawnCycle
@@ -51,55 +51,55 @@ pub(crate) enum ServerMessage {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct Init {
-    pub(crate) player_indices: Vec<u32>,
-    pub(crate) local_player_index: u32,
-    pub(crate) player_cycles: Vec<PlayerCycle>,
-    pub(crate) player_projectiles: Vec<PlayerProjectile>,
+pub struct Init {
+    pub player_indices: Vec<u32>,
+    pub local_player_index: u32,
+    pub player_cycles: Vec<PlayerCycle>,
+    pub player_projectiles: Vec<PlayerProjectile>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct AddPlayer {
-    pub(crate) player_index: u32,
-    pub(crate) name: String,
+pub struct AddPlayer {
+    pub player_index: u32,
+    pub name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct DespawnCycle {
-    pub(crate) cycle_index: u32,
+pub struct DespawnCycle {
+    pub cycle_index: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct PlayerCycle {
-    pub(crate) player_index: u32,
-    pub(crate) cycle_index: u32,
+pub struct PlayerCycle {
+    pub player_index: u32,
+    pub cycle_index: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct PlayerProjectile {
-    pub(crate) player_index: u32,
-    pub(crate) projectile_index: u32,
+pub struct PlayerProjectile {
+    pub player_index: u32,
+    pub projectile_index: u32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct Update {
-    pub(crate) player_inputs: Vec<PlayerInput>,
-    pub(crate) cycle_physics: Vec<CyclePhysics>,
-    pub(crate) debug_texts: Vec<String>,
-    pub(crate) debug_texts_world: Vec<WorldText>,
-    pub(crate) debug_shapes: Vec<DebugShape>,
+pub struct Update {
+    pub player_inputs: Vec<PlayerInput>,
+    pub cycle_physics: Vec<CyclePhysics>,
+    pub debug_texts: Vec<String>,
+    pub debug_texts_world: Vec<WorldText>,
+    pub debug_shapes: Vec<DebugShape>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct PlayerInput {
-    pub(crate) player_index: u32,
-    pub(crate) input: Input,
+pub struct PlayerInput {
+    pub player_index: u32,
+    pub input: Input,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct CyclePhysics {
-    pub(crate) cycle_index: u32,
-    pub(crate) translation: Vec3,
-    pub(crate) rotation: UnitQuaternion<f32>,
-    pub(crate) velocity: Vec3,
+pub struct CyclePhysics {
+    pub cycle_index: u32,
+    pub translation: Vec3,
+    pub rotation: UnitQuaternion<f32>,
+    pub velocity: Vec3,
 }

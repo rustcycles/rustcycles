@@ -10,7 +10,7 @@ use cvars::cvars;
 
 use crate::prelude::*;
 
-// Normally we use pub(crate) everywhere for when the project is eventually
+// Normally we use pub everywhere for when the project is eventually
 // split into crates but here we have to use pub:
 // https://github.com/martin-t/cvars/issues/13
 // Plus then cvars will likely be pub anyway.

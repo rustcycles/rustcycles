@@ -12,14 +12,14 @@ use crate::{common::Input, prelude::*};
 
 /// A client connected to a server. Can be observing, spectating or playing.
 #[derive(Debug)]
-pub(crate) struct Player {
-    pub(crate) input: Input,
-    pub(crate) ps: PlayerState,
-    pub(crate) cycle_handle: Option<Handle<Cycle>>,
+pub struct Player {
+    pub input: Input,
+    pub ps: PlayerState,
+    pub cycle_handle: Option<Handle<Cycle>>,
 }
 
 impl Player {
-    pub(crate) fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
+    pub fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
         Self {
             input: Input::default(),
             ps: PlayerState::Observing,
@@ -30,7 +30,7 @@ impl Player {
 
 /// How the player is participating in the game.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum PlayerState {
+pub enum PlayerState {
     /// The player is a freely floating camera observing the game.
     Observing,
     /// The player is watching another player's POV - LATER
@@ -41,17 +41,17 @@ pub(crate) enum PlayerState {
 }
 
 #[derive(Debug)]
-pub(crate) struct Cycle {
-    pub(crate) player_handle: Handle<Player>,
-    pub(crate) body_handle: Handle<Node>,
-    pub(crate) collider_handle: Handle<Node>,
-    pub(crate) time_last_fired: f32,
+pub struct Cycle {
+    pub player_handle: Handle<Player>,
+    pub body_handle: Handle<Node>,
+    pub collider_handle: Handle<Node>,
+    pub time_last_fired: f32,
 }
 
 #[derive(Debug)]
-pub(crate) struct Projectile {
-    pub(crate) player_handle: Handle<Player>,
-    pub(crate) pos: Vec3,
-    pub(crate) vel: Vec3,
-    pub(crate) time_fired: f32,
+pub struct Projectile {
+    pub player_handle: Handle<Player>,
+    pub pos: Vec3,
+    pub vel: Vec3,
+    pub time_fired: f32,
 }

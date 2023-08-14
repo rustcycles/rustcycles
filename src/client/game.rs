@@ -32,31 +32,31 @@ use crate::{
 ///
 /// Needs to be connected to a game Server to play. Contains a local copy of the game state
 /// which might not be entirely accurate due to network lag and packet loss.
-pub(crate) struct ClientGame {
+pub struct ClientGame {
     debug_text: Handle<UiNode>,
     conn: Box<dyn Connection>,
-    pub(crate) camera_handle: Handle<Node>,
-    pub(crate) player_handle: Handle<Player>,
-    pub(crate) delta_yaw: f32,
-    pub(crate) delta_pitch: f32,
-    pub(crate) input: Input,
-    pub(crate) input_prev: Input,
+    pub camera_handle: Handle<Node>,
+    pub player_handle: Handle<Player>,
+    pub delta_yaw: f32,
+    pub delta_pitch: f32,
+    pub input: Input,
+    pub input_prev: Input,
 }
 
 /// All data necessary to run a frame of client-side game logic in one convenient package.
 ///
 /// See also `ServerFrameData` and `FrameData`.
-pub(crate) struct ClientFrameData<'a> {
-    pub(crate) cvars: &'a Cvars,
-    pub(crate) scene: &'a mut Scene,
-    pub(crate) gs: &'a mut GameState,
-    pub(crate) cg: &'a mut ClientGame,
-    pub(crate) renderer: Option<&'a mut Renderer>,
-    pub(crate) ui: &'a mut UserInterface,
+pub struct ClientFrameData<'a> {
+    pub cvars: &'a Cvars,
+    pub scene: &'a mut Scene,
+    pub gs: &'a mut GameState,
+    pub cg: &'a mut ClientGame,
+    pub renderer: Option<&'a mut Renderer>,
+    pub ui: &'a mut UserInterface,
 }
 
 impl ClientGame {
-    pub(crate) async fn new(
+    pub async fn new(
         cvars: &Cvars,
         engine: &mut Engine,
         debug_text: Handle<UiNode>,
@@ -155,7 +155,7 @@ impl ClientGame {
         }
     }
 
-    pub(crate) fn send_input(&mut self) {
+    pub fn send_input(&mut self) {
         self.network_send(ClientMessage::Input(self.input));
     }
 
@@ -173,7 +173,7 @@ impl ClientGame {
 }
 
 impl FrameData<'_> {
-    pub(crate) fn init(&mut self, init: Init) -> Handle<Player> {
+    pub fn init(&mut self, init: Init) -> Handle<Player> {
         if self.gs.gs_type == GameStateType::Shared {
             // The player has already been spawned when running server logic.
             // LATER Deduplicate this line. Maybe don't even return the handle?
@@ -208,7 +208,7 @@ impl FrameData<'_> {
 }
 
 impl ClientFrameData<'_> {
-    pub(crate) fn fd(&mut self) -> FrameData<'_> {
+    pub fn fd(&mut self) -> FrameData<'_> {
         FrameData {
             cvars: self.cvars,
             scene: self.scene,
@@ -217,7 +217,7 @@ impl ClientFrameData<'_> {
     }
 
     /// All once-per-frame networking.
-    pub(crate) fn tick_begin_frame(&mut self) {
+    pub fn tick_begin_frame(&mut self) {
         // LATER Always send key/mouse presses immediately
         // but maybe rate-limit mouse movement updates
         // in case some systems update mouse position at a very high rate.
@@ -340,7 +340,7 @@ impl ClientFrameData<'_> {
         }
     }
 
-    pub(crate) fn tick_before_physics(&mut self, dt: f32) {
+    pub fn tick_before_physics(&mut self, dt: f32) {
         // Join / spec
         let ps = self.gs.players[self.cg.player_handle].ps;
         if ps == PlayerState::Observing && self.cg.input.fire1 {
@@ -540,7 +540,7 @@ impl ClientFrameData<'_> {
         dbg_arrow!(v!(50 5 7), pitch_rot2 * yaw_rot * FORWARD);
     }
 
-    pub(crate) fn tick_after_physics(&mut self, dt: f32) {
+    pub fn tick_after_physics(&mut self, dt: f32) {
         if self.cvars.d_physics_extra_sync {
             self.scene.graph.update_hierarchical_data();
         }

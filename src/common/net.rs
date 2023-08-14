@@ -10,16 +10,16 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::common::messages::{ClientMessage, ServerMessage};
 
-pub(crate) trait Listener {
+pub trait Listener {
     fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;
 }
 
-pub(crate) struct LocalListener {
+pub struct LocalListener {
     conn: Option<LocalConnection>,
 }
 
 impl LocalListener {
-    pub(crate) fn new(conn: LocalConnection) -> Self {
+    pub fn new(conn: LocalConnection) -> Self {
         Self { conn: Some(conn) }
     }
 }
@@ -56,7 +56,7 @@ type MsgLen = u32;
 const HEADER_LEN: usize = mem::size_of::<MsgLen>();
 
 #[derive(Debug, Clone)]
-pub(crate) struct NetworkMessage {
+pub struct NetworkMessage {
     content_len: [u8; HEADER_LEN],
     buf: Vec<u8>,
 }
@@ -70,7 +70,7 @@ pub(crate) struct NetworkMessage {
 ///     M: DeserializeOwned;
 /// ```
 /// but generic methods are not object safe so we wouldn't be able to use dynamic dispatch.
-pub(crate) trait Connection {
+pub trait Connection {
     fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error>;
 
     // `#[must_use]` only does something in the trait definition,
@@ -101,15 +101,15 @@ pub(crate) trait Connection {
     fn addr(&self) -> String;
 }
 
-pub(crate) struct LocalConnection {
+pub struct LocalConnection {
     // LATER Would be more efficient to sent messages without serialization
     // but it would likely require a bigger redesign.
-    pub(crate) sender: Sender<NetworkMessage>,
-    pub(crate) receiver: Receiver<NetworkMessage>,
+    pub sender: Sender<NetworkMessage>,
+    pub receiver: Receiver<NetworkMessage>,
 }
 
 impl LocalConnection {
-    pub(crate) fn new(sender: Sender<NetworkMessage>, receiver: Receiver<NetworkMessage>) -> Self {
+    pub fn new(sender: Sender<NetworkMessage>, receiver: Receiver<NetworkMessage>) -> Self {
         Self { sender, receiver }
     }
 
@@ -174,14 +174,14 @@ impl Connection for LocalConnection {
     }
 }
 
-pub(crate) struct TcpConnection {
+pub struct TcpConnection {
     stream: TcpStream,
     buffer: VecDeque<u8>,
-    pub(crate) addr: SocketAddr,
+    pub addr: SocketAddr,
 }
 
 impl TcpConnection {
-    pub(crate) fn new(stream: TcpStream, addr: SocketAddr) -> Self {
+    pub fn new(stream: TcpStream, addr: SocketAddr) -> Self {
         Self {
             stream,
             buffer: VecDeque::new(),
@@ -252,7 +252,7 @@ impl Connection for TcpConnection {
     }
 }
 
-pub(crate) fn serialize<M>(msg: M) -> NetworkMessage
+pub fn serialize<M>(msg: M) -> NetworkMessage
 where
     M: Serialize,
 {

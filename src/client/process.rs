@@ -38,12 +38,12 @@ use crate::{
 };
 
 /// The process that runs a player's game client.
-pub(crate) struct ClientProcess {
+pub struct ClientProcess {
     cvars: Cvars,
     clock: Instant,
     mouse_grabbed: bool,
     shift_pressed: bool,
-    pub(crate) engine: Engine,
+    pub engine: Engine,
     r_quality: i32,
     console: FyroxConsole,
     debug_text: Handle<UiNode>,
@@ -54,11 +54,11 @@ pub(crate) struct ClientProcess {
     // LATER Optional server-side game state when playing in local mode with separate game states.
     //  This will likely also require separate scenes.
     //sgs: Option<GameState>,
-    pub(crate) exit: bool,
+    pub exit: bool,
 }
 
 impl ClientProcess {
-    pub(crate) async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
+    pub async fn new(cvars: Cvars, mut engine: Engine, local_game: bool) -> Self {
         let clock = Instant::now();
 
         let debug_text =
@@ -161,7 +161,7 @@ impl ClientProcess {
         }
     }
 
-    pub(crate) fn resized(&mut self, size: PhysicalSize<u32>) {
+    pub fn resized(&mut self, size: PhysicalSize<u32>) {
         // This is also called when the window is first created.
 
         if self.cvars.d_events && self.cvars.d_events_resized {
@@ -189,7 +189,7 @@ impl ClientProcess {
         );
     }
 
-    pub(crate) fn focused(&mut self, focus: bool) {
+    pub fn focused(&mut self, focus: bool) {
         if self.cvars.d_events && self.cvars.d_events_focused {
             dbg_logf!("{} focused: {:?}", self.real_time(), focus);
         }
@@ -210,7 +210,7 @@ impl ClientProcess {
         // LATER pause/unpause
     }
 
-    pub(crate) fn keyboard_input(&mut self, input: KeyboardInput) {
+    pub fn keyboard_input(&mut self, input: KeyboardInput) {
         // NOTE: This event is repeated if the key is held, that means
         // there can be more `state: Pressed` events before a `state: Released`.
 
@@ -299,7 +299,7 @@ impl ClientProcess {
         self.cg.send_input();
     }
 
-    pub(crate) fn mouse_wheel(&self, delta: MouseScrollDelta, phase: TouchPhase) {
+    pub fn mouse_wheel(&self, delta: MouseScrollDelta, phase: TouchPhase) {
         if self.cvars.d_events && self.cvars.d_events_mouse_wheel {
             dbg_logf!("{} mouse wheel {:?} {:?}", self.real_time(), delta, phase);
         }
@@ -316,7 +316,7 @@ impl ClientProcess {
         // }
     }
 
-    pub(crate) fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
+    pub fn mouse_input(&mut self, state: ElementState, button: MouseButton) {
         if self.cvars.d_events && self.cvars.d_events_mouse_input {
             dbg_logf!("{} mouse_input: {:?} {:?}", self.real_time(), state, button);
         }
@@ -375,7 +375,7 @@ impl ClientProcess {
         self.mouse_grabbed = grab;
     }
 
-    pub(crate) fn mouse_motion(&mut self, delta: (f64, f64)) {
+    pub fn mouse_motion(&mut self, delta: (f64, f64)) {
         if self.cvars.d_events && self.cvars.d_events_mouse_motion {
             // LATER This event normally happens every 4 ms for me when moving the mouse. Print stats.
             // Is it limited by my polling rate? Would it be helpful to teach players how to increase it?
@@ -422,7 +422,7 @@ impl ClientProcess {
         self.cg.delta_pitch += delta_pitch;
     }
 
-    pub(crate) fn ui_message(&mut self, msg: &UiMessage) {
+    pub fn ui_message(&mut self, msg: &UiMessage) {
         self.ui_message_logging(msg);
 
         self.console.ui_message(&mut self.engine.user_interface, &mut self.cvars, msg);
@@ -456,7 +456,7 @@ impl ClientProcess {
         }
     }
 
-    pub(crate) fn update(&mut self) {
+    pub fn update(&mut self) {
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -565,11 +565,11 @@ impl ClientProcess {
         }
     }
 
-    pub(crate) fn loop_destroyed(&self) {
+    pub fn loop_destroyed(&self) {
         dbg_logf!("{} bye", self.real_time());
     }
 
-    pub(crate) fn real_time(&self) -> f32 {
+    pub fn real_time(&self) -> f32 {
         // LATER How to handle time in logging code? Real or frame time?
         // Should be OK to create one instant as 0 and clone it to a global/client/server.
         // Elapsed is guaranteed to be monotonic even across instances
@@ -618,92 +618,92 @@ mod scan_codes {
     // Note that many keys are different (e.g. R_ALT, KP_ENTER, arrows, ...),
     // this is just to get a vague idea how it looks.
 
-    pub(crate) const ESC: ScanCode = 1;
-    pub(crate) const NUM1: ScanCode = 2;
-    pub(crate) const NUM2: ScanCode = 3;
-    pub(crate) const NUM3: ScanCode = 4;
-    pub(crate) const NUM4: ScanCode = 5;
-    pub(crate) const NUM5: ScanCode = 6;
-    pub(crate) const NUM6: ScanCode = 7;
-    pub(crate) const NUM7: ScanCode = 8;
-    pub(crate) const NUM8: ScanCode = 9;
-    pub(crate) const NUM9: ScanCode = 10;
-    pub(crate) const NUM0: ScanCode = 11;
-    pub(crate) const MINUS: ScanCode = 12;
-    pub(crate) const EQUALS: ScanCode = 13;
-    pub(crate) const BACKSPACE: ScanCode = 14;
-    pub(crate) const TAB: ScanCode = 15;
-    pub(crate) const Q: ScanCode = 16;
-    pub(crate) const W: ScanCode = 17;
-    pub(crate) const E: ScanCode = 18;
-    pub(crate) const R: ScanCode = 19;
-    pub(crate) const T: ScanCode = 20;
-    pub(crate) const Y: ScanCode = 21;
-    pub(crate) const U: ScanCode = 22;
-    pub(crate) const I: ScanCode = 23;
-    pub(crate) const O: ScanCode = 24;
-    pub(crate) const P: ScanCode = 25;
-    pub(crate) const LBRACKET: ScanCode = 26;
-    pub(crate) const RBRACKET: ScanCode = 27;
-    pub(crate) const ENTER: ScanCode = 28;
-    pub(crate) const L_CTRL: ScanCode = 29;
-    pub(crate) const A: ScanCode = 30;
-    pub(crate) const S: ScanCode = 31;
-    pub(crate) const D: ScanCode = 32;
-    pub(crate) const F: ScanCode = 33;
-    pub(crate) const G: ScanCode = 34;
-    pub(crate) const H: ScanCode = 35;
-    pub(crate) const J: ScanCode = 36;
-    pub(crate) const K: ScanCode = 37;
-    pub(crate) const L: ScanCode = 38;
-    pub(crate) const SEMICOLON: ScanCode = 39;
-    pub(crate) const APOSTROPHE: ScanCode = 40;
-    pub(crate) const BACKTICK: ScanCode = 41;
-    pub(crate) const L_SHIFT: ScanCode = 42;
-    pub(crate) const BACKSLASH: ScanCode = 43;
-    pub(crate) const Z: ScanCode = 44;
-    pub(crate) const X: ScanCode = 45;
-    pub(crate) const C: ScanCode = 46;
-    pub(crate) const V: ScanCode = 47;
-    pub(crate) const B: ScanCode = 48;
-    pub(crate) const N: ScanCode = 49;
-    pub(crate) const M: ScanCode = 50;
-    pub(crate) const COMMA: ScanCode = 51;
-    pub(crate) const PERIOD: ScanCode = 52;
-    pub(crate) const SLASH: ScanCode = 53;
-    pub(crate) const R_SHIFT: ScanCode = 54;
-    pub(crate) const KP_MULTIPLY: ScanCode = 55;
-    pub(crate) const L_ALT: ScanCode = 56;
-    pub(crate) const SPACE: ScanCode = 57;
-    pub(crate) const CAPS_LOCK: ScanCode = 58;
-    pub(crate) const F1: ScanCode = 59;
-    pub(crate) const F2: ScanCode = 60;
-    pub(crate) const F3: ScanCode = 61;
-    pub(crate) const F4: ScanCode = 62;
-    pub(crate) const F5: ScanCode = 63;
-    pub(crate) const F6: ScanCode = 64;
-    pub(crate) const F7: ScanCode = 65;
-    pub(crate) const F8: ScanCode = 66;
-    pub(crate) const F9: ScanCode = 67;
-    pub(crate) const F10: ScanCode = 68;
-    pub(crate) const F11: ScanCode = 69;
-    pub(crate) const F12: ScanCode = 70;
-    pub(crate) const KP7: ScanCode = 71;
-    pub(crate) const KP8: ScanCode = 72;
-    pub(crate) const KP9: ScanCode = 73;
-    pub(crate) const KP_MINUS: ScanCode = 74;
-    pub(crate) const KP4: ScanCode = 75;
-    pub(crate) const KP5: ScanCode = 76;
-    pub(crate) const KP6: ScanCode = 77;
-    pub(crate) const KP_PLUS: ScanCode = 78;
-    pub(crate) const KP1: ScanCode = 79;
-    pub(crate) const KP2: ScanCode = 80;
-    pub(crate) const KP3: ScanCode = 81;
-    pub(crate) const KP0: ScanCode = 82;
-    pub(crate) const KP_PERIOD: ScanCode = 83;
+    pub const ESC: ScanCode = 1;
+    pub const NUM1: ScanCode = 2;
+    pub const NUM2: ScanCode = 3;
+    pub const NUM3: ScanCode = 4;
+    pub const NUM4: ScanCode = 5;
+    pub const NUM5: ScanCode = 6;
+    pub const NUM6: ScanCode = 7;
+    pub const NUM7: ScanCode = 8;
+    pub const NUM8: ScanCode = 9;
+    pub const NUM9: ScanCode = 10;
+    pub const NUM0: ScanCode = 11;
+    pub const MINUS: ScanCode = 12;
+    pub const EQUALS: ScanCode = 13;
+    pub const BACKSPACE: ScanCode = 14;
+    pub const TAB: ScanCode = 15;
+    pub const Q: ScanCode = 16;
+    pub const W: ScanCode = 17;
+    pub const E: ScanCode = 18;
+    pub const R: ScanCode = 19;
+    pub const T: ScanCode = 20;
+    pub const Y: ScanCode = 21;
+    pub const U: ScanCode = 22;
+    pub const I: ScanCode = 23;
+    pub const O: ScanCode = 24;
+    pub const P: ScanCode = 25;
+    pub const LBRACKET: ScanCode = 26;
+    pub const RBRACKET: ScanCode = 27;
+    pub const ENTER: ScanCode = 28;
+    pub const L_CTRL: ScanCode = 29;
+    pub const A: ScanCode = 30;
+    pub const S: ScanCode = 31;
+    pub const D: ScanCode = 32;
+    pub const F: ScanCode = 33;
+    pub const G: ScanCode = 34;
+    pub const H: ScanCode = 35;
+    pub const J: ScanCode = 36;
+    pub const K: ScanCode = 37;
+    pub const L: ScanCode = 38;
+    pub const SEMICOLON: ScanCode = 39;
+    pub const APOSTROPHE: ScanCode = 40;
+    pub const BACKTICK: ScanCode = 41;
+    pub const L_SHIFT: ScanCode = 42;
+    pub const BACKSLASH: ScanCode = 43;
+    pub const Z: ScanCode = 44;
+    pub const X: ScanCode = 45;
+    pub const C: ScanCode = 46;
+    pub const V: ScanCode = 47;
+    pub const B: ScanCode = 48;
+    pub const N: ScanCode = 49;
+    pub const M: ScanCode = 50;
+    pub const COMMA: ScanCode = 51;
+    pub const PERIOD: ScanCode = 52;
+    pub const SLASH: ScanCode = 53;
+    pub const R_SHIFT: ScanCode = 54;
+    pub const KP_MULTIPLY: ScanCode = 55;
+    pub const L_ALT: ScanCode = 56;
+    pub const SPACE: ScanCode = 57;
+    pub const CAPS_LOCK: ScanCode = 58;
+    pub const F1: ScanCode = 59;
+    pub const F2: ScanCode = 60;
+    pub const F3: ScanCode = 61;
+    pub const F4: ScanCode = 62;
+    pub const F5: ScanCode = 63;
+    pub const F6: ScanCode = 64;
+    pub const F7: ScanCode = 65;
+    pub const F8: ScanCode = 66;
+    pub const F9: ScanCode = 67;
+    pub const F10: ScanCode = 68;
+    pub const F11: ScanCode = 69;
+    pub const F12: ScanCode = 70;
+    pub const KP7: ScanCode = 71;
+    pub const KP8: ScanCode = 72;
+    pub const KP9: ScanCode = 73;
+    pub const KP_MINUS: ScanCode = 74;
+    pub const KP4: ScanCode = 75;
+    pub const KP5: ScanCode = 76;
+    pub const KP6: ScanCode = 77;
+    pub const KP_PLUS: ScanCode = 78;
+    pub const KP1: ScanCode = 79;
+    pub const KP2: ScanCode = 80;
+    pub const KP3: ScanCode = 81;
+    pub const KP0: ScanCode = 82;
+    pub const KP_PERIOD: ScanCode = 83;
     // 84
     // 85
-    pub(crate) const BACKSLASH2: ScanCode = 86; // Between LSHIFT and Z, not on all keyboards
+    pub const BACKSLASH2: ScanCode = 86; // Between LSHIFT and Z, not on all keyboards
     // 87
     // 88
     // 89
@@ -713,22 +713,22 @@ mod scan_codes {
     // 93
     // 94
     // 95
-    pub(crate) const KP_ENTER: ScanCode = 96;
-    pub(crate) const R_CTRL: ScanCode = 97;
-    pub(crate) const KP_DIVIDE: ScanCode = 98;
-    pub(crate) const PRINT_SCREEN: ScanCode = 99;
-    pub(crate) const R_ALT: ScanCode = 100;
+    pub const KP_ENTER: ScanCode = 96;
+    pub const R_CTRL: ScanCode = 97;
+    pub const KP_DIVIDE: ScanCode = 98;
+    pub const PRINT_SCREEN: ScanCode = 99;
+    pub const R_ALT: ScanCode = 100;
     // 101
-    pub(crate) const HOME: ScanCode = 102;
-    pub(crate) const UP_ARROW: ScanCode = 103;
-    pub(crate) const PG_UP: ScanCode = 104;
-    pub(crate) const LEFT_ARROW: ScanCode = 105;
-    pub(crate) const RIGHT_ARROW: ScanCode = 106;
-    pub(crate) const END: ScanCode = 107;
-    pub(crate) const DOWN_ARROW: ScanCode = 108;
-    pub(crate) const PG_DOWN: ScanCode = 109;
-    pub(crate) const INSERT: ScanCode = 110;
-    pub(crate) const DELETE: ScanCode = 111;
+    pub const HOME: ScanCode = 102;
+    pub const UP_ARROW: ScanCode = 103;
+    pub const PG_UP: ScanCode = 104;
+    pub const LEFT_ARROW: ScanCode = 105;
+    pub const RIGHT_ARROW: ScanCode = 106;
+    pub const END: ScanCode = 107;
+    pub const DOWN_ARROW: ScanCode = 108;
+    pub const PG_DOWN: ScanCode = 109;
+    pub const INSERT: ScanCode = 110;
+    pub const DELETE: ScanCode = 111;
     // 112
     // 113
     // 114
@@ -736,13 +736,13 @@ mod scan_codes {
     // 116
     // 117
     // 118
-    pub(crate) const PAUSE: ScanCode = 119;
+    pub const PAUSE: ScanCode = 119;
     // 120
     // 121
     // 122
     // 123
     // 124
-    pub(crate) const L_SUPER: ScanCode = 125;
-    pub(crate) const R_SUPER: ScanCode = 126;
-    pub(crate) const MENU: ScanCode = 127;
+    pub const L_SUPER: ScanCode = 125;
+    pub const R_SUPER: ScanCode = 126;
+    pub const MENU: ScanCode = 127;
 }

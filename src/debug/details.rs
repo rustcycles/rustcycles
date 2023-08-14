@@ -22,30 +22,30 @@ macro_rules! __println {
 
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct WorldText {
-    pub(crate) pos: Vec3,
-    pub(crate) msg: String,
+pub struct WorldText {
+    pub pos: Vec3,
+    pub msg: String,
 }
 
 impl WorldText {
-    pub(crate) fn new(pos: Vec3, msg: String) -> Self {
+    pub fn new(pos: Vec3, msg: String) -> Self {
         Self { pos, msg }
     }
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) struct DebugShape {
-    pub(crate) shape: Shape,
+pub struct DebugShape {
+    pub shape: Shape,
     /// Time left (decreases every frame)
-    pub(crate) time: f32,
+    pub time: f32,
     #[serde(with = "ColorDef")]
-    pub(crate) color: Color,
+    pub color: Color,
 }
 
 /// Helper enum, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub(crate) enum Shape {
+pub enum Shape {
     Line {
         begin: Vec3,
         end: Vec3,
@@ -76,25 +76,25 @@ pub struct ColorDef {
 }
 
 /// Helper function, prefer `dbg_line!()` instead.
-pub(crate) fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
+pub fn debug_line(begin: Vec3, end: Vec3, time: f32, color: Color) {
     let shape = Shape::Line { begin, end };
     debug_shape(shape, time, color);
 }
 
 /// Helper function, prefer `dbg_arrow!()` instead.
-pub(crate) fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
+pub fn debug_arrow(begin: Vec3, dir: Vec3, time: f32, color: Color) {
     let shape = Shape::Arrow { begin, dir };
     debug_shape(shape, time, color);
 }
 
 /// Helper function, prefer `dbg_cross!()` instead.
-pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
+pub fn debug_cross(point: Vec3, time: f32, color: Color) {
     let shape = Shape::Cross { point };
     debug_shape(shape, time, color);
 }
 
 /// Helper function, prefer `dbg_rot!()` instead.
-pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, scale: f32) {
+pub fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, scale: f32) {
     let shape = Shape::Rot { point, rot, scale };
     // Color is not used
     debug_shape(shape, time, WHITE);
@@ -108,7 +108,7 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
 }
 
 impl DebugShape {
-    pub(crate) fn to_lines(&self, cvars: &Cvars, lines: &mut Lines) {
+    pub fn to_lines(&self, cvars: &Cvars, lines: &mut Lines) {
         match self.shape {
             Shape::Line { begin, end } => {
                 if !cvars.d_draw_lines {
@@ -184,10 +184,10 @@ impl DebugShape {
 }
 
 #[derive(Debug)]
-pub(crate) struct Lines(pub(crate) FxHashMap<(Vector3<u32>, Vector3<u32>), Line>);
+pub struct Lines(pub FxHashMap<(Vector3<u32>, Vector3<u32>), Line>);
 
 impl Lines {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self(FxHashMap::default())
     }
 

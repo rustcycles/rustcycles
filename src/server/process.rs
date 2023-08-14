@@ -10,16 +10,16 @@ use crate::{
 };
 
 /// The process that runs a dedicated server.
-pub(crate) struct ServerProcess {
+pub struct ServerProcess {
     cvars: Cvars,
-    pub(crate) clock: Instant,
-    pub(crate) engine: Engine,
+    pub clock: Instant,
+    pub engine: Engine,
     gs: GameState,
     sg: ServerGame,
 }
 
 impl ServerProcess {
-    pub(crate) async fn new(cvars: Cvars, mut engine: Engine) -> Self {
+    pub async fn new(cvars: Cvars, mut engine: Engine) -> Self {
         let clock = Instant::now();
 
         let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
@@ -43,7 +43,7 @@ impl ServerProcess {
 
     /// This is similar to Client::update,
     /// see that for more information.
-    pub(crate) fn update(&mut self) {
+    pub fn update(&mut self) {
         let game_time_target = self.real_time();
 
         let dt = 1.0 / 60.0;
@@ -90,7 +90,7 @@ impl ServerProcess {
         }
     }
 
-    pub(crate) fn real_time(&self) -> f32 {
+    pub fn real_time(&self) -> f32 {
         self.clock.elapsed().as_secs_f32()
     }
 }

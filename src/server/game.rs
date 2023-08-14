@@ -18,7 +18,7 @@ use crate::{
 /// A game server. Could be a dedicated or a listen server.
 ///
 /// Lets clients connect to play.
-pub(crate) struct ServerGame {
+pub struct ServerGame {
     // LATER Connections and the listener should probably be persistent across matches.
     listener: Box<dyn Listener>,
     clients: Pool<RemoteClient>,
@@ -33,15 +33,15 @@ pub(crate) struct ServerGame {
 /// to access multiple fields mutably at the same time.
 ///
 /// LATER Unsafe Deref? Same on client.
-pub(crate) struct ServerFrameData<'a> {
-    pub(crate) cvars: &'a Cvars,
-    pub(crate) scene: &'a mut Scene,
-    pub(crate) gs: &'a mut GameState,
-    pub(crate) sg: &'a mut ServerGame,
+pub struct ServerFrameData<'a> {
+    pub cvars: &'a Cvars,
+    pub scene: &'a mut Scene,
+    pub gs: &'a mut GameState,
+    pub sg: &'a mut ServerGame,
 }
 
 impl ServerGame {
-    pub(crate) async fn new(listener: Box<dyn Listener>) -> Self {
+    pub async fn new(listener: Box<dyn Listener>) -> Self {
         Self {
             listener,
             clients: Pool::new(),
@@ -50,7 +50,7 @@ impl ServerGame {
 }
 
 impl ServerFrameData<'_> {
-    pub(crate) fn fd(&mut self) -> FrameData<'_> {
+    pub fn fd(&mut self) -> FrameData<'_> {
         FrameData {
             cvars: self.cvars,
             scene: self.scene,
@@ -58,13 +58,13 @@ impl ServerFrameData<'_> {
         }
     }
 
-    pub(crate) fn tick_begin_frame(&mut self) {
+    pub fn tick_begin_frame(&mut self) {
         self.accept_new_connections();
         self.connect_bots();
         self.sys_receive();
     }
 
-    pub(crate) fn accept_new_connections(&mut self) {
+    pub fn accept_new_connections(&mut self) {
         loop {
             match self.sg.listener.accept_conn() {
                 Ok(conn) => {
@@ -194,7 +194,7 @@ impl ServerFrameData<'_> {
         self.network_send(msg, SendDest::One(client_handle));
     }
 
-    pub(crate) fn sys_send_update(&mut self) {
+    pub fn sys_send_update(&mut self) {
         let mut player_inputs = Vec::new();
         for (player_handle, player) in self.gs.players.pair_iter() {
             let pi = PlayerInput {

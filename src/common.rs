@@ -1,9 +1,9 @@
 //! Data and code shared between the client and server. Most gamelogic goes here.
 
-pub(crate) mod entities;
-pub(crate) mod messages;
-pub(crate) mod net;
-pub(crate) mod trace;
+pub mod entities;
+pub mod messages;
+pub mod net;
+pub mod trace;
 
 use std::fmt::{self, Debug, Display, Formatter};
 
@@ -20,22 +20,22 @@ use crate::{
 };
 
 /// The state of the game - all data needed to run the gamelogic.
-pub(crate) struct GameState {
-    pub(crate) gs_type: GameStateType,
+pub struct GameState {
+    pub gs_type: GameStateType,
 
     /// This gamelogic frame's time in seconds.
     ///
     /// This does *not* have to run at the same speed as real world time.
     /// LATER d_speed, pause, configurable dt (don't forget integration_parameters.dt)
     /// LATER using f32 for time might lead to instability if a match is left running for a day or so
-    pub(crate) game_time: f32,
+    pub game_time: f32,
 
     /// The previous gamelogic frame's time in seconds.
-    pub(crate) game_time_prev: f32,
+    pub game_time_prev: f32,
 
     /// Currently this is not synced between client and server,
     /// it's just a debugging aid (e.g. run something on odd/even frames).
-    pub(crate) frame_number: usize,
+    pub frame_number: usize,
 
     /// The RNG for all gamelogic
     ///
@@ -43,23 +43,23 @@ pub(crate) struct GameState {
     /// because cl shouldn't run logic for all players (invisible should be culled).
     /// Even now they desync because they can shoot for a different number of frames
     /// (e.g. i think if input arrives a frame late to the server).
-    pub(crate) rng: Xoshiro256PlusPlus,
+    pub rng: Xoshiro256PlusPlus,
 
     /// Inclusive range [-1.0, 1.0].
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
-    pub(crate) range_uniform11: Uniform<f64>,
+    pub range_uniform11: Uniform<f64>,
 
     cycle_model: Resource<Model>,
 
-    pub(crate) scene_handle: Handle<Scene>,
+    pub scene_handle: Handle<Scene>,
 
-    pub(crate) players: Pool<Player>,
-    pub(crate) cycles: Pool<Cycle>,
-    pub(crate) projectiles: Pool<Projectile>,
+    pub players: Pool<Player>,
+    pub cycles: Pool<Cycle>,
+    pub projectiles: Pool<Projectile>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum GameStateType {
+pub enum GameStateType {
     Server,
     Client,
     Shared,
@@ -73,8 +73,8 @@ pub(crate) enum GameStateType {
 /// This struct and {Client,Server}FrameData are meant to have impl blocks throughout the codebase.
 ///
 /// Note there is no access to wallclock time here, all gamelogic must depend only on game time.
-pub(crate) struct FrameData<'a> {
-    pub(crate) cvars: &'a Cvars,
+pub struct FrameData<'a> {
+    pub cvars: &'a Cvars,
     // We have two choices here:
     // 1) Borrow the whole engine
     // 2) Borrow only the scene
@@ -85,12 +85,12 @@ pub(crate) struct FrameData<'a> {
     // and easily pass the one we want to update.
     // So currently we only borrow the scene and {Client,Server}Process deal with the engine.
     // We could also borrow the UI and the resource manager here too if needed.
-    pub(crate) scene: &'a mut Scene,
-    pub(crate) gs: &'a mut GameState,
+    pub scene: &'a mut Scene,
+    pub gs: &'a mut GameState,
 }
 
 impl GameState {
-    pub(crate) async fn new(cvars: &Cvars, engine: &mut Engine, gs_type: GameStateType) -> Self {
+    pub async fn new(cvars: &Cvars, engine: &mut Engine, gs_type: GameStateType) -> Self {
         let mut scene = Scene::new();
 
         engine
@@ -127,7 +127,7 @@ impl GameState {
 }
 
 impl FrameData<'_> {
-    pub(crate) fn tick_before_physics(&mut self, dt: f32) {
+    pub fn tick_before_physics(&mut self, dt: f32) {
         self.scene.graph.physics.integration_parameters.max_ccd_substeps =
             self.cvars.g_physics_max_ccd_substeps;
 
@@ -237,7 +237,7 @@ impl FrameData<'_> {
         }
     }
 
-    pub(crate) fn free_player(&mut self, player_handle: Handle<Player>) {
+    pub fn free_player(&mut self, player_handle: Handle<Player>) {
         let player = self.gs.players.free(player_handle);
         if let Some(handle) = player.cycle_handle {
             let cycle = self.gs.cycles.free(handle);
@@ -245,7 +245,7 @@ impl FrameData<'_> {
         }
     }
 
-    pub(crate) fn spawn_cycle(
+    pub fn spawn_cycle(
         &mut self,
         player_handle: Handle<Player>,
         cycle_index: Option<u32>,
@@ -299,7 +299,7 @@ impl FrameData<'_> {
     ///   the direction of the arrow to the direction as text.
     ///
     /// The rotation is clockwise when looking in the forward direction.
-    pub(crate) fn debug_engine_updates(&self, pos: Vec3) {
+    pub fn debug_engine_updates(&self, pos: Vec3) {
         if !self.cvars.d_draw || !self.cvars.d_draw_frame_timings {
             return;
         }
@@ -318,16 +318,16 @@ impl FrameData<'_> {
 
 // LATER Would be nice to send as little as possible since this is networked.
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
-pub(crate) struct Input {
+pub struct Input {
     /// LATER This should probably never be networked, since cl and sv have different time.
     /// LATER Default impl - should not be 0 if it's not the first match
     ///       in the same process - remove this entirely?
-    pub(crate) real_time: f32,
+    pub real_time: f32,
 
     /// LATER specify whether this is the current or prev or next frame,
     /// it might get messy depending on when input vs timekeeping is done
     /// and when it's sent.
-    pub(crate) game_time: f32,
+    pub game_time: f32,
 
     /// Counterclockwise: 0 is directly forward, negative is left, positive right.
     ///
@@ -336,33 +336,33 @@ pub(crate) struct Input {
     ///
     /// Some things like shooting need the angle at the exact time
     /// so we send yaw and pitch with each input, not just once per frame.
-    pub(crate) yaw: Deg,
-    pub(crate) yaw_speed: Deg,
-    pub(crate) pitch: Deg,
-    pub(crate) pitch_speed: Deg,
+    pub yaw: Deg,
+    pub yaw_speed: Deg,
+    pub pitch: Deg,
+    pub pitch_speed: Deg,
 
-    pub(crate) fire1: bool,
-    pub(crate) fire2: bool,
-    pub(crate) marker1: bool,
-    pub(crate) marker2: bool,
-    pub(crate) zoom: bool,
-    pub(crate) forward: bool,
-    pub(crate) backward: bool,
-    pub(crate) left: bool,
-    pub(crate) right: bool,
-    pub(crate) up: bool,
-    pub(crate) down: bool,
-    pub(crate) prev_weapon: bool,
-    pub(crate) next_weapon: bool,
-    pub(crate) reload: bool,
-    pub(crate) flag: bool,
-    pub(crate) grenade: bool,
-    pub(crate) kill: bool,
-    pub(crate) map: bool,
-    pub(crate) score: bool,
-    pub(crate) chat: bool,
-    pub(crate) pause: bool,
-    pub(crate) screenshot: bool,
+    pub fire1: bool,
+    pub fire2: bool,
+    pub marker1: bool,
+    pub marker2: bool,
+    pub zoom: bool,
+    pub forward: bool,
+    pub backward: bool,
+    pub left: bool,
+    pub right: bool,
+    pub up: bool,
+    pub down: bool,
+    pub prev_weapon: bool,
+    pub next_weapon: bool,
+    pub reload: bool,
+    pub flag: bool,
+    pub grenade: bool,
+    pub kill: bool,
+    pub map: bool,
+    pub score: bool,
+    pub chat: bool,
+    pub pause: bool,
+    pub screenshot: bool,
     // ^ when adding fields, also add them to other impls and functions below
 }
 
@@ -370,7 +370,7 @@ pub(crate) struct Input {
 // These don't need to be networked
 
 impl Input {
-    pub(crate) fn release_all_keys(&mut self) {
+    pub fn release_all_keys(&mut self) {
         self.fire1 = false;
         self.fire2 = false;
         self.marker1 = false;
@@ -395,7 +395,7 @@ impl Input {
         self.screenshot = false;
     }
 
-    pub(crate) fn look_rotation(&self) -> UnitQuaternion<f32> {
+    pub fn look_rotation(&self) -> UnitQuaternion<f32> {
         let yaw = self.yaw_rotation();
 
         let pitch_axis = yaw * LEFT_AXIS;
@@ -404,7 +404,7 @@ impl Input {
         pitch * yaw
     }
 
-    pub(crate) fn yaw_rotation(&self) -> UnitQuaternion<f32> {
+    pub fn yaw_rotation(&self) -> UnitQuaternion<f32> {
         UnitQuaternion::from_axis_angle(&UP_AXIS, self.yaw.to_radians())
     }
 }
@@ -500,10 +500,10 @@ impl Debug for Input {
 // This reasoning might change if this struct gets larger but it'll probably mean
 // only taking inspiration and bits of code from the angle crate, not adding it as a dep.
 #[derive(Debug, Clone, Copy, Default, Deserialize, Serialize)]
-pub(crate) struct Deg(pub(crate) f32);
+pub struct Deg(pub f32);
 
 impl Deg {
-    pub(crate) fn to_radians(self) -> f32 {
+    pub fn to_radians(self) -> f32 {
         self.0.to_radians()
     }
 }

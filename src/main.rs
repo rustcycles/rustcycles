@@ -5,7 +5,7 @@
 
 // Keep this first so the macros are available everywhere without having to import them.
 #[macro_use]
-pub(crate) mod debug;
+pub mod debug;
 
 mod client;
 mod common;

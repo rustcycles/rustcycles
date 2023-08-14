@@ -18,9 +18,9 @@ use fyrox::{core::algebra, scene::collider::BitMask};
 
 // This should generally be used instead of std's HashMap and HashSet
 // because we usually don't need HashDoS protection but do need determinism.
-pub(crate) use fxhash::{FxHashMap, FxHashSet};
+pub use fxhash::{FxHashMap, FxHashSet};
 
-pub(crate) use fyrox::{
+pub use fyrox::{
     core::{
         algebra::{Unit, UnitQuaternion, Vector2, Vector3, Vector4},
         color::Color,
@@ -40,15 +40,15 @@ pub(crate) use fyrox::{
 
 // This doesn't increase compile times in any measureble way.
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
-pub(crate) use inline_tweak::tweak;
+pub use inline_tweak::tweak;
 
-pub(crate) use rand::prelude::*;
+pub use rand::prelude::*;
 // `rng.sample(Normal::new(mean, std_dev))` gives exactly the same results as
 // `rng.sample(StandardNormal) * std_dev + mean`.
 // The latter sometimes requires type annotations.
-pub(crate) use rand_distr::{Normal, StandardNormal};
+pub use rand_distr::{Normal, StandardNormal};
 
-pub(crate) use crate::{
+pub use crate::{
     client::game::ClientFrameData,
     common::{
         trace::{trace_line, TraceOptions},
@@ -62,7 +62,7 @@ pub(crate) use crate::{
 // Visibility of macros by example works diffrently from normal items,
 // they behave as if they were defined in the crate's root
 // so we import it here to make it part of prelude.
-pub(crate) use crate::v;
+pub use crate::v;
 
 /// Shorthand for `Vector3::new()`.
 ///
@@ -107,42 +107,42 @@ macro_rules! v {
 /// Shorthand for `Vector3<f32>`
 ///
 /// X, Y, Z is left, up, forward.
-pub(crate) type Vec3 = Vector3<f32>;
-pub(crate) type Point3 = algebra::Point3<f32>;
+pub type Vec3 = Vector3<f32>;
+pub type Point3 = algebra::Point3<f32>;
 
 // Consts take less typing than using an extension trait - e.g. `Vec3::up()`
 // even though it's less explicit we're talking about 3D vectors.
 
 /// The column vector with a 1 as its first (X) component, and zero elsewhere.
-pub(crate) const LEFT: Vec3 = v!(1 0 0);
+pub const LEFT: Vec3 = v!(1 0 0);
 /// The column vector with a 1 as its second (Y) component, and zero elsewhere.
-pub(crate) const UP: Vec3 = v!(0 1 0);
+pub const UP: Vec3 = v!(0 1 0);
 /// The column vector with a 1 as its third (Z) component, and zero elsewhere.
-pub(crate) const FORWARD: Vec3 = v!(0 0 1);
+pub const FORWARD: Vec3 = v!(0 0 1);
 /// The column vector with a -1 as its first (X) component, and zero elsewhere.
-pub(crate) const RIGHT: Vec3 = v!(-1 0 0);
+pub const RIGHT: Vec3 = v!(-1 0 0);
 /// The column vector with a -1 as its second (Y) component, and zero elsewhere.
-pub(crate) const DOWN: Vec3 = v!(0 -1 0);
+pub const DOWN: Vec3 = v!(0 -1 0);
 /// The column vector with a -1 as its third (Z) component, and zero elsewhere.
-pub(crate) const BACK: Vec3 = v!(0 0 -1);
+pub const BACK: Vec3 = v!(0 0 -1);
 
 /// The unit column vector with a 1 as its first (X) component, and zero elsewhere.
-pub(crate) const LEFT_AXIS: Unit<Vec3> = Unit::new_unchecked(LEFT);
+pub const LEFT_AXIS: Unit<Vec3> = Unit::new_unchecked(LEFT);
 /// The unit column vector with a 1 as its second (Y) component, and zero elsewhere.
-pub(crate) const UP_AXIS: Unit<Vec3> = Unit::new_unchecked(UP);
+pub const UP_AXIS: Unit<Vec3> = Unit::new_unchecked(UP);
 /// The unit column vector with a 1 as its third (Z) component, and zero elsewhere.
-pub(crate) const FORWARD_AXIS: Unit<Vec3> = Unit::new_unchecked(FORWARD);
+pub const FORWARD_AXIS: Unit<Vec3> = Unit::new_unchecked(FORWARD);
 /// The unit column vector with a -1 as its first (X) component, and zero elsewhere.
-pub(crate) const RIGHT_AXIS: Unit<Vec3> = Unit::new_unchecked(RIGHT);
+pub const RIGHT_AXIS: Unit<Vec3> = Unit::new_unchecked(RIGHT);
 /// The unit column vector with a -1 as its second (Y) component, and zero elsewhere.
-pub(crate) const DOWN_AXIS: Unit<Vec3> = Unit::new_unchecked(DOWN);
+pub const DOWN_AXIS: Unit<Vec3> = Unit::new_unchecked(DOWN);
 /// The unit column vector with a -1 as its third (Z) component, and zero elsewhere.
-pub(crate) const BACK_AXIS: Unit<Vec3> = Unit::new_unchecked(BACK);
+pub const BACK_AXIS: Unit<Vec3> = Unit::new_unchecked(BACK);
 
 /// QoL methods for Vec3
 ///
 /// Should be imported along with the rest of the prelude using a glob.
-pub(crate) trait Vec3Ext {
+pub trait Vec3Ext {
     /// The X component of the vector.
     fn left(&self) -> f32;
     /// The Y component of the vector.
@@ -181,7 +181,7 @@ impl Vec3Ext for Vec3 {
 /// QoL methods for UnitQuaternion
 ///
 /// Should be imported along with the rest of the prelude using a glob.
-pub(crate) trait UnitQuaternionExt {
+pub trait UnitQuaternionExt {
     /// Create a unit quaternion from yaw, pitch and roll in that order.
     fn from_ypr(yaw: f32, pitch: f32, roll: f32) -> Self;
     /// Create a unit quaternion from yaw, pitch and roll in that order.
@@ -211,7 +211,7 @@ impl UnitQuaternionExt for UnitQuaternion<f32> {
 /// QoL methods for fyrox's Node.
 ///
 /// Should be imported along with the rest of the prelude using a glob.
-pub(crate) trait NodeExt {
+pub trait NodeExt {
     /// The "side" vector of the global transform basis, might not be normalized.
     fn left_vec(&self) -> Vec3;
     /// The "up" vector of the global transform basis, might not be normalized.
@@ -279,31 +279,31 @@ impl NodeExt for Node {
 
 // Associated consts can't be imported (or even glob-imported)
 // so we have to redefine them here.
-pub(crate) const WHITE: Color = Color::WHITE;
-pub(crate) const BLACK: Color = Color::BLACK;
-pub(crate) const RED: Color = Color::RED;
-pub(crate) const GREEN: Color = Color::GREEN;
+pub const WHITE: Color = Color::WHITE;
+pub const BLACK: Color = Color::BLACK;
+pub const RED: Color = Color::RED;
+pub const GREEN: Color = Color::GREEN;
 /// A hard to see dark blue, prefer BLUE2 instead.
-pub(crate) const BLUE: Color = Color::BLUE;
-pub(crate) const TRANSPARENT: Color = Color::TRANSPARENT;
-pub(crate) const ORANGE: Color = Color::ORANGE;
+pub const BLUE: Color = Color::BLUE;
+pub const TRANSPARENT: Color = Color::TRANSPARENT;
+pub const ORANGE: Color = Color::ORANGE;
 
 // And a couple more custom colors.
 // This doesn't follow any standard color naming scheme.
 /// A blue you can actually see
-pub(crate) const BLUE2: Color = Color::opaque(0, 100, 255);
-pub(crate) const YELLOW: Color = Color::opaque(255, 255, 0);
-pub(crate) const MAGENTA: Color = Color::opaque(255, 0, 255);
-pub(crate) const CYAN: Color = Color::opaque(0, 255, 255);
+pub const BLUE2: Color = Color::opaque(0, 100, 255);
+pub const YELLOW: Color = Color::opaque(255, 255, 0);
+pub const MAGENTA: Color = Color::opaque(255, 0, 255);
+pub const CYAN: Color = Color::opaque(0, 255, 255);
 
 // Note: These are a bit weird because the default is all bits set
 // so most colliders have all bits but some special objects only have a subset.
 // For example, the player can have only IG_ENTITIES and then we can
 // raycast while ignoring the player by setting `filter` to !IG_ENTITIES.
-pub(crate) const IG_ENTITIES: BitMask = BitMask(1 << 0);
-pub(crate) const IG_ALL: BitMask = BitMask(u32::MAX);
+pub const IG_ENTITIES: BitMask = BitMask(1 << 0);
+pub const IG_ALL: BitMask = BitMask(u32::MAX);
 
-pub(crate) trait PoolExt<T> {
+pub trait PoolExt<T> {
     /// Collect the handles into a `Vec`.
     ///
     /// This is a workaround for borrowck limitations so we can

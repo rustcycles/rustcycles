@@ -33,6 +33,7 @@ use fyrox::{
 use crate::{
     client::game::{ClientFrameData, ClientGame},
     common::net::{LocalConnection, LocalListener, TcpConnection},
+    debug,
     prelude::*,
     server::game::ServerGame,
 };
@@ -469,6 +470,7 @@ impl ClientProcess {
             self.gs.game_time_prev = self.gs.game_time;
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
+            debug::set_game_time(self.gs.game_time);
 
             // LATER Check order of cl and sv stuff for minimum latency.
             // LATER change endpoint name for parts to locl/losv?

@@ -5,6 +5,7 @@ use std::net::TcpListener;
 use fyrox::core::instant::Instant;
 
 use crate::{
+    debug,
     prelude::*,
     server::game::{ServerFrameData, ServerGame},
 };
@@ -51,6 +52,7 @@ impl ServerProcess {
             self.gs.game_time_prev = self.gs.game_time;
             self.gs.game_time += dt;
             self.gs.frame_number += 1;
+            debug::set_game_time(self.gs.game_time);
 
             self.sfd().tick_begin_frame();
 

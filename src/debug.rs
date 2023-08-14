@@ -57,7 +57,7 @@
 
 pub mod details;
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use crate::{
     debug::details::{DebugShape, WorldText},
@@ -71,9 +71,8 @@ macro_rules! dbg_logf {
         dbg_logf!("")
     };
     ($($t:tt)*) => {{
-        // TODO game_time, also below
         let msg = format!($($t)*);
-        $crate::__println!("{} {}", $crate::debug::endpoint_name(), msg);
+        $crate::__println!("{} {:.04} {}", $crate::debug::endpoint_name(), $crate::debug::game_time(), msg);
     }};
 }
 
@@ -494,6 +493,8 @@ thread_local! {
         default_color: WHITE,
     });
 
+    static DEBUG_GAME_TIME: Cell<fl> = const { Cell::new(0.0) };
+
     pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
     pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
     pub static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
@@ -528,6 +529,14 @@ pub fn endpoint_name() -> &'static str {
 
 pub fn endpoint_color() -> Color {
     DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
+}
+
+pub fn set_game_time(time: fl) {
+    DEBUG_GAME_TIME.with(|game_time| game_time.set(time));
+}
+
+pub fn game_time() -> fl {
+    DEBUG_GAME_TIME.with(|game_time| game_time.get())
 }
 
 pub fn clear_expired() {

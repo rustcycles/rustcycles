@@ -60,7 +60,7 @@ pub(crate) enum Shape {
     Rot {
         point: Vec3,
         rot: UnitQuaternion<f32>,
-        size: f32,
+        scale: f32,
     },
 }
 
@@ -94,8 +94,8 @@ pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
 }
 
 /// Helper function, prefer `dbg_rot!()` instead.
-pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, size: f32) {
-    let shape = Shape::Rot { point, rot, size };
+pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, scale: f32) {
+    let shape = Shape::Rot { point, rot, scale };
     // Color is not used
     debug_shape(shape, time, WHITE);
 }
@@ -166,10 +166,12 @@ impl DebugShape {
                     lines.insert(Vec3::zeros(), point, self.color);
                 }
             }
-            Shape::Rot { point, rot, size } => {
+            Shape::Rot { point, rot, scale } => {
                 if !cvars.d_draw_rots {
                     return;
                 }
+
+                let size = scale * cvars.d_draw_rots_size;
 
                 // Oringally, this used SceneDrawingContext::draw_transform
                 // but this way we can use BLUE2 instead of the hard to see BLUE.

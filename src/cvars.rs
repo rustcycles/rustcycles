@@ -72,6 +72,7 @@ cvars! {
     /// This ruins perf in debug builds: https://github.com/FyroxEngine/Fyrox/issues/237
     d_draw_physics: bool = true,
     d_draw_rots: bool = true,
+    d_draw_rots_size: f32 = 1.0,
     d_draw_text: bool = true,
     d_draw_text_shadow: bool = true,
     d_draw_text_shadow_dilation: f32 = 0.0,

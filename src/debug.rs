@@ -217,9 +217,9 @@ macro_rules! dbg_cross {
 /// Draw RGB basis vectors at `point`, rotated by `rot`.
 #[macro_export]
 macro_rules! dbg_rot {
-    ($point:expr, $rot:expr, $time:expr, $size:expr) => {{
+    ($point:expr, $rot:expr, $time:expr, $scale:expr) => {{
         #[allow(trivial_numeric_casts)]
-        $crate::debug::details::debug_rot($point, $rot, $time as fl, $size as fl);
+        $crate::debug::details::debug_rot($point, $rot, $time as fl, $scale as fl);
     }};
     ($point:expr, $rot:expr, $time:expr) => {
         $crate::dbg_rot!($point, $rot, 0.0, 1.0)

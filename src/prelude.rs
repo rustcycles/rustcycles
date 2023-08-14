@@ -114,17 +114,17 @@ pub(crate) type Point3 = algebra::Point3<f32>;
 // even though it's less explicit we're talking about 3D vectors.
 
 /// The column vector with a 1 as its first (X) component, and zero elsewhere.
-pub(crate) const LEFT: Vec3 = Vec3::new(1.0, 0.0, 0.0);
+pub(crate) const LEFT: Vec3 = v!(1 0 0);
 /// The column vector with a 1 as its second (Y) component, and zero elsewhere.
-pub(crate) const UP: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+pub(crate) const UP: Vec3 = v!(0 1 0);
 /// The column vector with a 1 as its third (Z) component, and zero elsewhere.
-pub(crate) const FORWARD: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+pub(crate) const FORWARD: Vec3 = v!(0 0 1);
 /// The column vector with a -1 as its first (X) component, and zero elsewhere.
-pub(crate) const RIGHT: Vec3 = Vec3::new(-1.0, 0.0, 0.0);
+pub(crate) const RIGHT: Vec3 = v!(-1 0 0);
 /// The column vector with a -1 as its second (Y) component, and zero elsewhere.
-pub(crate) const DOWN: Vec3 = Vec3::new(0.0, -1.0, 0.0);
+pub(crate) const DOWN: Vec3 = v!(0 -1 0);
 /// The column vector with a -1 as its third (Z) component, and zero elsewhere.
-pub(crate) const BACK: Vec3 = Vec3::new(0.0, 0.0, -1.0);
+pub(crate) const BACK: Vec3 = v!(0 0 -1);
 
 /// The unit column vector with a 1 as its first (X) component, and zero elsewhere.
 pub(crate) const LEFT_AXIS: Unit<Vec3> = Unit::new_unchecked(LEFT);
@@ -288,7 +288,7 @@ pub(crate) const BLUE: Color = Color::BLUE;
 pub(crate) const TRANSPARENT: Color = Color::TRANSPARENT;
 pub(crate) const ORANGE: Color = Color::ORANGE;
 
-// And a couple more custom ones.
+// And a couple more custom colors.
 // This doesn't follow any standard color naming scheme.
 /// A blue you can actually see
 pub(crate) const BLUE2: Color = Color::opaque(0, 100, 255);
@@ -326,6 +326,11 @@ impl<T: 'static> PoolExt<T> for Pool<T> {
         self.pair_iter().map(|(h, _)| h).collect()
     }
 }
+
+// For easly switching between f32 and f64.
+// Currently only (meant to be) used in debug code.
+#[allow(non_camel_case_types)]
+pub type fl = f32;
 
 #[cfg(test)]
 mod tests {

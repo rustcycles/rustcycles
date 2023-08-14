@@ -7,18 +7,29 @@
 // Some items in this file could trivially be inlined into debug.rs.
 // Usually, they're here because they differ between RecWars and RustCycles.
 
-use std::cell::RefCell;
-
 use fxhash::FxHashMap;
 use fyrox::{core::algebra::Vector3, scene::debug::Line};
 use serde::{Deserialize, Serialize};
 
-use crate::prelude::*;
+use crate::{debug::DEBUG_SHAPES, prelude::*};
 
 #[macro_export]
 macro_rules! __println {
     ($($t:tt)*) => {
         println!($($t)*)
+    }
+}
+
+/// Helper struct, use one of the `dbg_*!()` macros.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub(crate) struct WorldText {
+    pub(crate) pos: Vec3,
+    pub(crate) msg: String,
+}
+
+impl WorldText {
+    pub(crate) fn new(pos: Vec3, msg: String) -> Self {
+        Self { pos, msg }
     }
 }
 
@@ -32,7 +43,7 @@ pub(crate) struct DebugShape {
     pub(crate) color: Color,
 }
 
-/// Helper struct, use one of the `dbg_*!()` macros.
+/// Helper enum, use one of the `dbg_*!()` macros.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub(crate) enum Shape {
     Line {
@@ -86,7 +97,7 @@ pub(crate) fn debug_cross(point: Vec3, time: f32, color: Color) {
 pub(crate) fn debug_rot(point: Vec3, rot: UnitQuaternion<f32>, time: f32, size: f32) {
     let shape = Shape::Rot { point, rot, size };
     // Color is not used
-    debug_shape(shape, time, Color::WHITE);
+    debug_shape(shape, time, WHITE);
 }
 
 fn debug_shape(shape: Shape, time: f32, color: Color) {
@@ -105,6 +116,8 @@ impl DebugShape {
                 }
 
                 lines.insert(begin, end, self.color);
+
+                // LATER d_draw_lines_ends_half_length line in RecWars
             }
             Shape::Arrow { begin, dir } => {
                 if !cvars.d_draw_arrows {
@@ -114,7 +127,7 @@ impl DebugShape {
                 let end = begin + dir;
                 lines.insert(begin, end, self.color);
 
-                // When the arrow is horizontal, we want two of the side lines
+                // When the arrow is exactly horizontal, we want two of the side lines
                 // to be above and below the arrow body and the other two to the sides.
                 // When it's not horizontal, we want it to appear pitched up/down,
                 // no weird rotations around the axis.
@@ -150,7 +163,6 @@ impl DebugShape {
                 lines.insert(point - dir4, point + dir4, self.color);
 
                 if cvars.d_draw_crosses_line_from_origin {
-                    // This is sometimes useful if we have trouble finding the cross.
                     lines.insert(Vec3::zeros(), point, self.color);
                 }
             }
@@ -194,53 +206,16 @@ impl Lines {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct DebugEndpoint {
-    pub(crate) name: &'static str,
-    pub(crate) default_color: Color,
-}
-
-// LATER(multithreading) Make debug tools work correctly from all threads.
-thread_local! {
-    // The default value here should be overwritten as soon as it's decided
-    // whether the thread is a client or a server. If you see it in stdout/stderr,
-    // something is wrong - it's very early in startup or somebody spawned
-    // more threads without setting this.
-    static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = RefCell::new(DebugEndpoint{
-        name: "??cl/sv",
-        default_color: Color::WHITE,
-    });
-
-    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
-}
-
-pub(crate) fn set_endpoint(name: &'static str) {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        let mut endpoint = endpoint.borrow_mut();
-        endpoint.name = name;
-        endpoint.default_color = endpoint_to_color(name);
-    });
-}
-
-fn endpoint_to_color(name: &'static str) -> Color {
-    match name {
-        "sv" | "losv" => GREEN,
-        "cl" | "locl" => RED,
-        "lo" => CYAN,
-        _ => WHITE,
-    }
-}
-
-pub(crate) fn endpoint_name() -> &'static str {
-    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().name)
-}
-
-pub(crate) fn endpoint_color() -> Color {
-    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
-}
-
-pub(crate) fn clear_expired() {
-    DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
-    DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
+#[cfg(test)]
+pub const V1: Vec3 = v!(1 2 3);
+#[cfg(test)]
+pub const V2: Vec3 = v!(4 5 6);
+#[cfg(test)]
+#[macro_export]
+macro_rules! r1 {
+    () => {
+        // There's no way to construct a unit quaternion
+        // in a const context, just use a macro.
+        UnitQuaternion::from_euler_angles(0.1, 0.2, 0.3)
+    };
 }

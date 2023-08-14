@@ -210,7 +210,7 @@ fn init_global_state(endpoint_name: &'static str) {
         prev_hook(panic_info);
     }));
 
-    debug::details::set_endpoint(endpoint_name);
+    debug::set_endpoint(endpoint_name);
 
     // LATER Switch fyrox to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO

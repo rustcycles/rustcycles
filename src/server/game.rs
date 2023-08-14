@@ -11,7 +11,7 @@ use crate::{
         },
         net::{self, Connection, Listener},
     },
-    debug::details::{DEBUG_SHAPES, DEBUG_TEXTS},
+    debug::{DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     prelude::*,
 };
 
@@ -216,10 +216,13 @@ impl ServerFrameData<'_> {
             cycle_physics.push(cp);
         }
 
-        // Send debug items, then clear everything on the server
+        // Send debug items, then clear everything on the server (not just expired)
         // so it doesn't get sent again next frame.
-        // Calling debug::details::cleanup() would only clear expired.
         let debug_texts = DEBUG_TEXTS.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            mem::take(&mut *texts)
+        });
+        let debug_texts_world = DEBUG_TEXTS_WORLD.with(|texts| {
             let mut texts = texts.borrow_mut();
             mem::take(&mut *texts)
         });
@@ -232,6 +235,7 @@ impl ServerFrameData<'_> {
             player_inputs,
             cycle_physics,
             debug_texts,
+            debug_texts_world,
             debug_shapes,
         });
         self.network_send(msg, SendDest::All);

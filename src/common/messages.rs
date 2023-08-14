@@ -4,7 +4,11 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{common::Input, debug::details::DebugShape, prelude::*};
+use crate::{
+    common::Input,
+    debug::details::{DebugShape, WorldText},
+    prelude::*,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum ClientMessage {
@@ -82,6 +86,7 @@ pub(crate) struct Update {
     pub(crate) player_inputs: Vec<PlayerInput>,
     pub(crate) cycle_physics: Vec<CyclePhysics>,
     pub(crate) debug_texts: Vec<String>,
+    pub(crate) debug_texts_world: Vec<WorldText>,
     pub(crate) debug_shapes: Vec<DebugShape>,
 }
 

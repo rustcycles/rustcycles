@@ -22,7 +22,8 @@ use crate::{
     },
     debug::{
         self,
-        details::{Lines, DEBUG_SHAPES, DEBUG_TEXTS},
+        details::Lines,
+        {DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     },
     prelude::*,
 };
@@ -297,6 +298,7 @@ impl ClientFrameData<'_> {
                     player_inputs,
                     cycle_physics,
                     debug_texts,
+                    debug_texts_world,
                     debug_shapes,
                 }) => {
                     for PlayerInput {
@@ -325,7 +327,10 @@ impl ClientFrameData<'_> {
                         let mut texts = texts.borrow_mut();
                         texts.extend(debug_texts);
                     });
-
+                    DEBUG_TEXTS_WORLD.with(|texts| {
+                        let mut texts = texts.borrow_mut();
+                        texts.extend(debug_texts_world);
+                    });
                     DEBUG_SHAPES.with(|shapes| {
                         let mut shapes = shapes.borrow_mut();
                         shapes.extend(debug_shapes);
@@ -566,7 +571,6 @@ impl ClientFrameData<'_> {
             // So instead, we convert everything to lines,
             // merge colors if they overlap and only then draw it.
             // This way if cl and sv shapes overlap, they end up yellow (red + green).
-            // LATER would be more efficient to merge whole shapes, not individual lines.
             let mut shapes = shapes.borrow_mut();
             let mut lines = Lines::new();
             for shape in shapes.iter_mut() {
@@ -608,7 +612,14 @@ impl ClientFrameData<'_> {
             debug_string,
         ));
 
+        DEBUG_TEXTS_WORLD.with(|texts| {
+            let texts = texts.borrow();
+            if !texts.is_empty() {
+                soft_unreachable!("world texts not yet implemented"); // LATER
+            }
+        });
+
         // Cleanup
-        debug::details::clear_expired();
+        debug::clear_expired();
     }
 }

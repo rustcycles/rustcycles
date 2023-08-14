@@ -63,6 +63,7 @@ cvars! {
     d_draw_arrows: bool = true,
     d_draw_crosses: bool = true,
     d_draw_crosses_half_len: f32 = 0.5,
+    /// Sometimes useful if you have trouble finding the crosses.
     d_draw_crosses_line_from_origin: bool = false,
     d_draw_frame_timings: bool = true,
     d_draw_frame_timings_steps: usize = 4,

@@ -49,11 +49,20 @@
 // They should evaluate to `()`.
 
 // This file is shared between RecWars and RustCycles
-// to keep their debug APIs the same.
+// to keep their debug APIs the same
+// and as an experiment to see how much code is shareable
+// between significantly different multiplayer games.
 
 #![allow(dead_code)]
 
 pub(crate) mod details;
+
+use std::cell::RefCell;
+
+use crate::{
+    debug::details::{DebugShape, WorldText},
+    prelude::*,
+};
 
 /// Print text into stdout. Uses `println!(..)`-style formatting.
 #[macro_export]
@@ -61,24 +70,20 @@ macro_rules! dbg_logf {
     () => {
         dbg_logf!("")
     };
-    ($($t:tt)*) => {
-        {
-            // TODO game_time, also below
-            let msg = format!($($t)*);
-            $crate::__println!("{} {}", $crate::debug::details::endpoint_name(), msg);
-        }
-    };
+    ($($t:tt)*) => {{
+        // TODO game_time, also below
+        let msg = format!($($t)*);
+        $crate::__println!("{} {}", $crate::debug::endpoint_name(), msg);
+    }};
 }
 
 /// Print variables into stdout formatted as `[file:line] var1: value1, var2: value2`.
 #[macro_export]
 macro_rules! dbg_logd {
-    ($($e:expr),*) => {
-        {
-            let s = $crate::__format_pairs!( $( $e ),* );
-            dbg_logf!("[{}:{}] {}", file!(), line!(), s);
-        }
-    };
+    ($($e:expr),*) => {{
+        let s = $crate::__format_pairs!($($e),*);
+        dbg_logf!("[{}:{}] {}", file!(), line!(), s);
+    }};
 }
 
 /// Print text onto the screen. Uses `println!(..)`-style formatting.
@@ -89,15 +94,13 @@ macro_rules! dbg_textf {
     () => {
         dbg_textf!("")
     };
-    ($($t:tt)*) => {
-        {
-            let msg = format!( $( $t )* );
-            let text = format!("{} {}", $crate::debug::details::endpoint_name(), msg);
-            $crate::debug::details::DEBUG_TEXTS.with(|texts| {
-                texts.borrow_mut().push(text);
-            });
-        }
-    };
+    ($($t:tt)*) => {{
+        let msg = format!($($t)*);
+        let text = format!("{} {}", $crate::debug::endpoint_name(), msg);
+        $crate::debug::DEBUG_TEXTS.with(|texts| {
+            texts.borrow_mut().push(text);
+        });
+    }};
 }
 
 /// Print variables onto the screen formatted as `[file:line] var1: value1, var2: value2`.
@@ -105,12 +108,35 @@ macro_rules! dbg_textf {
 /// Useful for printing debug info each frame.
 #[macro_export]
 macro_rules! dbg_textd {
-    ($($e:expr),*) => {
-        {
-            let s = $crate::__format_pairs!( $( $e ),* );
-            dbg_textf!("[{}:{}] {}", file!(), line!(), s);
-        }
-    };
+    ($($e:expr),*) => {{
+        let s = $crate::__format_pairs!($($e),*);
+        dbg_textf!("[{}:{}] {}", file!(), line!(), s);
+    }};
+}
+
+/// Print text onto the screen at the given world coordinates.
+///
+/// Useful for printing debug info next to game entities each frame.
+#[macro_export]
+macro_rules! dbg_world_textf {
+    ($pos:expr, $($t:tt)*) => {{
+        let msg = format!($($t)*);
+        let text = $crate::debug::details::WorldText::new($pos, msg);
+        $crate::debug::DEBUG_TEXTS_WORLD.with(|texts| {
+            texts.borrow_mut().push(text);
+        });
+    }};
+}
+
+/// Print variables onto the screen at the given world coordinates formatted as `var1: value1, var2: value2`.
+///
+/// Useful for printing debug info next to game entities each frame.
+#[macro_export]
+macro_rules! dbg_world_textd {
+    ($pos:expr,$($e:expr),*) => {{
+        let s = $crate::__format_pairs!($($e),*);
+        dbg_world_textf!($pos, "[{}:{}] {}", file!(), line!(), s);
+    }};
 }
 
 /// Private helper to print the name and value of each given variable.
@@ -129,7 +155,7 @@ macro_rules! __format_pairs {
         format!(
             "{}, {}",
             $crate::__format_pairs!($e),
-            $crate::__format_pairs!( $( $rest ),+ )
+            $crate::__format_pairs!($($rest),+)
         )
     };
 }
@@ -140,11 +166,12 @@ macro_rules! __format_pairs {
 /// - color
 #[macro_export]
 macro_rules! dbg_line {
-    ($begin:expr, $end:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_line($begin, $end, $time as f32, $color)
-    };
+    ($begin:expr, $end:expr, $time:expr, $color:expr) => {{
+        #[allow(trivial_numeric_casts)]
+        $crate::debug::details::debug_line($begin, $end, $time as fl, $color);
+    }};
     ($begin:expr, $end:expr, $time:expr) => {
-        $crate::dbg_line!($begin, $end, $time, $crate::debug::details::endpoint_color())
+        $crate::dbg_line!($begin, $end, $time, $crate::debug::endpoint_color())
     };
     ($begin:expr, $end:expr) => {
         $crate::dbg_line!($begin, $end, 0.0)
@@ -157,11 +184,12 @@ macro_rules! dbg_line {
 /// - color
 #[macro_export]
 macro_rules! dbg_arrow {
-    ($begin:expr, $dir:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_arrow($begin, $dir, $time as f32, $color)
-    };
+    ($begin:expr, $dir:expr, $time:expr, $color:expr) => {{
+        #[allow(trivial_numeric_casts)]
+        $crate::debug::details::debug_arrow($begin, $dir, $time as fl, $color);
+    }};
     ($begin:expr, $dir:expr, $time:expr) => {
-        $crate::dbg_arrow!($begin, $dir, $time, $crate::debug::details::endpoint_color())
+        $crate::dbg_arrow!($begin, $dir, $time, $crate::debug::endpoint_color())
     };
     ($begin:expr, $dir:expr) => {
         $crate::dbg_arrow!($begin, $dir, 0.0)
@@ -174,11 +202,12 @@ macro_rules! dbg_arrow {
 /// - color
 #[macro_export]
 macro_rules! dbg_cross {
-    ($point:expr, $time:expr, $color:expr) => {
-        $crate::debug::details::debug_cross($point, $time as f32, $color)
-    };
+    ($point:expr, $time:expr, $color:expr) => {{
+        #[allow(trivial_numeric_casts)]
+        $crate::debug::details::debug_cross($point, $time as fl, $color);
+    }};
     ($point:expr, $time:expr) => {
-        $crate::dbg_cross!($point, $time, $crate::debug::details::endpoint_color())
+        $crate::dbg_cross!($point, $time, $crate::debug::endpoint_color())
     };
     ($point:expr) => {
         $crate::dbg_cross!($point, 0.0)
@@ -188,9 +217,10 @@ macro_rules! dbg_cross {
 /// Draw RGB basis vectors at `point`, rotated by `rot`.
 #[macro_export]
 macro_rules! dbg_rot {
-    ($point:expr, $rot:expr, $time:expr, $size:expr) => {
-        $crate::debug::details::debug_rot($point, $rot, $time as f32, $size as f32)
-    };
+    ($point:expr, $rot:expr, $time:expr, $size:expr) => {{
+        #[allow(trivial_numeric_casts)]
+        $crate::debug::details::debug_rot($point, $rot, $time as fl, $size as fl);
+    }};
     ($point:expr, $rot:expr, $time:expr) => {
         $crate::dbg_rot!($point, $rot, 0.0, 1.0)
     };
@@ -334,7 +364,7 @@ impl<T: Default, E> SoftUnwrap for Result<T, E> {
     }
 }
 
-// LATER soft accessors for Pool
+// LATER soft accessors for Vecs and generational arenas
 
 /// Extension trait for debugging iterators.
 ///
@@ -451,12 +481,71 @@ where
     }
 }
 
+// The public debugging API is above, shared implementation details below.
+
+// LATER(multithreading) Make debug tools work correctly from all threads.
+thread_local! {
+    // The default value here should be overwritten as soon as it's decided
+    // whether the thread is a client or a server. If you see it in stdout/stderr,
+    // something is wrong - it's very early in startup or somebody spawned
+    // more threads without setting this.
+    static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = RefCell::new(DebugEndpoint{
+        name: "??cl/sv",
+        default_color: WHITE,
+    });
+
+    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct DebugEndpoint {
+    pub(crate) name: &'static str,
+    pub(crate) default_color: Color,
+}
+
+pub(crate) fn set_endpoint(name: &'static str) {
+    DEBUG_ENDPOINT.with(|endpoint| {
+        let mut endpoint = endpoint.borrow_mut();
+        endpoint.name = name;
+        endpoint.default_color = endpoint_to_color(name);
+    });
+}
+
+fn endpoint_to_color(name: &'static str) -> Color {
+    match name {
+        "sv" | "losv" => GREEN,
+        "cl" | "locl" => RED,
+        "lo" => CYAN,
+        _ => WHITE,
+    }
+}
+
+pub(crate) fn endpoint_name() -> &'static str {
+    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().name)
+}
+
+pub(crate) fn endpoint_color() -> Color {
+    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
+}
+
+pub(crate) fn clear_expired() {
+    DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
+    DEBUG_TEXTS_WORLD.with(|texts| texts.borrow_mut().clear());
+    DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unit_cmp)] // https://github.com/rust-lang/rust-clippy/issues/4661
 
     // Don't import anything else here to test the macros properly use full paths.
-    use crate::prelude::*;
+    use crate::{
+        debug::details::{V1, V2},
+        prelude::*,
+        r1,
+    };
 
     // LATER Test these do what they should, not just that they compile.
     //  At least check the globals. Or better yet, test them by running the game and comparing output.
@@ -484,6 +573,12 @@ mod tests {
         dbg_textd!(x);
         dbg_textd!(x, y, 7);
 
+        dbg_world_textf!(V1, "abcd");
+        dbg_world_textf!(V1, "x: {}, y: {y}, 7: {}", x, 7);
+
+        dbg_world_textd!(V1, x);
+        dbg_world_textd!(V1, x, y, 7);
+
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
@@ -502,6 +597,12 @@ mod tests {
             _ => dbg_textd!(),
             _ => dbg_textd!(x),
             _ => dbg_textd!(x, y, 7),
+
+            _ => dbg_world_textf!(V1, "abcd"),
+            _ => dbg_world_textf!(V1, "x: {}, y: {y}, 7: {}", x, 7),
+
+            _ => dbg_world_textd!(V1, x),
+            _ => dbg_world_textd!(V1, x, y, 7),
         };
         assert_eq!(nothing, ());
     }
@@ -510,56 +611,55 @@ mod tests {
     fn test_drawing_compiles() {
         #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
 
-        dbg_line!(v!(1 2 3), v!(4 5 6));
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5);
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5, BLUE);
-        dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, BLUE);
+        dbg_line!(V1, V2);
+        dbg_line!(V1, V2, 5);
+        dbg_line!(V1, V2, 5.0);
+        dbg_line!(V1, V2, 5, BLUE);
+        dbg_line!(V1, V2, 5.0, BLUE);
 
-        dbg_arrow!(v!(1 2 3), v!(4 5 6));
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5);
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0);
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5, BLUE);
-        dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, BLUE);
+        dbg_arrow!(V1, V2);
+        dbg_arrow!(V1, V2, 5);
+        dbg_arrow!(V1, V2, 5.0);
+        dbg_arrow!(V1, V2, 5, BLUE);
+        dbg_arrow!(V1, V2, 5.0, BLUE);
 
-        dbg_cross!(v!(1 2 3));
-        dbg_cross!(v!(1 2 3), 5);
-        dbg_cross!(v!(1 2 3), 5.0);
-        dbg_cross!(v!(1 2 3), 5, BLUE);
-        dbg_cross!(v!(1 2 3), 5.0, BLUE);
+        dbg_cross!(V1);
+        dbg_cross!(V1, 5);
+        dbg_cross!(V1, 5.0);
+        dbg_cross!(V1, 5, BLUE);
+        dbg_cross!(V1, 5.0, BLUE);
 
-        let rot = UnitQuaternion::from_euler_angles(0.1, 0.2, 0.3);
-        dbg_rot!(v!(1 2 3), rot);
-        dbg_rot!(v!(1 2 3), rot, 5);
-        dbg_rot!(v!(1 2 3), rot, 5.0);
-        dbg_rot!(v!(1 2 3), rot, 5, 2);
-        dbg_rot!(v!(1 2 3), rot, 5, 2.0);
-        dbg_rot!(v!(1 2 3), rot, 5.0, 2);
-        dbg_rot!(v!(1 2 3), rot, 5.0, 2.0);
+        dbg_rot!(V1, r1!());
+        dbg_rot!(V1, r1!(), 5);
+        dbg_rot!(V1, r1!(), 5.0);
+        dbg_rot!(V1, r1!(), 5, 2);
+        dbg_rot!(V1, r1!(), 5, 2.0);
+        dbg_rot!(V1, r1!(), 5.0, 2);
+        dbg_rot!(V1, r1!(), 5.0, 2.0);
 
         // Test the macros in expression position
         #[allow(unreachable_patterns)]
         let nothing = match 0 {
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6)),
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5),
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0),
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5, BLUE),
-            _ => dbg_line!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
+            _ => dbg_line!(V1, V2),
+            _ => dbg_line!(V1, V2, 5),
+            _ => dbg_line!(V1, V2, 5.0),
+            _ => dbg_line!(V1, V2, 5, BLUE),
+            _ => dbg_line!(V1, V2, 5.0, BLUE),
 
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6)),
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5),
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0),
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5, BLUE),
-            _ => dbg_arrow!(v!(1 2 3), v!(4 5 6), 5.0, BLUE),
+            _ => dbg_arrow!(V1, V2),
+            _ => dbg_arrow!(V1, V2, 5),
+            _ => dbg_arrow!(V1, V2, 5.0),
+            _ => dbg_arrow!(V1, V2, 5, BLUE),
+            _ => dbg_arrow!(V1, V2, 5.0, BLUE),
 
-            _ => dbg_cross!(v!(1 2 3)),
-            _ => dbg_cross!(v!(1 2 3), 5),
-            _ => dbg_cross!(v!(1 2 3), 5.0),
-            _ => dbg_cross!(v!(1 2 3), 5, BLUE),
-            _ => dbg_cross!(v!(1 2 3), 5.0, BLUE),
+            _ => dbg_cross!(V1),
+            _ => dbg_cross!(V1, 5),
+            _ => dbg_cross!(V1, 5.0),
+            _ => dbg_cross!(V1, 5, BLUE),
+            _ => dbg_cross!(V1, 5.0, BLUE),
 
-            _ => dbg_rot!(v!(1 2 3), rot),
-            _ => dbg_rot!(v!(1 2 3), rot, 5.0),
+            _ => dbg_rot!(V1, r1!()),
+            _ => dbg_rot!(V1, r1!(), 5.0),
         };
         assert_eq!(nothing, ());
     }

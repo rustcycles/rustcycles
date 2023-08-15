@@ -331,8 +331,8 @@ fn client_main(cvars: Cvars, local_server: bool) {
                     WindowEvent::Focused(focus) => {
                         client.focused(focus);
                     }
-                    WindowEvent::KeyboardInput { input, .. } => {
-                        client.keyboard_input(input);
+                    WindowEvent::KeyboardInput { event, .. } => {
+                        client.keyboard_input(&event);
                     }
                     WindowEvent::MouseWheel { delta, phase, .. } => {
                         client.mouse_wheel(delta, phase);

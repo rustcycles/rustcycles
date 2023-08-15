@@ -17,7 +17,7 @@ use fyrox::{
     core::instant::Instant,
     dpi::PhysicalSize,
     engine::GraphicsContext,
-    event::{ElementState, KeyboardInput, MouseButton, MouseScrollDelta, TouchPhase},
+    event::{ElementState, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase},
     gui::{
         brush::Brush,
         formatted_text::WrapMode,
@@ -26,6 +26,7 @@ use fyrox::{
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
+    keyboard::KeyCode,
     renderer::QualitySettings,
     window::CursorGrabMode,
 };
@@ -211,28 +212,28 @@ impl ClientProcess {
         // LATER pause/unpause
     }
 
-    pub fn keyboard_input(&mut self, input: KeyboardInput) {
+    pub fn keyboard_input(&mut self, event: &KeyEvent) {
         // NOTE: This event is repeated if the key is held, that means
         // there can be more `state: Pressed` events before a `state: Released`.
 
         if self.cvars.d_events && self.cvars.d_events_keyboard_input {
-            dbg_logf!("{} keyboard_input: {:?}", self.real_time(), input);
+            dbg_logf!("{} keyboard_input: {:?}", self.real_time(), event);
         }
 
-        self.client_input(input);
+        self.client_input(event);
         if !self.console.is_open() {
-            self.game_input(input);
+            self.game_input(event);
         }
     }
 
     /// Input that is handled regardless of whether we're in menu/console/game.
-    fn client_input(&mut self, input: KeyboardInput) {
-        use scan_codes::*;
+    fn client_input(&mut self, event: &KeyEvent) {
+        use KeyCode::*;
 
-        let pressed = input.state == ElementState::Pressed;
+        let pressed = event.state == ElementState::Pressed;
 
-        match input.scancode {
-            ESC if pressed => {
+        match event.physical_key {
+            Escape if pressed => {
                 if self.console.is_open() {
                     // With shift or without, ESC closes an open console.
                     self.close_console();
@@ -246,13 +247,13 @@ impl ClientProcess {
                     self.set_mouse_grab(false);
                 }
             }
-            BACKTICK if pressed => {
+            Backquote if pressed => {
                 // LATER Configurable console bind.
                 if !self.console.is_open() {
                     self.open_console();
                 }
             }
-            L_SHIFT => self.shift_pressed = pressed,
+            ShiftLeft => self.shift_pressed = pressed,
             _ => (),
         }
     }
@@ -269,28 +270,28 @@ impl ClientProcess {
     }
 
     /// Input that is handdled only when we're in game.
-    fn game_input(&mut self, input: KeyboardInput) {
-        use scan_codes::*;
+    fn game_input(&mut self, event: &KeyEvent) {
+        use KeyCode::*;
 
-        let pressed = input.state == ElementState::Pressed;
+        let pressed = event.state == ElementState::Pressed;
 
-        match input.scancode {
-            W => self.cg.input.forward = pressed,
-            A => self.cg.input.left = pressed,
-            S => self.cg.input.backward = pressed,
-            D => self.cg.input.right = pressed,
-            SPACE => self.cg.input.up = pressed,
-            L_SHIFT => self.cg.input.down = pressed,
-            Q => self.cg.input.prev_weapon = pressed,
-            E => self.cg.input.next_weapon = pressed,
-            R => self.cg.input.reload = pressed,
-            F => self.cg.input.flag = pressed,
-            G => self.cg.input.grenade = pressed,
-            K => self.cg.input.kill = pressed,
-            M => self.cg.input.map = pressed,
-            TAB => self.cg.input.score = pressed,
-            ENTER => self.cg.input.chat = pressed,
-            PAUSE => self.cg.input.pause = pressed,
+        match event.physical_key {
+            KeyW => self.cg.input.forward = pressed,
+            KeyA => self.cg.input.left = pressed,
+            KeyS => self.cg.input.backward = pressed,
+            KeyD => self.cg.input.right = pressed,
+            Space => self.cg.input.up = pressed,
+            ShiftLeft => self.cg.input.down = pressed,
+            KeyQ => self.cg.input.prev_weapon = pressed,
+            KeyE => self.cg.input.next_weapon = pressed,
+            KeyR => self.cg.input.reload = pressed,
+            KeyF => self.cg.input.flag = pressed,
+            KeyG => self.cg.input.grenade = pressed,
+            KeyK => self.cg.input.kill = pressed,
+            KeyM => self.cg.input.map = pressed,
+            Tab => self.cg.input.score = pressed,
+            Enter => self.cg.input.chat = pressed,
+            Pause => self.cg.input.pause = pressed,
             F12 => self.cg.input.screenshot = pressed,
             _ => (),
         }
@@ -330,6 +331,8 @@ impl ClientProcess {
                 MouseButton::Left => self.cg.input.fire1 = pressed,
                 MouseButton::Right => self.cg.input.fire2 = pressed,
                 MouseButton::Middle => self.cg.input.zoom = pressed,
+                MouseButton::Back => self.cg.input.marker2 = pressed,
+                MouseButton::Forward => self.cg.input.marker1 = pressed,
                 MouseButton::Other(8) => self.cg.input.marker1 = pressed,
                 MouseButton::Other(9) => self.cg.input.marker2 = pressed,
                 MouseButton::Other(_) => {}
@@ -578,173 +581,4 @@ impl ClientProcess {
         // because it uses Instant::now() internally.
         self.clock.elapsed().as_secs_f32()
     }
-}
-
-/// Layout independant scancodes.
-///
-/// This is a separate mod so you can glob-import it.
-///
-/// We use scancodes, not virtual key codes, because they don't depend on layout.
-/// This is problematic in other ways:
-/// - They might not be consistent across platforms and vendors.
-/// - We currently have no way to map scan codes to a layout _dependant_ key names
-///   for displaying in the UI.
-///
-/// Here's a bunch of issues to follow:
-/// - https://github.com/rust-windowing/winit/issues/732:
-///   - Improving Scan Code and General Keyboard Layout Handling
-///   - From my testing on Windows and Linux the letter/punctuation keys, number keys,
-///     function keys, and escape, space, shift, enter, tab, backspace, and caps keys
-///     are all identical across both platforms, but various other keys
-///     (such as arrow keys) weren't consistent.
-/// - https://github.com/rust-windowing/winit/issues/2436:
-///   - Expose ScanCode to VirtualKeyCode mapping
-/// - https://github.com/rust-windowing/winit/issues/1806
-///   - Meta Issue: Keyboard input
-/// - https://github.com/bevyengine/bevy/discussions/2386:
-///   - Naming problems: KeyboardInput Scancodes/Virtual Scancodes
-#[rustfmt::skip]
-// ...and also so I can stop rustfmt from mangling it.
-// Seriously, remove #[rustfmt::skip] and see what it does, I dare you.
-// I've never seen anybody *ever* format comments like that
-// and rustfmt does it *by default* without a way to disable it.
-// I. Just. Hate. It.
-mod scan_codes {
-    #![allow(dead_code)]
-
-    use fyrox::event::ScanCode;
-
-    // Apparently there are different numbering schemes all called "scancodes".
-    // This image is the least inaccurate for the one in winit (on Kubuntu 22.04 if that matters):
-    // https://forum.thegamecreators.com/thread/145420
-    // Note that many keys are different (e.g. R_ALT, KP_ENTER, arrows, ...),
-    // this is just to get a vague idea how it looks.
-
-    pub const ESC: ScanCode = 1;
-    pub const NUM1: ScanCode = 2;
-    pub const NUM2: ScanCode = 3;
-    pub const NUM3: ScanCode = 4;
-    pub const NUM4: ScanCode = 5;
-    pub const NUM5: ScanCode = 6;
-    pub const NUM6: ScanCode = 7;
-    pub const NUM7: ScanCode = 8;
-    pub const NUM8: ScanCode = 9;
-    pub const NUM9: ScanCode = 10;
-    pub const NUM0: ScanCode = 11;
-    pub const MINUS: ScanCode = 12;
-    pub const EQUALS: ScanCode = 13;
-    pub const BACKSPACE: ScanCode = 14;
-    pub const TAB: ScanCode = 15;
-    pub const Q: ScanCode = 16;
-    pub const W: ScanCode = 17;
-    pub const E: ScanCode = 18;
-    pub const R: ScanCode = 19;
-    pub const T: ScanCode = 20;
-    pub const Y: ScanCode = 21;
-    pub const U: ScanCode = 22;
-    pub const I: ScanCode = 23;
-    pub const O: ScanCode = 24;
-    pub const P: ScanCode = 25;
-    pub const LBRACKET: ScanCode = 26;
-    pub const RBRACKET: ScanCode = 27;
-    pub const ENTER: ScanCode = 28;
-    pub const L_CTRL: ScanCode = 29;
-    pub const A: ScanCode = 30;
-    pub const S: ScanCode = 31;
-    pub const D: ScanCode = 32;
-    pub const F: ScanCode = 33;
-    pub const G: ScanCode = 34;
-    pub const H: ScanCode = 35;
-    pub const J: ScanCode = 36;
-    pub const K: ScanCode = 37;
-    pub const L: ScanCode = 38;
-    pub const SEMICOLON: ScanCode = 39;
-    pub const APOSTROPHE: ScanCode = 40;
-    pub const BACKTICK: ScanCode = 41;
-    pub const L_SHIFT: ScanCode = 42;
-    pub const BACKSLASH: ScanCode = 43;
-    pub const Z: ScanCode = 44;
-    pub const X: ScanCode = 45;
-    pub const C: ScanCode = 46;
-    pub const V: ScanCode = 47;
-    pub const B: ScanCode = 48;
-    pub const N: ScanCode = 49;
-    pub const M: ScanCode = 50;
-    pub const COMMA: ScanCode = 51;
-    pub const PERIOD: ScanCode = 52;
-    pub const SLASH: ScanCode = 53;
-    pub const R_SHIFT: ScanCode = 54;
-    pub const KP_MULTIPLY: ScanCode = 55;
-    pub const L_ALT: ScanCode = 56;
-    pub const SPACE: ScanCode = 57;
-    pub const CAPS_LOCK: ScanCode = 58;
-    pub const F1: ScanCode = 59;
-    pub const F2: ScanCode = 60;
-    pub const F3: ScanCode = 61;
-    pub const F4: ScanCode = 62;
-    pub const F5: ScanCode = 63;
-    pub const F6: ScanCode = 64;
-    pub const F7: ScanCode = 65;
-    pub const F8: ScanCode = 66;
-    pub const F9: ScanCode = 67;
-    pub const F10: ScanCode = 68;
-    pub const F11: ScanCode = 69;
-    pub const F12: ScanCode = 70;
-    pub const KP7: ScanCode = 71;
-    pub const KP8: ScanCode = 72;
-    pub const KP9: ScanCode = 73;
-    pub const KP_MINUS: ScanCode = 74;
-    pub const KP4: ScanCode = 75;
-    pub const KP5: ScanCode = 76;
-    pub const KP6: ScanCode = 77;
-    pub const KP_PLUS: ScanCode = 78;
-    pub const KP1: ScanCode = 79;
-    pub const KP2: ScanCode = 80;
-    pub const KP3: ScanCode = 81;
-    pub const KP0: ScanCode = 82;
-    pub const KP_PERIOD: ScanCode = 83;
-    // 84
-    // 85
-    pub const BACKSLASH2: ScanCode = 86; // Between LSHIFT and Z, not on all keyboards
-    // 87
-    // 88
-    // 89
-    // 90
-    // 91
-    // 92
-    // 93
-    // 94
-    // 95
-    pub const KP_ENTER: ScanCode = 96;
-    pub const R_CTRL: ScanCode = 97;
-    pub const KP_DIVIDE: ScanCode = 98;
-    pub const PRINT_SCREEN: ScanCode = 99;
-    pub const R_ALT: ScanCode = 100;
-    // 101
-    pub const HOME: ScanCode = 102;
-    pub const UP_ARROW: ScanCode = 103;
-    pub const PG_UP: ScanCode = 104;
-    pub const LEFT_ARROW: ScanCode = 105;
-    pub const RIGHT_ARROW: ScanCode = 106;
-    pub const END: ScanCode = 107;
-    pub const DOWN_ARROW: ScanCode = 108;
-    pub const PG_DOWN: ScanCode = 109;
-    pub const INSERT: ScanCode = 110;
-    pub const DELETE: ScanCode = 111;
-    // 112
-    // 113
-    // 114
-    // 115
-    // 116
-    // 117
-    // 118
-    pub const PAUSE: ScanCode = 119;
-    // 120
-    // 121
-    // 122
-    // 123
-    // 124
-    pub const L_SUPER: ScanCode = 125;
-    pub const R_SUPER: ScanCode = 126;
-    pub const MENU: ScanCode = 127;
 }

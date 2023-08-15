@@ -57,12 +57,19 @@ strum_macros = "0.25.2"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
+# In general, if you override one of these, you need to override everything
+# so that cvars-console-fyrox uses the same version of cvars and fyrox-ui.
+
 #cvars = { path = "../cvars/cvars" }
+cvars = { git = "https://github.com/martin-t/cvars", rev = "54ea6c816c4c935c2574644e2b57bce6361d8a34" }
+
 #cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
-#fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "2537fc1bf5a03dd55c0a2e54bc14a5458d45e724" }
+cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "54ea6c816c4c935c2574644e2b57bce6361d8a34" }
+
+fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "336a283fc7852f9f3254a6a009f61b3287dfa284" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
 #fyrox = { path = "../Fyrox" }
-# Might need to override fyrox-ui as well so that cvars-console-fyrox uses the same version.
-#fyrox-ui = { git = "https://github.com/FyroxEngine/Fyrox", rev = "2537fc1bf5a03dd55c0a2e54bc14a5458d45e724" }
+
+fyrox-ui = { git = "https://github.com/FyroxEngine/Fyrox", rev = "336a283fc7852f9f3254a6a009f61b3287dfa284" }
 #fyrox-ui = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
 #fyrox-ui = { path = "../Fyrox/fyrox-ui" }

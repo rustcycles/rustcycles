@@ -49,7 +49,7 @@ jobs:
         run: |
           sudo apt-get update # Run update first or install might start failing eventually.
           # Fyrox deps
-          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libgl1-mesa-glx
+          sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libxkbcommon-x11-dev libgl1-mesa-glx
           # Add OpenGL libs to the CI runner because Fyrox currently has no headless mode
           sudo apt-get install --no-install-recommends -y libegl1-mesa libegl1
       - run: rustc --version && cargo --version

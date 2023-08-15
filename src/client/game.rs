@@ -22,7 +22,7 @@ use crate::{
     },
     debug::{
         self,
-        details::Lines,
+        details::UniqueLines,
         {DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     },
     prelude::*,
@@ -572,7 +572,7 @@ impl ClientFrameData<'_> {
             // merge colors if they overlap and only then draw it.
             // This way if cl and sv shapes overlap, they end up yellow (red + green).
             let mut shapes = shapes.borrow_mut();
-            let mut lines = Lines::new();
+            let mut lines = UniqueLines::default();
             for shape in shapes.iter_mut() {
                 if self.cvars.d_draw {
                     shape.to_lines(self.cvars, &mut lines);

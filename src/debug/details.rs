@@ -108,7 +108,7 @@ fn debug_shape(shape: Shape, time: f32, color: Color) {
 }
 
 impl DebugShape {
-    pub fn to_lines(&self, cvars: &Cvars, lines: &mut Lines) {
+    pub fn to_lines(&self, cvars: &Cvars, lines: &mut UniqueLines) {
         match self.shape {
             Shape::Line { begin, end } => {
                 if !cvars.d_draw_lines {
@@ -183,14 +183,10 @@ impl DebugShape {
     }
 }
 
-#[derive(Debug)]
-pub struct Lines(pub FxHashMap<(Vector3<u32>, Vector3<u32>), Line>);
+#[derive(Debug, Default)]
+pub struct UniqueLines(pub FxHashMap<(Vector3<u32>, Vector3<u32>), Line>);
 
-impl Lines {
-    pub fn new() -> Self {
-        Self(FxHashMap::default())
-    }
-
+impl UniqueLines {
     /// Insert the line into the hashmap, merging colors if a line already exists
     /// in the exact same place.
     fn insert(&mut self, begin: Vec3, end: Vec3, color: Color) {

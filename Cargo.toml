@@ -61,15 +61,15 @@ strum_macros = "0.25.2"
 # so that cvars-console-fyrox uses the same version of cvars and fyrox-ui.
 
 #cvars = { path = "../cvars/cvars" }
-cvars = { git = "https://github.com/martin-t/cvars", rev = "54ea6c816c4c935c2574644e2b57bce6361d8a34" }
+cvars = { git = "https://github.com/martin-t/cvars", rev = "efb4f71422563d49813f21a67c3b9fb253e44387" }
 
 #cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
-cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "54ea6c816c4c935c2574644e2b57bce6361d8a34" }
+cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "efb4f71422563d49813f21a67c3b9fb253e44387" }
 
-fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "336a283fc7852f9f3254a6a009f61b3287dfa284" }
+fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "7307756adf3cbfa65ca158998fc2440df10b80b2" }
 #fyrox = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
 #fyrox = { path = "../Fyrox" }
 
-fyrox-ui = { git = "https://github.com/FyroxEngine/Fyrox", rev = "336a283fc7852f9f3254a6a009f61b3287dfa284" }
+fyrox-ui = { git = "https://github.com/FyroxEngine/Fyrox", rev = "7307756adf3cbfa65ca158998fc2440df10b80b2" }
 #fyrox-ui = { git = "https://github.com/martin-t/Fyrox", rev = "6fcc4d0cc261611428333aea4fcf1e551812375b" }
 #fyrox-ui = { path = "../Fyrox/fyrox-ui" }

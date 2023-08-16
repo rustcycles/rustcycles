@@ -581,7 +581,7 @@ dependencies = [
 [[package]]
 name = "cvars"
 version = "0.4.2"
-source = "git+https://github.com/martin-t/cvars?rev=54ea6c816c4c935c2574644e2b57bce6361d8a34#54ea6c816c4c935c2574644e2b57bce6361d8a34"
+source = "git+https://github.com/martin-t/cvars?rev=efb4f71422563d49813f21a67c3b9fb253e44387#efb4f71422563d49813f21a67c3b9fb253e44387"
 dependencies = [
  "cvars-macros",
 ]
@@ -589,7 +589,7 @@ dependencies = [
 [[package]]
 name = "cvars-console"
 version = "0.2.0"
-source = "git+https://github.com/martin-t/cvars?rev=54ea6c816c4c935c2574644e2b57bce6361d8a34#54ea6c816c4c935c2574644e2b57bce6361d8a34"
+source = "git+https://github.com/martin-t/cvars?rev=efb4f71422563d49813f21a67c3b9fb253e44387#efb4f71422563d49813f21a67c3b9fb253e44387"
 dependencies = [
  "cvars",
 ]
@@ -597,7 +597,7 @@ dependencies = [
 [[package]]
 name = "cvars-console-fyrox"
 version = "0.3.0"
-source = "git+https://github.com/martin-t/cvars?rev=54ea6c816c4c935c2574644e2b57bce6361d8a34#54ea6c816c4c935c2574644e2b57bce6361d8a34"
+source = "git+https://github.com/martin-t/cvars?rev=efb4f71422563d49813f21a67c3b9fb253e44387#efb4f71422563d49813f21a67c3b9fb253e44387"
 dependencies = [
  "cvars",
  "cvars-console",
@@ -607,7 +607,7 @@ dependencies = [
 [[package]]
 name = "cvars-macros"
 version = "0.4.2"
-source = "git+https://github.com/martin-t/cvars?rev=54ea6c816c4c935c2574644e2b57bce6361d8a34#54ea6c816c4c935c2574644e2b57bce6361d8a34"
+source = "git+https://github.com/martin-t/cvars?rev=efb4f71422563d49813f21a67c3b9fb253e44387#efb4f71422563d49813f21a67c3b9fb253e44387"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -906,7 +906,7 @@ dependencies = [
 [[package]]
 name = "fyrox"
 version = "0.31.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "bitflags 2.4.0",
  "clap",
@@ -942,7 +942,7 @@ dependencies = [
 [[package]]
 name = "fyrox-core"
 version = "0.25.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "android-activity",
  "arrayvec",
@@ -971,7 +971,7 @@ dependencies = [
 [[package]]
 name = "fyrox-core-derive"
 version = "0.20.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "convert_case",
  "darling",
@@ -984,7 +984,7 @@ dependencies = [
 [[package]]
 name = "fyrox-resource"
 version = "0.9.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "fxhash",
  "fyrox-core",
@@ -995,7 +995,7 @@ dependencies = [
 [[package]]
 name = "fyrox-sound"
 version = "0.32.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "fyrox-core",
  "fyrox-resource",
@@ -1011,7 +1011,7 @@ dependencies = [
 [[package]]
 name = "fyrox-ui"
 version = "0.22.0"
-source = "git+https://github.com/FyroxEngine/Fyrox?rev=336a283fc7852f9f3254a6a009f61b3287dfa284#336a283fc7852f9f3254a6a009f61b3287dfa284"
+source = "git+https://github.com/FyroxEngine/Fyrox?rev=7307756adf3cbfa65ca158998fc2440df10b80b2#7307756adf3cbfa65ca158998fc2440df10b80b2"
 dependencies = [
  "copypasta",
  "fontdue",

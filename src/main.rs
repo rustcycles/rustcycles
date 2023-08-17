@@ -28,7 +28,6 @@ use fyrox::{
     utils::translate_event,
     window::{Fullscreen, WindowBuilder},
 };
-use strum_macros::EnumString;
 
 use crate::{client::process::ClientProcess, prelude::*, server::process::ServerProcess};
 
@@ -75,18 +74,7 @@ use crate::{client::process::ClientProcess, prelude::*, server::process::ServerP
 //  - [ ] If possible, lint against unwrap, print, println, dbg,
 //          todo, panic, unreachable, unimplemented, ... See debug.rs for alternatives.
 
-#[derive(Debug, Default)]
-struct Opts {
-    /// Whether to run the client, server or both.
-    endpoint: Option<Endpoint>,
-
-    // LATER Fix examples
-    /// Set cvar values - use key value pairs (separated by space).
-    /// Example: g_armor 150 hud_names false
-    cvar_args: Vec<String>,
-}
-
-#[derive(Debug, EnumString)]
+#[derive(Debug)]
 enum Endpoint {
     /// Run a local game (client and server in one process)
     Local,
@@ -110,31 +98,28 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::process::exit(1);
     }
 
-    let mut opts = Opts::default();
-
     // We are not using a derive-based library (anymore)
     // because they add a couple hundred ms to incremental debug builds.
     //
     // If hand parsing gets too complex, might wanna consider one of the libs here:
     // https://github.com/rosetta-rs/argparse-rosetta-rs
-    //
-    // LATER Add --help and --version
     let mut args = env::args().skip(1).peekable(); // Skip path to self
-    match args.peek().map(String::as_str) {
+    let endpoint = match args.peek().map(String::as_str) {
         Some("launcher") => {
             args.next();
+            None
         }
         Some("local") => {
-            opts.endpoint = Some(Endpoint::Local);
             args.next();
+            Some(Endpoint::Local)
         }
         Some("client") => {
-            opts.endpoint = Some(Endpoint::Client);
             args.next();
+            Some(Endpoint::Client)
         }
         Some("server") => {
-            opts.endpoint = Some(Endpoint::Server);
             args.next();
+            Some(Endpoint::Server)
         }
         #[rustfmt::skip]
         Some("--help") => {
@@ -154,7 +139,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("    are only read at startup so the value needs to be specified");
             println!("    on the command line to take effect");
             println!();
-            // LATER ^ Reloading the map should also work.
             return Ok(());
         }
         Some("--version") => {
@@ -169,33 +153,33 @@ fn main() -> Result<(), Box<dyn Error>> {
         Some(arg) if arg.starts_with('-') => {
             panic!("Unknown option: {}", arg);
         }
-        _ => {}
-    }
+        _ => None,
+    };
     // Anything else, we assume it's a cvar.
-    // Some games require cvars to be prefixed by `+` which allows more specific error messages
-    // because they know it's meant to be a cvar and not a malformed command line option.
+    // Some games require cvars/commands to be prefixed by `+` which allows more specific error messages
+    // because they know it's meant to be a cvar/command and not a malformed command line option.
     // We might wanna require that too but this is slightly less typing for now.
-    opts.cvar_args = args.collect();
+    let cvar_args = args.collect();
 
-    match opts.endpoint {
+    match endpoint {
         // LATER None should launch client and offer choice in menu
         None => {
             init_global_state("launcher");
-            client_server_main(opts);
+            client_server_main(cvar_args);
         }
         Some(Endpoint::Local) => {
             init_global_state("lo");
-            let cvars = args_to_cvars(&opts.cvar_args)?;
+            let cvars = args_to_cvars(&cvar_args)?;
             client_main(cvars, true);
         }
         Some(Endpoint::Client) => {
             init_global_state("cl");
-            let cvars = args_to_cvars(&opts.cvar_args)?;
+            let cvars = args_to_cvars(&cvar_args)?;
             client_main(cvars, false);
         }
         Some(Endpoint::Server) => {
             init_global_state("sv");
-            let cvars = args_to_cvars(&opts.cvar_args)?;
+            let cvars = args_to_cvars(&cvar_args)?;
             server_main(cvars);
         }
     }
@@ -262,7 +246,7 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
 ///
 /// LATER It should do that explicitly, right now it only kills the server
 /// because client quits without a server anyway.
-fn client_server_main(opts: Opts) {
+fn client_server_main(cvar_args: Vec<String>) {
     // This is broken - most input gets ignored (on Kubuntu):
     // thread::spawn(|| {
     //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
@@ -279,7 +263,7 @@ fn client_server_main(opts: Opts) {
     server_cmd.arg("server");
     client_cmd.arg("client");
 
-    for arg in &opts.cvar_args {
+    for arg in &cvar_args {
         server_cmd.arg(arg);
         client_cmd.arg(arg);
     }

@@ -198,7 +198,7 @@ fn init_global_state(endpoint_name: &'static str) {
     // Log which endpoint panicked.
     let prev_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
-        dbg_logf!("panicking {:?}", panic_info);
+        dbg_logf!("panicking"); // No need to print panic_info here, it'll be printed later anyway.
         prev_hook(panic_info);
     }));
 }

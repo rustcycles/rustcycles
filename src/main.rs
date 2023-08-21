@@ -188,18 +188,19 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn init_global_state(endpoint_name: &'static str) {
-    let prev_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic_info| {
-        dbg_logf!("panicking");
-        prev_hook(panic_info);
-    }));
-
     debug::set_endpoint(endpoint_name);
 
     // LATER Switch fyrox to a more standard logger
     // or at least add a level below INFO so load times can remain as INFO
     // and the other messages are hidden by default.
     Log::set_verbosity(MessageKind::Warning);
+
+    // Log which endpoint panicked.
+    let prev_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        dbg_logf!("panicking {:?}", panic_info);
+        prev_hook(panic_info);
+    }));
 }
 
 fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
@@ -214,7 +215,7 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
         }
 
         let str_value = cvars_iter.next().ok_or_else(|| {
-            format!("missing value for cvar `{}` or incorrect command line option", cvar_name)
+            format!("missing value for cvar `{cvar_name}` or incorrect command line option")
         })?;
         let res = cvars.set_str(cvar_name, str_value);
         match res.as_ref() {
@@ -223,14 +224,12 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
                 // so the user can check it was parsed correctly.
                 dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
             }
-            Err(msg) => {
+            Err(e) => {
+                let msg = format!("failed to set cvar {cvar_name} to value {str_value}: {e}");
                 if cvars.d_exit_on_unknown_cvar {
-                    return Err(format!(
-                        "failed to set cvar {} to value {}: {}",
-                        cvar_name, str_value, msg
-                    ));
+                    return Err(msg);
                 } else {
-                    dbg_logf!("failed to set cvar {} to value {}: {}", cvar_name, str_value, msg);
+                    dbg_logf!("WARNING {msg}");
                 }
             }
         }
@@ -247,14 +246,6 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
 /// LATER It should do that explicitly, right now it only kills the server
 /// because client quits without a server anyway.
 fn client_server_main(cvar_args: Vec<String>) {
-    // This is broken - most input gets ignored (on Kubuntu):
-    // thread::spawn(|| {
-    //     // LATER EventLoop::new_any_thread is Unix only, what happens on Windows?
-    //     server_main(EventLoop::new_any_thread());
-    // });
-    // thread::sleep(Duration::from_secs(1));
-    // client_main();
-
     let path = env::args().next().unwrap();
 
     let mut server_cmd = Command::new(&path);

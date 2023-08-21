@@ -493,7 +493,7 @@ thread_local! {
         default_color: WHITE,
     });
 
-    static DEBUG_GAME_TIME: Cell<fl> = const { Cell::new(0.0) };
+    static DEBUG_GAME_TIME: Cell<fl> = const { Cell::new(-1.0) };
 
     pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
     pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());

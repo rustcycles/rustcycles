@@ -1,3 +1,11 @@
+//! Networking listeners and connections. TCP (remote) and mpsc (local).
+//!
+//! We could use TCP locally too but WASM doesn't support it so we use mpsc.
+//!
+//! LATER Long term the plan is to switch away from TCP but honestly as long as it works, it's not a priority.
+//! The common wisdom to never use TCP for games doesn't seem to apply on modern networks.
+//! Veloren has been using TCP for years and nobody complains because nobody even notices.
+
 use std::{
     collections::VecDeque,
     io::{self, ErrorKind, Read, Write},

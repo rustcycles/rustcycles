@@ -92,6 +92,7 @@ cvars! {
 
     /// Run init, gamelogic, and rendering once, then exit. Useful for crude testing/benchmarking.
     d_exit_after_one_frame: bool = false,
+    /// During init. Set this first.
     d_exit_on_unknown_cvar: bool = true,
 
     d_physics_extra_sync: bool = false,

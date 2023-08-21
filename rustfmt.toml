@@ -1,5 +1,5 @@
 # This is too much, it leads to too much line wrapping when using 2 editors side by side
-# (in VSC with minimap enabled and explorer open).
+# (1920x1080, VSC with minimap enabled and explorer open).
 #max_width = 120
 
 # This should lead to fewer linebreaks in code like this:

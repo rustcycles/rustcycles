@@ -11,12 +11,18 @@ use std::{
     io::{self, ErrorKind, Read, Write},
     iter, mem,
     net::{SocketAddr, TcpListener, TcpStream},
+    str::FromStr,
     sync::mpsc::{Receiver, Sender, TryRecvError},
+    thread,
+    time::Duration,
 };
 
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::common::messages::{ClientMessage, ServerMessage};
+use crate::{
+    common::messages::{ClientMessage, ServerMessage},
+    prelude::*,
+};
 
 pub trait Listener {
     fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;
@@ -258,6 +264,29 @@ impl Connection for TcpConnection {
     fn addr(&self) -> String {
         self.addr.to_string()
     }
+}
+
+pub fn tcp_connect(cvars: &Cvars, addr: &str) -> TcpConnection {
+    let addr = SocketAddr::from_str(addr).unwrap();
+
+    let mut connect_attempts = 0;
+    let stream = loop {
+        connect_attempts += 1;
+        // LATER Don't block the main thread - async?
+        // LATER Limit the number of attempts.
+        if let Ok(stream) = TcpStream::connect(addr) {
+            dbg_logf!("connect attempts: {}", connect_attempts);
+            break stream;
+        }
+        if connect_attempts % cvars.net_tcp_connect_retry_print_every_n == 0 {
+            dbg_logf!("connect attempts: {}", connect_attempts);
+        }
+        thread::sleep(Duration::from_millis(cvars.net_tcp_connect_retry_delay_ms));
+    };
+    stream.set_nodelay(true).unwrap();
+    stream.set_nonblocking(true).unwrap();
+
+    TcpConnection::new(stream, addr)
 }
 
 pub fn serialize<M>(msg: M) -> NetworkMessage

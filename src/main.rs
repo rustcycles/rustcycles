@@ -272,12 +272,12 @@ fn client_server_main(cvar_args: Vec<String>) {
 
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
-fn client_main(cvars: Cvars, local_server: bool) {
+fn client_main(cvars: Cvars, local_game: bool) {
     let event_loop = EventLoop::new();
     let engine = init_engine_client(&cvars);
     let use_graphics = !cvars.cl_headless;
 
-    let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_server));
+    let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_game));
     event_loop.run(move |event, window_target, control_flow| {
         // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
         *control_flow = ControlFlow::Poll;

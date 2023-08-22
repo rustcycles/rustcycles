@@ -4,13 +4,7 @@
 //! When connected to a remote server, contains a game client.
 //! When playing locally, contains both a client and a server.
 
-use std::{
-    net::{SocketAddr, TcpStream},
-    str::FromStr,
-    sync::mpsc,
-    thread,
-    time::Duration,
-};
+use std::sync::mpsc;
 
 use cvars_console_fyrox::FyroxConsole;
 use fyrox::{
@@ -33,7 +27,7 @@ use fyrox::{
 
 use crate::{
     client::game::{ClientFrameData, ClientGame},
-    common::net::{LocalConnection, LocalListener, TcpConnection},
+    common::net::{self, LocalConnection, LocalListener},
     debug,
     prelude::*,
     server::game::ServerGame,
@@ -116,26 +110,7 @@ impl ClientProcess {
 
             (Some(sg), cg)
         } else {
-            let addr = SocketAddr::from_str("127.0.0.1:26000").unwrap();
-
-            let mut connect_attempts = 0;
-            let stream = loop {
-                connect_attempts += 1;
-                // LATER Don't block the main thread - async?
-                // LATER Limit the number of attempts.
-                if let Ok(stream) = TcpStream::connect(addr) {
-                    dbg_logf!("connect attempts: {}", connect_attempts);
-                    break stream;
-                }
-                if connect_attempts % 100 == 0 {
-                    dbg_logf!("connect attempts: {}", connect_attempts);
-                }
-                thread::sleep(Duration::from_millis(10));
-            };
-            stream.set_nodelay(true).unwrap();
-            stream.set_nonblocking(true).unwrap();
-
-            let conn = TcpConnection::new(stream, addr);
+            let conn = net::tcp_connect(&cvars, "127.0.0.1:26000");
             let cg =
                 ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn), &mut gs).await;
 

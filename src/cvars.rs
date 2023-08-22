@@ -147,6 +147,9 @@ cvars! {
     /// Additional coefficient for vertical sensitivity.
     m_sensitivity_vertical: f32 = 1.0,
 
+    net_tcp_connect_retry_delay_ms: u64 = 10,
+    net_tcp_connect_retry_print_every_n: u64 = 100,
+
     r_quality: i32 = 0,
 
     /// Run the dedicated server without a window.

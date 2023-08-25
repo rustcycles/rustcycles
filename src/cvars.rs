@@ -15,6 +15,8 @@ use crate::prelude::*;
 // https://github.com/martin-t/cvars/issues/13
 // Plus then cvars will likely be pub anyway.
 cvars! {
+    #![cvars(sorted)]
+
     //! Console variables - configuration options for anything and everything.
     //!
     //! Prefix meanings:
@@ -36,13 +38,17 @@ cvars! {
     cl_camera_fov: f32 = 75.0,
     cl_camera_initial_position: CVec3 = v!(0 5 -15).into(),
     cl_camera_speed: f32 = 10.0,
-    cl_camera_z_near: f32 = 0.001,
     cl_camera_z_far: f32 = 2048.0,
+    cl_camera_z_near: f32 = 0.001,
 
     cl_fullscreen: bool = true,
     /// Run the game without a window. Useful for CI.
     cl_headless: bool = false,
     cl_mouse_grab_on_focus: bool = true,
+
+    cl_net_tcp_connect_retry_delay_ms: u64 = 10,
+    cl_net_tcp_connect_retry_print_every_n: u64 = 100,
+
     cl_vsync: bool = true,
     cl_window_height: i32 = 540,
     cl_window_width: i32 = 960,
@@ -147,15 +153,14 @@ cvars! {
     /// Additional coefficient for vertical sensitivity.
     m_sensitivity_vertical: f32 = 1.0,
 
-    net_tcp_connect_retry_delay_ms: u64 = 10,
-    net_tcp_connect_retry_print_every_n: u64 = 100,
-
     r_quality: i32 = 0,
 
     /// Run the dedicated server without a window.
     ///
     /// Currently off by default because it seems to cause weird stuttering.
     sv_headless: bool = false,
+
+    sv_net_listen_addr: String = "127.0.0.1:26000".to_owned(),
 }
 
 /// Vec3 with support for cvars. Should be converted to Vec3 before use in gamecode.

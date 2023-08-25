@@ -278,10 +278,10 @@ pub fn tcp_connect(cvars: &Cvars, addr: &str) -> TcpConnection {
             dbg_logf!("connect attempts: {}", connect_attempts);
             break stream;
         }
-        if connect_attempts % cvars.net_tcp_connect_retry_print_every_n == 0 {
+        if connect_attempts % cvars.cl_net_tcp_connect_retry_print_every_n == 0 {
             dbg_logf!("connect attempts: {}", connect_attempts);
         }
-        thread::sleep(Duration::from_millis(cvars.net_tcp_connect_retry_delay_ms));
+        thread::sleep(Duration::from_millis(cvars.cl_net_tcp_connect_retry_delay_ms));
     };
     stream.set_nodelay(true).unwrap();
     stream.set_nonblocking(true).unwrap();

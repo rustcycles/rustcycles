@@ -23,7 +23,7 @@ impl ServerProcess {
     pub async fn new(cvars: Cvars, mut engine: Engine) -> Self {
         let clock = Instant::now();
 
-        let listener = TcpListener::bind("127.0.0.1:26000").unwrap();
+        let listener = TcpListener::bind(&cvars.sv_net_listen_addr).unwrap();
         listener.set_nonblocking(true).unwrap();
 
         let gs_type = GameStateType::Server;

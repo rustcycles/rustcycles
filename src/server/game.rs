@@ -68,7 +68,9 @@ impl ServerFrameData<'_> {
         loop {
             match self.sg.listener.accept_conn() {
                 Ok(conn) => {
-                    dbg_logf!("accept {}", conn.addr());
+                    dbg_logf!("connection accepted {}", conn.addr());
+
+                    // TODO(bug) If sending fails, clien is disconnected but this function continues - will likely crash.
 
                     // Add player
                     // This is sent to all clients except the new one.

@@ -46,8 +46,8 @@ cvars! {
     cl_headless: bool = false,
     cl_mouse_grab_on_focus: bool = true,
 
-    cl_net_tcp_connect_retry_delay_ms: u64 = 10,
-    cl_net_tcp_connect_retry_print_every_n: u64 = 100,
+    cl_net_connect_retry_delay_ms: u64 = 10,
+    cl_net_connect_retry_print_every_n: u64 = 100,
 
     cl_vsync: bool = true,
     cl_window_height: i32 = 540,

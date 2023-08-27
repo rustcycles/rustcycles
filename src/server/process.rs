@@ -47,6 +47,11 @@ impl ServerProcess {
     pub fn update(&mut self) {
         let game_time_target = self.real_time();
 
+        let dt_update = game_time_target - self.gs.game_time;
+        if dt_update > 5.0 {
+            dbg_logf!("large dt_update: {dt_update}");
+        }
+
         let dt = 1.0 / 60.0;
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time_prev = self.gs.game_time;

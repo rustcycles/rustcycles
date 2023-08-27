@@ -442,7 +442,12 @@ impl ClientProcess {
 
         let game_time_target = self.real_time();
 
-        // LATER Abstract game loop logic and merge with server
+        let dt_update = game_time_target - self.gs.game_time;
+        if dt_update > 5.0 {
+            dbg_logf!("large dt_update: {dt_update}");
+        }
+
+        // LATER Abstract game loop logic and merge with server?
         let dt = 1.0 / 60.0;
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time_prev = self.gs.game_time;

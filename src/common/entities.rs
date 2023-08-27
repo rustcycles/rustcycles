@@ -13,21 +13,23 @@ use crate::{common::Input, prelude::*};
 /// A client connected to a server. Can be observing, spectating or playing.
 #[derive(Debug)]
 pub struct Player {
+    pub name: String,
+    pub state: PlayerState,
     pub input: Input,
-    pub ps: PlayerState,
     pub cycle_handle: Option<Handle<Cycle>>,
 }
 
 impl Player {
     pub fn new(cycle_handle: Option<Handle<Cycle>>) -> Self {
         Self {
+            name: "unnamed".to_owned(), // TODO
+            state: PlayerState::Observing,
             input: Input::default(),
-            ps: PlayerState::Observing,
             cycle_handle,
         }
     }
 }
-
+//
 /// How the player is participating in the game.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PlayerState {

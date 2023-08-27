@@ -134,7 +134,7 @@ impl FrameData<'_> {
         for cycle in &mut self.gs.cycles {
             let player = &self.gs.players[cycle.player_handle];
 
-            let playing = player.ps == PlayerState::Playing;
+            let playing = player.state == PlayerState::Playing;
             let input = player.input;
             let rot = input.yaw_rotation();
             let body = self.scene.graph[cycle.body_handle].as_rigid_body_mut();

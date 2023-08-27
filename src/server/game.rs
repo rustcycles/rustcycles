@@ -134,14 +134,14 @@ impl ServerFrameData<'_> {
                         dbg_logd!(chat);
                     }
                     ClientMessage::Join => {
-                        self.gs.players[client.player_handle].ps = PlayerState::Playing;
+                        self.gs.players[client.player_handle].state = PlayerState::Playing;
                         let player_index = client.player_handle.index();
                         dbg_logf!("player {} is now playing", player_index);
                         let msg = ServerMessage::Join { player_index };
                         msgs_to_all.push(msg);
                     }
                     ClientMessage::Observe => {
-                        self.gs.players[client.player_handle].ps = PlayerState::Observing;
+                        self.gs.players[client.player_handle].state = PlayerState::Observing;
                         let player_index = client.player_handle.index();
                         dbg_logf!("player {} is now observing", player_index);
                         let msg = ServerMessage::Observe { player_index };

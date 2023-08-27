@@ -263,7 +263,7 @@ impl ClientFrameData<'_> {
                     self.fd().free_player(player_handle);
                 }
                 ServerMessage::Observe { player_index } => {
-                    self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Observing;
+                    self.gs.players.at_mut(player_index).unwrap().state = PlayerState::Observing;
                     dbg_logf!("player {} is now observing", player_index);
                 }
                 ServerMessage::Spectate {
@@ -271,7 +271,7 @@ impl ClientFrameData<'_> {
                     spectatee_index,
                 } => {
                     let spectatee_handle = self.gs.players.handle_from_index(spectatee_index);
-                    self.gs.players.at_mut(player_index).unwrap().ps =
+                    self.gs.players.at_mut(player_index).unwrap().state =
                         PlayerState::Spectating { spectatee_handle };
                     dbg_logf!(
                         "player {} is now spectating player {}",
@@ -280,7 +280,7 @@ impl ClientFrameData<'_> {
                     );
                 }
                 ServerMessage::Join { player_index } => {
-                    self.gs.players.at_mut(player_index).unwrap().ps = PlayerState::Playing;
+                    self.gs.players.at_mut(player_index).unwrap().state = PlayerState::Playing;
                     dbg_logf!("player {} is now playing", player_index);
                 }
                 ServerMessage::SpawnCycle(PlayerCycle {
@@ -342,7 +342,7 @@ impl ClientFrameData<'_> {
 
     pub fn tick_before_physics(&mut self, dt: f32) {
         // Join / spec
-        let ps = self.gs.players[self.cg.player_handle].ps;
+        let ps = self.gs.players[self.cg.player_handle].state;
         if ps == PlayerState::Observing && self.cg.input.fire1 {
             self.cg.network_send(ClientMessage::Join);
         } else if ps == PlayerState::Playing && self.cg.input.fire2 {

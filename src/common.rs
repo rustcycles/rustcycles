@@ -70,10 +70,10 @@ pub enum GameStateType {
 /// It could be all passed as separate arguments to the functions that need it,
 /// but this is more ergonomic.
 ///
-/// This struct and {Client,Server}FrameData are meant to have impl blocks throughout the codebase.
+/// This struct and {Client,Server}FrameCtx are meant to have impl blocks throughout the codebase.
 ///
 /// Note there is no access to wallclock time here, all gamelogic must depend only on game time.
-pub struct FrameData<'a> {
+pub struct FrameCtx<'a> {
     pub cvars: &'a Cvars,
     // We have two choices here:
     // 1) Borrow the whole engine
@@ -126,7 +126,7 @@ impl GameState {
     }
 }
 
-impl FrameData<'_> {
+impl FrameCtx<'_> {
     pub fn tick_before_physics(&mut self, dt: f32) {
         self.scene.graph.physics.integration_parameters.max_ccd_substeps =
             self.cvars.g_physics_max_ccd_substeps;

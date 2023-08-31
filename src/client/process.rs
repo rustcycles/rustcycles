@@ -26,7 +26,7 @@ use fyrox::{
 };
 
 use crate::{
-    client::game::{ClientFrameData, ClientGame},
+    client::game::{ClientFrameCtx, ClientGame},
     common::net::{self, LocalConnection, LocalListener},
     debug,
     prelude::*,
@@ -97,13 +97,13 @@ impl ClientProcess {
             // and send init data into it so the client can read it during creation.
             // Otherwise the client would remain stuck.
             // Yes, this is really ugly.
-            let mut data = ServerFrameData {
+            let mut ctx = ServerFrameCtx {
                 cvars: &cvars,
                 scene: &mut engine.scenes[gs.scene_handle],
                 gs: &mut gs,
                 sg: &mut sg,
             };
-            data.accept_new_connections();
+            ctx.accept_new_connections();
 
             let cg =
                 ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn2), &mut gs).await;
@@ -458,12 +458,12 @@ impl ClientProcess {
             // LATER Check order of cl and sv stuff for minimum latency.
             // LATER change endpoint name for parts to locl/losv?
 
-            self.cfd().tick_begin_frame();
-            self.sfd().map(|mut sfd| sfd.tick_begin_frame());
+            self.cl_ctx().tick_begin_frame();
+            self.sv_ctx().map(|mut ctx| ctx.tick_begin_frame());
 
-            self.fd().tick_before_physics(dt);
+            self.ctx().tick_before_physics(dt);
 
-            self.cfd().tick_before_physics(dt);
+            self.cl_ctx().tick_before_physics(dt);
 
             // Update animations, transformations, physics, ...
             // Dummy control flow and lag since we don't use fyrox plugins.
@@ -476,15 +476,15 @@ impl ClientProcess {
 
             // `tick_after_physics` tells the engine to draw debug shapes and text.
             // Any debug calls after it will show up next frame.
-            self.fd().debug_engine_updates(v!(-5 3 3));
-            self.cfd().tick_after_physics(dt);
-            self.fd().debug_engine_updates(v!(-6 3 3));
+            self.ctx().debug_engine_updates(v!(-5 3 3));
+            self.cl_ctx().tick_after_physics(dt);
+            self.ctx().debug_engine_updates(v!(-6 3 3));
 
             // `sys_send_update` sends debug shapes and text to client.
             // Any debug calls after it will show up next frame.
-            self.fd().debug_engine_updates(v!(-5 5 3));
-            self.sfd().map(|mut sfd| sfd.sys_send_update());
-            self.fd().debug_engine_updates(v!(-6 5 3));
+            self.ctx().debug_engine_updates(v!(-5 5 3));
+            self.sv_ctx().map(|mut ctx| ctx.sys_send_update());
+            self.ctx().debug_engine_updates(v!(-6 5 3));
 
             // Update UI
             self.engine.post_update(dt);
@@ -517,8 +517,8 @@ impl ClientProcess {
         ctx.window.request_redraw();
     }
 
-    fn sfd(&mut self) -> Option<ServerFrameData> {
-        self.sg.as_mut().map(|sg| ServerFrameData {
+    fn sv_ctx(&mut self) -> Option<ServerFrameCtx> {
+        self.sg.as_mut().map(|sg| ServerFrameCtx {
             cvars: &self.cvars,
             scene: &mut self.engine.scenes[self.gs.scene_handle],
             gs: &mut self.gs,
@@ -526,13 +526,13 @@ impl ClientProcess {
         })
     }
 
-    fn cfd(&mut self) -> ClientFrameData {
+    fn cl_ctx(&mut self) -> ClientFrameCtx {
         let renderer = match &mut self.engine.graphics_context {
             GraphicsContext::Initialized(ctx) => Some(&mut ctx.renderer),
             _ => None,
         };
 
-        ClientFrameData {
+        ClientFrameCtx {
             cvars: &self.cvars,
             scene: &mut self.engine.scenes[self.gs.scene_handle],
             gs: &mut self.gs,
@@ -542,8 +542,8 @@ impl ClientProcess {
         }
     }
 
-    fn fd(&mut self) -> FrameData {
-        FrameData {
+    fn ctx(&mut self) -> FrameCtx {
+        FrameCtx {
             cvars: &self.cvars,
             scene: &mut self.engine.scenes[self.gs.scene_handle],
             gs: &mut self.gs,

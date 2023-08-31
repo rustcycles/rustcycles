@@ -113,7 +113,7 @@ impl TraceOptions {
     }
 }
 
-impl FrameData<'_> {
+impl FrameCtx<'_> {
     pub fn trace_line<P>(
         &self,
         ray_origin: P,
@@ -128,7 +128,7 @@ impl FrameData<'_> {
     }
 }
 
-/// Standalone function for cases where it's impossible to borrow `FrameData` as a whole
+/// Standalone function for cases where it's impossible to borrow `FrameCtx` as a whole
 /// but `cvars` and `scene` are available separately.
 pub fn trace_line<P>(
     cvars: &Cvars,

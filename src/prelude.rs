@@ -49,14 +49,14 @@ pub use rand::prelude::*;
 pub use rand_distr::{Normal, StandardNormal};
 
 pub use crate::{
-    client::game::ClientFrameData,
+    client::game::ClientFrameCtx,
     common::{
         trace::{trace_line, TraceOptions},
-        FrameData, GameState, GameStateType,
+        FrameCtx, GameState, GameStateType,
     },
     cvars::Cvars,
     debug::{DbgIterator, SoftUnwrap},
-    server::game::ServerFrameData,
+    server::game::ServerFrameCtx,
 };
 
 // Visibility of macros by example works diffrently from normal items,

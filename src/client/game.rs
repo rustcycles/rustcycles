@@ -45,8 +45,8 @@ pub struct ClientGame {
 
 /// All data necessary to run a frame of client-side game logic in one convenient package.
 ///
-/// See also `ServerFrameData` and `FrameData`.
-pub struct ClientFrameData<'a> {
+/// See also `ServerFrameCtx` and `FrameCtx`.
+pub struct ClientFrameCtx<'a> {
     pub cvars: &'a Cvars,
     pub scene: &'a mut Scene,
     pub gs: &'a mut GameState,
@@ -94,7 +94,7 @@ impl ClientGame {
         )
         .build(&mut scene.graph);
 
-        let mut data = FrameData { cvars, scene, gs };
+        let mut ctx = FrameCtx { cvars, scene, gs };
 
         let mut init_attempts = 0;
         let player_handle = loop {
@@ -105,7 +105,7 @@ impl ClientGame {
             }
             if let Some(msg) = msg {
                 if let ServerMessage::Init(init) = msg {
-                    let local_player_handle = data.init(init);
+                    let local_player_handle = ctx.init(init);
                     dbg_logf!("init attempts: {}", init_attempts);
                     break local_player_handle;
                 } else {
@@ -172,7 +172,7 @@ impl ClientGame {
     }
 }
 
-impl FrameData<'_> {
+impl FrameCtx<'_> {
     pub fn init(&mut self, init: Init) -> Handle<Player> {
         if self.gs.gs_type == GameStateType::Shared {
             // The player has already been spawned when running server logic.
@@ -207,9 +207,9 @@ impl FrameData<'_> {
     }
 }
 
-impl ClientFrameData<'_> {
-    pub fn fd(&mut self) -> FrameData<'_> {
-        FrameData {
+impl ClientFrameCtx<'_> {
+    pub fn ctx(&mut self) -> FrameCtx<'_> {
+        FrameCtx {
             cvars: self.cvars,
             scene: self.scene,
             gs: self.gs,
@@ -260,7 +260,7 @@ impl ClientFrameData<'_> {
                 }
                 ServerMessage::RemovePlayer { player_index } => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
-                    self.fd().free_player(player_handle);
+                    self.ctx().free_player(player_handle);
                 }
                 ServerMessage::Observe { player_index } => {
                     self.gs.players.at_mut(player_index).unwrap().state = PlayerState::Observing;
@@ -288,7 +288,7 @@ impl ClientFrameData<'_> {
                     cycle_index,
                 }) => {
                     let player_handle = self.gs.players.handle_from_index(player_index);
-                    self.fd().spawn_cycle(player_handle, Some(cycle_index));
+                    self.ctx().spawn_cycle(player_handle, Some(cycle_index));
                 }
                 ServerMessage::DespawnCycle { cycle_index } => {
                     dbg_logd!(cycle_index);
@@ -389,7 +389,7 @@ impl ClientFrameData<'_> {
                 delta += -up * dt * self.cvars.cl_camera_speed;
             }
 
-            let hits = self.fd().trace_line(camera_pos_old, delta, trace_opts);
+            let hits = self.ctx().trace_line(camera_pos_old, delta, trace_opts);
             let new_pos = hits[0].position.coords;
             self.scene.graph[self.cg.camera_handle]
                 .local_transform_mut()
@@ -398,8 +398,8 @@ impl ClientFrameData<'_> {
             let up = UP * self.cvars.cl_camera_3rd_person_up;
             let back = cam_rot * BACK * self.cvars.cl_camera_3rd_person_back;
 
-            let hits = self.fd().trace_line(player_cycle_pos, up, trace_opts);
-            let hits = self.fd().trace_line(hits[0].position, back, trace_opts);
+            let hits = self.ctx().trace_line(player_cycle_pos, up, trace_opts);
+            let hits = self.ctx().trace_line(hits[0].position, back, trace_opts);
             let new_pos = hits[0].position.coords;
             self.scene.graph[self.cg.camera_handle]
                 .local_transform_mut()
@@ -430,7 +430,7 @@ impl ClientFrameData<'_> {
         }
 
         // LATER Intersect with each pole (currently it probably assumes they're all one object)
-        let hits = self.fd().trace_line(0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
+        let hits = self.ctx().trace_line(0.5 * DOWN + BACK, FORWARD, TraceOptions::default());
         for hit in hits {
             dbg_cross!(hit.position.coords, 0.0);
         }

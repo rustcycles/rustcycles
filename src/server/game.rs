@@ -26,14 +26,14 @@ pub struct ServerGame {
 
 /// All data necessary to run a frame of server-side gamelogic in one convenient package.
 ///
-/// See also `ClientFrameData` and `FrameData`.
+/// See also `ClientFrameCtx` and `FrameCtx`.
 ///
-/// Note that this struct can't just _contain_ FrameData and deref into it
+/// Note that this struct can't just _contain_ FrameCtx and deref into it
 /// because Deref borrows self as a whole so it would be impossible
 /// to access multiple fields mutably at the same time.
 ///
 /// LATER Unsafe Deref? Same on client.
-pub struct ServerFrameData<'a> {
+pub struct ServerFrameCtx<'a> {
     pub cvars: &'a Cvars,
     pub scene: &'a mut Scene,
     pub gs: &'a mut GameState,
@@ -49,9 +49,9 @@ impl ServerGame {
     }
 }
 
-impl ServerFrameData<'_> {
-    pub fn fd(&mut self) -> FrameData<'_> {
-        FrameData {
+impl ServerFrameCtx<'_> {
+    pub fn ctx(&mut self) -> FrameCtx<'_> {
+        FrameCtx {
             cvars: self.cvars,
             scene: self.scene,
             gs: self.gs,
@@ -91,7 +91,7 @@ impl ServerFrameData<'_> {
                     self.send_init(client_handle);
 
                     // Spawn cycle
-                    let cycle_handle = self.fd().spawn_cycle(player_handle, None);
+                    let cycle_handle = self.ctx().spawn_cycle(player_handle, None);
 
                     // Tell all players
                     let player_cycle = PlayerCycle {
@@ -163,7 +163,7 @@ impl ServerFrameData<'_> {
 
     fn disconnect(&mut self, client_handle: Handle<RemoteClient>) {
         let client = self.sg.clients.free(client_handle);
-        self.fd().free_player(client.player_handle);
+        self.ctx().free_player(client.player_handle);
         let msg = ServerMessage::RemovePlayer {
             player_index: client.player_handle.index(),
         };

@@ -35,7 +35,7 @@ pub struct GameState {
 
     /// Currently this is not synced between client and server,
     /// it's just a debugging aid (e.g. run something on odd/even frames).
-    pub frame_number: usize,
+    pub frame_num: usize,
 
     /// The RNG for all gamelogic
     ///
@@ -114,7 +114,7 @@ impl GameState {
             // We wanna avoid having to specialcase divisions by zero in the first frame.
             // It would usually be 0.0 / 0.0 anyway so now it's 0.0 / -1.0.
             game_time_prev: -1.0,
-            frame_number: 0,
+            frame_num: 0,
             rng: Xoshiro256PlusPlus::seed_from_u64(cvars.d_seed),
             range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
             cycle_model,
@@ -304,14 +304,14 @@ impl FrameCtx<'_> {
             return;
         }
 
-        let step = (self.gs.frame_number % self.cvars.d_draw_frame_timings_steps) as f32;
+        let step = (self.gs.frame_num % self.cvars.d_draw_frame_timings_steps) as f32;
         let angle =
             2.0 * std::f32::consts::PI / self.cvars.d_draw_frame_timings_steps as f32 * step;
         let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);
         if self.cvars.d_draw_frame_timings_text {
-            dbg_textd!(self.gs.frame_number, pos, angle.to_degrees());
+            dbg_textd!(self.gs.frame_num, pos, angle.to_degrees());
         }
     }
 }

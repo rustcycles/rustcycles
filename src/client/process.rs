@@ -452,7 +452,7 @@ impl ClientProcess {
         while self.gs.game_time + dt < game_time_target {
             self.gs.game_time_prev = self.gs.game_time;
             self.gs.game_time += dt;
-            self.gs.frame_number += 1;
+            self.gs.frame_num += 1;
             debug::set_game_time(self.gs.game_time);
 
             // LATER Check order of cl and sv stuff for minimum latency.

@@ -239,7 +239,7 @@ impl ClientFrameCtx<'_> {
 
         self.scene.drawing_context.clear_lines();
 
-        let (msgs, _) = self.cg.conn.receive_sm();
+        let (msgs, closed) = self.cg.conn.receive_sm();
 
         if self.gs.gs_type == GameStateType::Shared {
             // Shared mode ignores all messages that update game state
@@ -337,6 +337,11 @@ impl ClientFrameCtx<'_> {
                     })
                 }
             }
+        }
+
+        if closed {
+            dbg_logf!("Server closed the connection, exitting"); // LATER Don't exit
+            std::process::exit(0);
         }
     }
 

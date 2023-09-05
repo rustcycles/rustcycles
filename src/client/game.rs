@@ -591,7 +591,7 @@ impl ClientFrameCtx<'_> {
 
         // Compose per-frame debug string
         let mut debug_string = String::new();
-        if self.cvars.d_draw_text {
+        if self.cvars.d_draw && self.cvars.d_draw_text {
             if self.cvars.d_engine_stats {
                 if let Some(renderer) = &self.renderer {
                     debug_string.push_str(&renderer.get_statistics().to_string());

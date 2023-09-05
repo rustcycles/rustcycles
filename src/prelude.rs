@@ -16,6 +16,13 @@ use fyrox::{core::algebra, scene::collider::BitMask};
 // Make the most commonly used types available without importing manually.
 // Criteria for inclusion: used in a lot of files and unlikely to collide.
 
+pub use std::{
+    collections::VecDeque,
+    f32::consts::PI,
+    fmt::{self, Debug, Display, Formatter},
+    str::FromStr,
+};
+
 // This should generally be used instead of std's HashMap and HashSet
 // because we usually don't need HashDoS protection but do need determinism.
 pub use fxhash::{FxHashMap, FxHashSet};

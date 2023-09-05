@@ -1,10 +1,6 @@
 //! Console variables - configuration options for anything and everything.
 
-use std::{
-    fmt::{self, Display, Formatter},
-    num::ParseFloatError,
-    str::FromStr,
-};
+use std::num::ParseFloatError;
 
 use cvars::cvars;
 

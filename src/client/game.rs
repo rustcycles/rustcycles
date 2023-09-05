@@ -491,14 +491,13 @@ impl ClientFrameCtx<'_> {
         // Start with no rotation, then rotate 180° around each axis.
         // The result is visually the same as no rotation but the euler angles are different.
 
-        let pi = std::f32::consts::PI;
         let t = self.gs.game_time % 7.0;
         let tyaw = t.clamp(1.0, 2.0) - 1.0;
         let tpitch = t.clamp(3.0, 4.0) - 3.0;
         let troll = t.clamp(5.0, 6.0) - 5.0;
-        let yaw = tyaw * pi;
-        let pitch = tpitch * pi;
-        let roll = troll * pi;
+        let yaw = tyaw * PI;
+        let pitch = tpitch * PI;
+        let roll = troll * PI;
 
         // This is off to the side because it's hard to see above the map.
         let pos_rot = v!(40 5 5);
@@ -515,9 +514,9 @@ impl ClientFrameCtx<'_> {
 
         // Show the difference between intrinsic and extrinsic rotations
         // (easier to see with just 45° instead of 180°).
-        let yaw45 = tyaw * pi / 4.0;
-        let pitch45 = tpitch * pi / 4.0;
-        let roll45 = troll * pi / 4.0;
+        let yaw45 = tyaw * PI / 4.0;
+        let pitch45 = tpitch * PI / 4.0;
+        let roll45 = troll * PI / 4.0;
         let rot45_intrinsic = UnitQuaternion::from_ypr(yaw45, pitch45, roll45);
         dbg_rot!(pos_rot + 4.0 * FORWARD, rot45_intrinsic);
         let rot45_extrinsic = UnitQuaternion::from_ypr_extrinsic(yaw45, pitch45, roll45);

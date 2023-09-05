@@ -7,11 +7,9 @@
 //! Veloren has been using TCP for years and nobody complains because nobody even notices.
 
 use std::{
-    collections::VecDeque,
     io::{self, ErrorKind, Read, Write},
     iter, mem,
     net::{SocketAddr, TcpListener, TcpStream},
-    str::FromStr,
     sync::mpsc::{Receiver, Sender, TryRecvError},
     thread,
     time::Duration,

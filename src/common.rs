@@ -5,8 +5,6 @@ pub mod messages;
 pub mod net;
 pub mod trace;
 
-use std::fmt::{self, Debug, Display, Formatter};
-
 use fyrox::{
     asset::Resource, resource::model::ModelResourceExtension, scene::collider::InteractionGroups,
 };
@@ -305,8 +303,7 @@ impl FrameCtx<'_> {
         }
 
         let step = (self.gs.frame_num % self.cvars.d_draw_frame_timings_steps) as f32;
-        let angle =
-            2.0 * std::f32::consts::PI / self.cvars.d_draw_frame_timings_steps as f32 * step;
+        let angle = 2.0 * PI / self.cvars.d_draw_frame_timings_steps as f32 * step;
         let rot = UnitQuaternion::from_axis_angle(&FORWARD_AXIS, angle);
         let dir = rot * UP;
         dbg_arrow!(pos, dir);

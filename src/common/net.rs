@@ -15,12 +15,9 @@ use std::{
     time::Duration,
 };
 
-use serde::{de::DeserializeOwned, Serialize};
+use serde::de::DeserializeOwned;
 
-use crate::{
-    common::messages::{ClientMessage, ServerMessage},
-    prelude::*,
-};
+use crate::prelude::*;
 
 pub trait Listener {
     fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;

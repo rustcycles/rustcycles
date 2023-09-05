@@ -14,10 +14,8 @@
 [![Total lines](https://tokei.rs/b1/github/rustcycles/rustcycles)](https://github.com/rustcycles/rustcycles)
 [![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
 
-<!-- Note to my future OCD: The ideal image width for a github readme is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). The recommended size for the social preview is higher, likely best to use a different image. -->
-<!-- Check https://github.com/topics/tron to make sure it doesn't look blurry. -->
 <!-- To avoid keeping the file in the repo forever, use either the social preview or upload it to a dummy github issue (AFAIK the issue doesn't even need to be submitted and it'll still be hosted forever). -->
-![Preview](https://repository-images.githubusercontent.com/396838109/8648455d-06b8-4884-a2cc-46fcc5688284)
+![Spectating](https://github.com/rustcycles/rustcycles/assets/4079823/f6ad566c-54f0-49c0-9a2a-5019e908f09e)
 ![Gameplay](https://github.com/rustcycles/rustcycles/assets/4079823/5411df7a-6d31-482b-b3a0-ab3256f5280e)
 <!-- When updating this, also update https://fyrox.rs/games.html -->
 

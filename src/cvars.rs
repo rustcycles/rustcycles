@@ -63,7 +63,6 @@ cvars! {
     /// Same as d_dbg but for ints.
     d_dbgi: i32 = 0,
 
-
     // TODO A lot of these cvars need to be synced to server when playing locally.
     /// Master switch for debug output - the d_draw_* group.
     d_draw: bool = true,

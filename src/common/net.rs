@@ -6,6 +6,11 @@
 //! The common wisdom to never use TCP for games doesn't seem to apply on modern networks.
 //! Veloren has been using TCP for years and nobody complains because nobody even notices.
 
+// This file is shared between RecWars and RustCycles
+// to keep their debug APIs the same
+// and as an experiment to see how much code is shareable
+// between significantly different multiplayer games.
+
 use std::{
     io::{self, ErrorKind, Read, Write},
     iter, mem,

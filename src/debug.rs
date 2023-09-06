@@ -228,6 +228,15 @@ macro_rules! dbg_rot {
     };
 }
 
+/// Same as `assert!` but at compile time.
+#[macro_export]
+macro_rules! static_assert {
+    ($($arg:tt)+) => {
+        const _: () = assert!($($arg)+);
+    };
+}
+// There is no corresponding static_assert_{eq,ne} because assert_{eq,ne} call a non-const function.
+
 /// Same as `assert!` but only prints a message without crashing.
 #[macro_export]
 macro_rules! soft_assert {
@@ -480,7 +489,13 @@ where
     }
 }
 
+//
+//
+// =======================================================================
 // The public debugging API is above, shared implementation details below.
+// =======================================================================
+//
+//
 
 // LATER(multithreading) Make debug tools work correctly from all threads.
 thread_local! {
@@ -674,7 +689,12 @@ mod tests {
     }
 
     #[test]
-    fn test_soft_assert() {
+    fn test_static_asserts() {
+        static_assert!(2 + 2 == 4);
+    }
+
+    #[test]
+    fn test_soft_asserts() {
         #![allow(clippy::let_unit_value)] // We need to test that the macros eval to a ()
         #![allow(clippy::nonminimal_bool)]
         #![allow(clippy::redundant_clone)]

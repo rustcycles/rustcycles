@@ -19,7 +19,7 @@
 ![Gameplay](https://github.com/rustcycles/rustcycles/assets/4079823/5411df7a-6d31-482b-b3a0-ab3256f5280e)
 <!-- When updating this, also update https://fyrox.rs/games.html -->
 
-RustCycles is a third person arena shooter that's about movement, not aim. You have to be smart and think fast.
+RustCycles is a third person multiplayer arena shooter that's about movement, not aim. You have to be smart and think fast.
 
 _This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking._
 
@@ -31,7 +31,7 @@ Multiplayer shooters are large and complex projects and 80% of the code is not g
 
 There are no prebuilt binaries and no web version yet, you have to build the game yourself.
 
-- RustCycles uses git submodules for its assets. To clone the repo, use `git clone --recurse-submodules git@github.com:rustcycles/rustcycles.git`. If you already cloned it without submodules, use `git submodule update --init --recursive`.
+- RustCycles uses git submodules for its assets. To clone the repo, use `git clone --recurse-submodules git@github.com:rustcycles/rustcycles.git`. If you have already cloned it without submodules, use `git submodule update --init --recursive`.
 
 - If on linux, install dependencies (debian example): `sudo apt install libasound2-dev libudev-dev pkg-config xorg-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libfontconfig1-dev`
 <!-- libfontconfig1-dev is not needed on CI for some reason but I couldn't compile without it on Kubuntu 22.04 -->

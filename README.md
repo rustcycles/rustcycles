@@ -15,13 +15,18 @@
 [![Lines of comments](https://tokei.rs/b1/github/rustcycles/rustcycles?category=comments)](https://github.com/rustcycles/rustcycles)
 
 <!-- To avoid keeping the file in the repo forever, use either the social preview or upload it to a dummy github issue (AFAIK the issue doesn't even need to be submitted and it'll still be hosted forever). -->
-![Spectating](https://github.com/rustcycles/rustcycles/assets/4079823/f6ad566c-54f0-49c0-9a2a-5019e908f09e)
 ![Gameplay](https://github.com/rustcycles/rustcycles/assets/4079823/5411df7a-6d31-482b-b3a0-ab3256f5280e)
 <!-- When updating this, also update https://fyrox.rs/games.html -->
 
-RustCycles is a third person multiplayer arena shooter that's about movement, not aim. You have to be smart and think fast.
+RustCycles is a FOSS third person multiplayer arena shooter that's about movement, not aim. You have to be smart and think fast.
 
-_This is just barely a prototype. There's no real gameplay yet, just the engine's default physics and some primitive networking._
+_This is just barely a prototype. There's no real gameplay yet, just basic physics and some networked projectiles._
+
+RustCycles is developed in lockstep with [RecWars](https://github.com/martin-t/rec-wars). Even though they are very different, built on different engines, they share the general architecture. Ideas are tested in one game, then ported to the other.
+
+The ultimate goal is to create a fully moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. RecWars is built in the spirit of [everlasting games](https://spicylobster.itch.io/jumpy/devlog/337996/everlasting-games).
+
+![Spectating](https://github.com/rustcycles/rustcycles/assets/4079823/f6ad566c-54f0-49c0-9a2a-5019e908f09e)
 
 Currently RustCycles is the only open source Fyrox game which uses networking. If you're also writing a multiplayer game in Fyrox, feel free to ping me on Fyrox's or RustCycles' discord to exchange notes and ideas.
 

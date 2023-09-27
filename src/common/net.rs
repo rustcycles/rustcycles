@@ -7,7 +7,7 @@
 //! Veloren has been using TCP for years and nobody complains because nobody even notices.
 
 // This file is shared between RecWars and RustCycles
-// to keep their debug APIs the same
+// to keep their networking APIs the same
 // and as an experiment to see how much code is shareable
 // between significantly different multiplayer games.
 

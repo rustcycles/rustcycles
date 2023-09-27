@@ -34,7 +34,7 @@ use crate::{
 /// which might not be entirely accurate due to network lag and packet loss.
 pub struct ClientGame {
     debug_text: Handle<UiNode>,
-    conn: Box<dyn Connection>,
+    conn: Box<dyn Connection<ServerMessage>>,
     pub camera_handle: Handle<Node>,
     pub player_handle: Handle<Player>,
     pub delta_yaw: f32,
@@ -60,7 +60,7 @@ impl ClientGame {
         cvars: &Cvars,
         engine: &mut Engine,
         debug_text: Handle<UiNode>,
-        mut conn: Box<dyn Connection>,
+        mut conn: Box<dyn Connection<ServerMessage>>,
         gs: &mut GameState,
     ) -> Self {
         let scene = &mut engine.scenes[gs.scene_handle];
@@ -99,7 +99,7 @@ impl ClientGame {
         let mut init_attempts = 0;
         let player_handle = loop {
             init_attempts += 1;
-            let (msg, closed) = conn.receive_one_sm();
+            let (msg, closed) = conn.receive_one();
             if closed {
                 panic!("connection closed before init"); // LATER Don't crash
             }
@@ -239,7 +239,7 @@ impl ClientFrameCtx<'_> {
 
         self.scene.drawing_context.clear_lines();
 
-        let (msgs, closed) = self.cg.conn.receive_sm();
+        let (msgs, closed) = self.cg.conn.receive();
 
         if self.gs.gs_type == GameStateType::Shared {
             // Shared mode ignores all messages that update game state

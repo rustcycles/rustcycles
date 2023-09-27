@@ -20,7 +20,7 @@ use crate::{
 /// Lets clients connect to play.
 pub struct ServerGame {
     // LATER Connections and the listener should probably be persistent across matches.
-    listener: Box<dyn Listener>,
+    listener: Box<dyn Listener<ClientMessage>>,
     clients: Pool<RemoteClient>,
 }
 
@@ -41,7 +41,7 @@ pub struct ServerFrameCtx<'a> {
 }
 
 impl ServerGame {
-    pub async fn new(listener: Box<dyn Listener>) -> Self {
+    pub async fn new(listener: Box<dyn Listener<ClientMessage>>) -> Self {
         Self {
             listener,
             clients: Pool::new(),
@@ -120,7 +120,7 @@ impl ServerFrameCtx<'_> {
         let mut disconnected = Vec::new();
         let mut msgs_to_all = Vec::new();
         for (client_handle, client) in self.sg.clients.pair_iter_mut() {
-            let (msgs, closed) = client.conn.receive_cm();
+            let (msgs, closed) = client.conn.receive();
             // We might have received valid messages before the stream was closed - handle them
             // even though for some, such as player input, it doesn't affect anything.
             for msg in msgs {
@@ -279,12 +279,12 @@ enum SendDest {
 }
 
 struct RemoteClient {
-    conn: Box<dyn Connection>,
+    conn: Box<dyn Connection<ClientMessage>>,
     player_handle: Handle<Player>,
 }
 
 impl RemoteClient {
-    fn new(conn: Box<dyn Connection>, player_handle: Handle<Player>) -> Self {
+    fn new(conn: Box<dyn Connection<ClientMessage>>, player_handle: Handle<Player>) -> Self {
         Self {
             conn,
             player_handle,

@@ -24,8 +24,16 @@ use serde::de::DeserializeOwned;
 
 use crate::prelude::*;
 
-pub trait Listener {
-    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;
+/// A trait to abstract over local and remote listeners.
+///
+/// Note: ideally only the function would be generic over the message type
+/// but then the trait wouldn't be object safe so we have to make the whole trait genetic.
+/// The same reasning applies to `Connection<M>`.
+pub trait Listener<M>
+where
+    M: DeserializeOwned,
+{
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection<M>>>;
 }
 
 pub struct LocalListener {
@@ -38,8 +46,11 @@ impl LocalListener {
     }
 }
 
-impl Listener for LocalListener {
-    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>> {
+impl<M> Listener<M> for LocalListener
+where
+    M: DeserializeOwned,
+{
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection<M>>> {
         let conn = self.conn.take();
         match conn {
             Some(conn) => Ok(Box::new(conn)),
@@ -50,8 +61,11 @@ impl Listener for LocalListener {
 
 // Note we use the TcpListener from std here, not a custom type,
 // no point adding an extra type.
-impl Listener for TcpListener {
-    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>> {
+impl<M> Listener<M> for TcpListener
+where
+    M: DeserializeOwned,
+{
+    fn accept_conn(&mut self) -> io::Result<Box<dyn Connection<M>>> {
         let (stream, addr) = self.accept()?;
 
         // LATER Measure if nodelay actually makes a difference,
@@ -76,15 +90,10 @@ pub struct NetworkMessage {
 }
 
 /// A trait to abstract over local and remove connections.
-///
-/// Note that ideally `receive` (and `receive_one`) would have a sigature like this:
-/// ```rust
-/// fn receive<M>(&mut self) -> (Vec<M>, bool)
-/// where
-///     M: DeserializeOwned;
-/// ```
-/// but generic methods are not object safe so we wouldn't be able to use dynamic dispatch.
-pub trait Connection {
+pub trait Connection<M>
+where
+    M: DeserializeOwned,
+{
     fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error>;
 
     // `#[must_use]` only does something in the trait definition,
@@ -95,29 +104,24 @@ pub trait Connection {
     ///
     /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
     #[must_use]
-    fn receive_cm(&mut self) -> (Vec<ClientMessage>, bool);
-
-    /// Same as `receive_cm` but for `ServerMessage`s.
-    #[must_use]
-    fn receive_sm(&mut self) -> (Vec<ServerMessage>, bool);
+    fn receive(&mut self) -> (Vec<M>, bool);
 
     /// Read one message if available or return None.
     ///
     /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
     #[must_use]
-    fn receive_one_cm(&mut self) -> (Option<ClientMessage>, bool);
-
-    /// Same as `receive_one_cm` but for `ServerMessage`s.
-    #[must_use]
-    fn receive_one_sm(&mut self) -> (Option<ServerMessage>, bool);
+    fn receive_one(&mut self) -> (Option<M>, bool);
 
     #[must_use]
     fn addr(&self) -> String;
 }
 
+/// Send and receive serialized messages locally using mpsc.
+///
+/// It would be more efficient to avoid serialization entirely but:
+/// - It would require a bigger redesign.
+/// - We need to serialize them for demos/replays anyway.
 pub struct LocalConnection {
-    // LATER Would be more efficient to sent messages without serialization
-    // but it would likely require a bigger redesign.
     pub sender: Sender<NetworkMessage>,
     pub receiver: Receiver<NetworkMessage>,
 }
@@ -126,11 +130,18 @@ impl LocalConnection {
     pub fn new(sender: Sender<NetworkMessage>, receiver: Receiver<NetworkMessage>) -> Self {
         Self { sender, receiver }
     }
+}
 
-    fn receive<M>(&mut self) -> (Vec<M>, bool)
-    where
-        M: DeserializeOwned,
-    {
+impl<M> Connection<M> for LocalConnection
+where
+    M: DeserializeOwned,
+{
+    fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error> {
+        self.sender.send(net_msg.clone()).unwrap();
+        Ok(())
+    }
+
+    fn receive(&mut self) -> (Vec<M>, bool) {
         let mut msgs = Vec::new();
         loop {
             let (msg, closed) = self.receive_one();
@@ -145,10 +156,7 @@ impl LocalConnection {
         }
     }
 
-    fn receive_one<M>(&mut self) -> (Option<M>, bool)
-    where
-        M: DeserializeOwned,
-    {
+    fn receive_one(&mut self) -> (Option<M>, bool) {
         let res = self.receiver.try_recv();
         match res {
             Ok(msg) => {
@@ -158,29 +166,6 @@ impl LocalConnection {
             Err(TryRecvError::Empty) => (None, false),
             Err(TryRecvError::Disconnected) => (None, true),
         }
-    }
-}
-
-impl Connection for LocalConnection {
-    fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error> {
-        self.sender.send(net_msg.clone()).unwrap();
-        Ok(())
-    }
-
-    fn receive_cm(&mut self) -> (Vec<ClientMessage>, bool) {
-        self.receive()
-    }
-
-    fn receive_sm(&mut self) -> (Vec<ServerMessage>, bool) {
-        self.receive()
-    }
-
-    fn receive_one_cm(&mut self) -> (Option<ClientMessage>, bool) {
-        self.receive_one()
-    }
-
-    fn receive_one_sm(&mut self) -> (Option<ServerMessage>, bool) {
-        self.receive_one()
     }
 
     fn addr(&self) -> String {
@@ -194,6 +179,7 @@ pub struct TcpConnection {
     pub addr: SocketAddr,
 }
 
+/// Send and receive serialized messages over the network using TCP.
 impl TcpConnection {
     pub fn new(stream: TcpStream, addr: SocketAddr) -> Self {
         Self {
@@ -202,35 +188,12 @@ impl TcpConnection {
             addr,
         }
     }
-
-    /// Read all available bytes from `stream` into `buffer`,
-    /// parse messages that are complete and return them in a vector.
-    ///
-    /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
-    fn receive<M>(&mut self) -> (Vec<M>, bool)
-    where
-        M: DeserializeOwned,
-    {
-        let closed = read(&mut self.stream, &mut self.buffer);
-        let msgs = iter::from_fn(|| parse_one(&mut self.buffer)).collect();
-        (msgs, closed)
-    }
-
-    /// Read all available bytes from `stream` into `buffer`,
-    /// parse a single message if there is enough data and return the message or None.
-    ///
-    /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
-    fn receive_one<M>(&mut self) -> (Option<M>, bool)
-    where
-        M: DeserializeOwned,
-    {
-        let closed = read(&mut self.stream, &mut self.buffer);
-        let msg = parse_one(&mut self.buffer);
-        (msg, closed)
-    }
 }
 
-impl Connection for TcpConnection {
+impl<M> Connection<M> for TcpConnection
+where
+    M: DeserializeOwned,
+{
     fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error> {
         // LATER Measure network usage.
         // LATER Try to minimize network usage.
@@ -245,20 +208,24 @@ impl Connection for TcpConnection {
         Ok(())
     }
 
-    fn receive_cm(&mut self) -> (Vec<ClientMessage>, bool) {
-        self.receive()
+    /// Read all available bytes from `stream` into `buffer`,
+    /// parse messages that are complete and return them in a vector.
+    ///
+    /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
+    fn receive(&mut self) -> (Vec<M>, bool) {
+        let closed = read(&mut self.stream, &mut self.buffer);
+        let msgs = iter::from_fn(|| parse_one(&mut self.buffer)).collect();
+        (msgs, closed)
     }
 
-    fn receive_sm(&mut self) -> (Vec<ServerMessage>, bool) {
-        self.receive()
-    }
-
-    fn receive_one_cm(&mut self) -> (Option<ClientMessage>, bool) {
-        self.receive_one()
-    }
-
-    fn receive_one_sm(&mut self) -> (Option<ServerMessage>, bool) {
-        self.receive_one()
+    /// Read all available bytes from `stream` into `buffer`,
+    /// parse a single message if there is enough data and return the message or None.
+    ///
+    /// Also return whether the connection has been closed (doesn't matter if cleanly or reading failed).
+    fn receive_one(&mut self) -> (Option<M>, bool) {
+        let closed = read(&mut self.stream, &mut self.buffer);
+        let msg = parse_one(&mut self.buffer);
+        (msg, closed)
     }
 
     fn addr(&self) -> String {

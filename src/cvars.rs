@@ -23,8 +23,6 @@ cvars! {
     //! r_ is rendering
     //! sv_ is server administration + performance
 
-    // Would be nice to keep alphabetically.
-
     // LATER move back depending on speed? change fov too?
     cl_camera_3rd_person_back: f32 = 2.0,
     cl_camera_3rd_person_up: f32 = 1.0,

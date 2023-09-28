@@ -72,6 +72,10 @@ impl ServerFrameCtx<'_> {
 
                     // TODO(bug) If sending fails, clien is disconnected but this function continues - will likely crash.
 
+                    // TODO Do what RecWars does - client and player created together,
+                    // send init to new player, AddPlayer to everyone except him.
+                    // Spawning and sending it a separate event that happens many times during a game.
+
                     // Add player
                     // This is sent to all clients except the new one.
                     let player = Player::new(None);

@@ -16,12 +16,13 @@ cvars! {
     //! Console variables - configuration options for anything and everything.
     //!
     //! Prefix meanings:
-    //! cl_ is client
-    //! d_ is debug
-    //! g_ is gameplay
-    //! hud_ is the heads-up display
-    //! r_ is rendering
-    //! sv_ is server administration + performance
+    //! cl_     client
+    //! d_      debugging
+    //! g_      gameplay (some of it runs only on the server but this can change with better clientside prediction)
+    //! hud_    heads-up display
+    //! r_      rendering
+    //! sv_     server administration + performance (not gameplay even if it only runs on the server)
+    //! sys_    low level / "engine"
 
     // LATER move back depending on speed? change fov too?
     cl_camera_3rd_person_back: f32 = 2.0,

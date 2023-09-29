@@ -21,6 +21,10 @@ use crate::{
 pub struct GameState {
     pub gs_type: GameStateType,
 
+    /// Currently this is not synced between client and server,
+    /// it's just a debugging aid (e.g. run something on odd/even frames).
+    pub frame_num: usize,
+
     /// This gamelogic frame's time in seconds.
     ///
     /// This does *not* have to run at the same speed as real world time.
@@ -30,10 +34,6 @@ pub struct GameState {
 
     /// The previous gamelogic frame's time in seconds.
     pub game_time_prev: f32,
-
-    /// Currently this is not synced between client and server,
-    /// it's just a debugging aid (e.g. run something on odd/even frames).
-    pub frame_num: usize,
 
     /// The RNG for all gamelogic
     ///

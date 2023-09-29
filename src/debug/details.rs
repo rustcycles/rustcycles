@@ -9,7 +9,6 @@
 
 use fxhash::FxHashMap;
 use fyrox::{core::algebra::Vector3, scene::debug::Line};
-use serde::{Deserialize, Serialize};
 
 use crate::{debug::DEBUG_SHAPES, prelude::*};
 

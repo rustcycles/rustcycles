@@ -8,9 +8,6 @@ pub mod trace;
 use fyrox::{
     asset::Resource, resource::model::ModelResourceExtension, scene::collider::InteractionGroups,
 };
-use rand::distributions::Uniform;
-use rand_xoshiro::Xoshiro256PlusPlus;
-use serde::{Deserialize, Serialize};
 
 use crate::{
     common::entities::{Cycle, Player, PlayerState, Projectile},

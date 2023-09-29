@@ -2,8 +2,6 @@
 //!
 //! LATER These will form the basis of demo recording and replay.
 
-use serde::{Deserialize, Serialize};
-
 use crate::{
     common::Input,
     debug::details::{DebugShape, WorldText},

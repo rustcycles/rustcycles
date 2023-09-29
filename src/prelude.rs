@@ -45,7 +45,7 @@ pub use fyrox::{
     },
 };
 
-// This doesn't increase compile times in any measureble way.
+// This doesn't increase incremental compile times in any measureble way.
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub use inline_tweak::tweak;
 
@@ -53,9 +53,13 @@ pub use rand::prelude::*;
 // `rng.sample(Normal::new(mean, std_dev))` gives exactly the same results as
 // `rng.sample(StandardNormal) * std_dev + mean`.
 // The latter sometimes requires type annotations.
-pub use rand_distr::{Normal, StandardNormal};
+pub use rand_distr::{Normal, StandardNormal, Uniform};
+pub use rand_xoshiro::Xoshiro256PlusPlus;
 
 pub use serde::{Deserialize, Serialize};
+
+pub use strum::EnumCount;
+pub use strum_macros::{EnumCount, FromRepr};
 
 pub use crate::{
     client::game::ClientFrameCtx,

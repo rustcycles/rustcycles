@@ -334,7 +334,7 @@ impl ClientFrameCtx<'_> {
                     DEBUG_SHAPES.with(|shapes| {
                         let mut shapes = shapes.borrow_mut();
                         shapes.extend(debug_shapes);
-                    })
+                    });
                 }
             }
         }

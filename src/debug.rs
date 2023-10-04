@@ -349,25 +349,48 @@ macro_rules! soft_unreachable {
 
 pub trait SoftUnwrap {
     type Inner;
+
+    #[track_caller]
     fn soft_unwrap(self) -> Self::Inner;
 }
 
 impl<T: Default> SoftUnwrap for Option<T> {
     type Inner = T;
+
     fn soft_unwrap(self) -> Self::Inner {
         match self {
             Some(x) => x,
-            None => soft_unreachable!("Option::None"),
+            None => {
+                let loc = std::panic::Location::caller();
+                dbg_logf!(
+                    "[ERROR]: soft_unwrap failed: Option::None, {}:{}:{}",
+                    loc.file(),
+                    loc.line(),
+                    loc.column()
+                );
+                Default::default()
+            }
         }
     }
 }
 
-impl<T: Default, E> SoftUnwrap for Result<T, E> {
+impl<T: Default, E: Debug> SoftUnwrap for Result<T, E> {
     type Inner = T;
+
     fn soft_unwrap(self) -> Self::Inner {
         match self {
             Ok(x) => x,
-            Err(_) => soft_unreachable!("soft_unwrap failed: Result::Err"),
+            Err(e) => {
+                let loc = std::panic::Location::caller();
+                dbg_logf!(
+                    "[ERROR]: soft_unwrap failed: Result::Err({:?}), {}:{}:{}",
+                    e,
+                    loc.file(),
+                    loc.line(),
+                    loc.column()
+                );
+                Default::default()
+            }
         }
     }
 }

@@ -110,9 +110,9 @@ cvars! {
     /// A "temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
     dbg: bool = false,
-    /// Same as d_dbg but for floats.
+    /// Same as dbg but for floats.
     dbgf: f32 = 0.0,
-    /// Same as d_dbg but for ints.
+    /// Same as dbg but for ints.
     dbgi: i32 = 0,
 
     /// This is needed because the default 1 causes the wheel to randomly stutter/stop

@@ -12,8 +12,4 @@ set -euo pipefail
 
 cargo fmt -- --check
 
-! ( grep --recursive --color=auto --exclude-dir=.git --exclude-dir=target [F]IXME . && echo "The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)" )
-
-! ( grep --recursive --color=auto --exclude-dir=.git --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo "The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?" )
-
-! ( find data ! -name README.md | grep [A-Z] && echo "Asset names/paths must be all lowercase" )
+./extra-lints.sh

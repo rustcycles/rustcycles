@@ -105,16 +105,4 @@ jobs:
       # Note that --all-features doesn't check all code when something is *disabled* by a feature.
       - run: cargo clippy --all-targets --all-features -- --deny warnings
 
-      # No fixmes allowed - they're to be fixed before committing
-      # or at least before merging to master so they can be used
-      # during development for things that must not be forgotten
-      # and grep's output is not littered with other people's fixmes.
-      #
-      # Grep returns success when found and failure when not found, `!` inverts success/failure.
-      # The `[F]` is the usual trick to avoid matching this line itself
-      # without excluding this whole file so it's still checked.
-      - run: '! ( grep --recursive --exclude-dir=target [F]IXME . && echo "The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)" )'
-
-      # Similar as above - cvars like d_dbg* should not be committed to master
-      # so they're available to be used by other devs.
-      - run: '! ( grep --recursive --exclude-dir=target --exclude=debug.rs cvars\.d_dbg . && echo "The d_dbg* cvars should not be used in committed code. Maybe you forgot to remove debug code?" )'
+      - run: ./extra-lints.sh

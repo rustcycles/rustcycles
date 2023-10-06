@@ -10,7 +10,7 @@
 //! - Use `dbg_text*` to print things that happen every frame on screen.
 //! - Use `dbg_line`, `dbg_arrow`, `dbg_cross`, `dbg_rot` to draw shapes in 3D space.
 //! - If you're testing something that needs to be toggled at runtime,
-//!   consider using `cvars.d_dbg*`.
+//!   consider using `cvars.dbg*`.
 //!
 //! Note there can be multiple different framerates: e.g. server bookkeeping,
 //! client/server gamelogic, client bookkeeping, rendering.

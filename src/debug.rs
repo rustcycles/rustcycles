@@ -241,12 +241,6 @@ macro_rules! static_assert {
 #[macro_export]
 macro_rules! soft_assert {
     // The matchers are the same as in stdlib's assert.
-    // The message format is similar but not identical.
-    // Examples from regular asserts:
-    // assert!(false);
-    // assert!(false, "test");
-    // thread 'main' panicked at 'assertion failed: false', src/main.rs:2:5
-    // thread 'main' panicked at 'test', src/main.rs:3:5
     ($cond:expr $(,)?) => {
         soft_assert!($cond, stringify!($cond))
     };
@@ -266,16 +260,11 @@ macro_rules! soft_assert {
 #[macro_export]
 macro_rules! soft_assert_eq {
     // The matchers are the same as in stdlib's assert.
-    // The message format is similar but not identical, we want to fit on one line.
-    // Examples from regular asserts:
-    // assert_eq!(1, 2);
-    // assert_eq!(1, 2, "test");
-    // thread 'main' panicked at 'assertion failed: `(left == right)`
-    //   left: `1`,
-    //  right: `2`', src/main.rs:4:5
-    // thread 'main' panicked at 'assertion failed: `(left == right)`
-    //   left: `1`,
-    //  right: `2`: test', src/main.rs:5:5
+    // The message format is to fit on one line.
+    // LATER Is one line necessary?
+    //  As long as each is prefixes with endpoint and timestamp, it should be ok.
+    //  Consider changing format to match stdlib 1.73.0:
+    //  https://blog.rust-lang.org/2023/10/05/Rust-1.73.0.html#cleaner-panic-messages
     ($left:expr, $right:expr $(,)?) => {
         soft_assert_eq!($left, $right, "`{} == {}`", stringify!($left), stringify!($right))
     };

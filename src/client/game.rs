@@ -323,16 +323,13 @@ impl ClientFrameCtx<'_> {
                         body.set_lin_vel(velocity);
                     }
 
-                    DEBUG_TEXTS.with(|texts| {
-                        let mut texts = texts.borrow_mut();
+                    DEBUG_TEXTS.with_borrow_mut(|texts| {
                         texts.extend(debug_texts);
                     });
-                    DEBUG_TEXTS_WORLD.with(|texts| {
-                        let mut texts = texts.borrow_mut();
+                    DEBUG_TEXTS_WORLD.with_borrow_mut(|texts| {
                         texts.extend(debug_texts_world);
                     });
-                    DEBUG_SHAPES.with(|shapes| {
-                        let mut shapes = shapes.borrow_mut();
+                    DEBUG_SHAPES.with_borrow_mut(|shapes| {
                         shapes.extend(debug_shapes);
                     });
                 }
@@ -569,13 +566,12 @@ impl ClientFrameCtx<'_> {
         }
 
         // Deduplicate and draw debug shapes
-        DEBUG_SHAPES.with(|shapes| {
+        DEBUG_SHAPES.with_borrow_mut(|shapes| {
             // Sometimes debug shapes overlap and only the last one gets drawn.
             // This is especially common when both client and server wanna draw.
             // So instead, we convert everything to lines,
             // merge colors if they overlap and only then draw it.
             // This way if cl and sv shapes overlap, they end up yellow (red + green).
-            let mut shapes = shapes.borrow_mut();
             let mut lines = UniqueLines::default();
             for shape in shapes.iter_mut() {
                 if self.cvars.d_draw {
@@ -599,8 +595,7 @@ impl ClientFrameCtx<'_> {
                 debug_string.push('\n');
                 debug_string.push('\n');
             }
-            DEBUG_TEXTS.with(|texts| {
-                let texts = texts.borrow();
+            DEBUG_TEXTS.with_borrow(|texts| {
                 for text in texts.iter() {
                     debug_string.push_str(text);
                     debug_string.push('\n');
@@ -616,8 +611,7 @@ impl ClientFrameCtx<'_> {
             debug_string,
         ));
 
-        DEBUG_TEXTS_WORLD.with(|texts| {
-            let texts = texts.borrow();
+        DEBUG_TEXTS_WORLD.with_borrow(|texts| {
             if !texts.is_empty() {
                 soft_unreachable!("world texts not yet implemented"); // LATER
             }

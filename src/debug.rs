@@ -96,8 +96,8 @@ macro_rules! dbg_textf {
     ($($t:tt)*) => {{
         let msg = format!($($t)*);
         let text = format!("{} {}", $crate::debug::endpoint_name(), msg);
-        $crate::debug::DEBUG_TEXTS.with(|texts| {
-            texts.borrow_mut().push(text);
+        $crate::debug::DEBUG_TEXTS.with_borrow_mut(|texts| {
+            texts.push(text);
         });
     }};
 }
@@ -121,8 +121,8 @@ macro_rules! dbg_world_textf {
     ($pos:expr, $($t:tt)*) => {{
         let msg = format!($($t)*);
         let text = $crate::debug::details::WorldText::new($pos, msg);
-        $crate::debug::DEBUG_TEXTS_WORLD.with(|texts| {
-            texts.borrow_mut().push(text);
+        $crate::debug::DEBUG_TEXTS_WORLD.with_borrow_mut(|texts| {
+            texts.push(text);
         });
     }};
 }
@@ -534,10 +534,9 @@ pub struct DebugEndpoint {
 }
 
 pub fn set_endpoint(name: &'static str) {
-    DEBUG_ENDPOINT.with(|endpoint| {
-        let mut endpoint = endpoint.borrow_mut();
-        endpoint.name = name;
-        endpoint.default_color = endpoint_to_color(name);
+    DEBUG_ENDPOINT.set(DebugEndpoint {
+        name,
+        default_color: endpoint_to_color(name),
     });
 }
 
@@ -551,25 +550,25 @@ fn endpoint_to_color(name: &'static str) -> Color {
 }
 
 pub fn endpoint_name() -> &'static str {
-    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().name)
+    DEBUG_ENDPOINT.with_borrow(|endpoint| endpoint.name)
 }
 
 pub fn endpoint_color() -> Color {
-    DEBUG_ENDPOINT.with(|endpoint| endpoint.borrow().default_color)
+    DEBUG_ENDPOINT.with_borrow(|endpoint| endpoint.default_color)
 }
 
 pub fn set_game_time(time: fl) {
-    DEBUG_GAME_TIME.with(|game_time| game_time.set(time));
+    DEBUG_GAME_TIME.set(time);
 }
 
 pub fn game_time() -> fl {
-    DEBUG_GAME_TIME.with(|game_time| game_time.get())
+    DEBUG_GAME_TIME.get()
 }
 
 pub fn clear_expired() {
-    DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
-    DEBUG_TEXTS_WORLD.with(|texts| texts.borrow_mut().clear());
-    DEBUG_SHAPES.with(|shapes| shapes.borrow_mut().retain(|shape| shape.time > 0.0));
+    DEBUG_TEXTS.with_borrow_mut(|texts| texts.clear());
+    DEBUG_TEXTS_WORLD.with_borrow_mut(|texts| texts.clear());
+    DEBUG_SHAPES.with_borrow_mut(|shapes| shapes.retain(|shape| shape.time > 0.0));
 }
 
 #[cfg(test)]

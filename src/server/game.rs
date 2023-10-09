@@ -1,6 +1,6 @@
 //! Server-side gamelogic.
 
-use std::{io::ErrorKind, mem};
+use std::io::ErrorKind;
 
 use crate::{
     common::{
@@ -224,18 +224,9 @@ impl ServerFrameCtx<'_> {
 
         // Send debug items, then clear everything on the server (not just expired)
         // so it doesn't get sent again next frame.
-        let debug_texts = DEBUG_TEXTS.with(|texts| {
-            let mut texts = texts.borrow_mut();
-            mem::take(&mut *texts)
-        });
-        let debug_texts_world = DEBUG_TEXTS_WORLD.with(|texts| {
-            let mut texts = texts.borrow_mut();
-            mem::take(&mut *texts)
-        });
-        let debug_shapes = DEBUG_SHAPES.with(|shapes| {
-            let mut shapes = shapes.borrow_mut();
-            mem::take(&mut *shapes)
-        });
+        let debug_texts = DEBUG_TEXTS.take();
+        let debug_texts_world = DEBUG_TEXTS_WORLD.take();
+        let debug_shapes = DEBUG_SHAPES.take();
 
         let msg = ServerMessage::Update(Update {
             player_inputs,

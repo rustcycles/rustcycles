@@ -12,6 +12,8 @@ on:
     # Runs at 15:00 UTC on Fri
     - cron: "0 15 * * 5"
   workflow_dispatch:
+    # This allows running it on any branch manually:
+    # https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # This is unmaintained but works for now.
+      # Actions-rs/install is unmaintained but works for now.
       # Alternatives for when it breaks:
-      #  - dtolnay/install - not a full replacement - only supports crates he uses
-      #  - baptiste0928/cargo-install - probably just compiles it and then caches it for subsequent runs
-      #  - just `cargo install` and caching
+      #  - dtolnay/install - not a full replacement - only supports crates he uses (not audit currently)
+      #  - baptiste0928/cargo-install - looks like it just compiles the crate and then caches it for subsequent runs
+      #  - just `cargo install` and caching it
       - uses: actions-rs/install@v0.1
         with:
           crate: cargo-audit

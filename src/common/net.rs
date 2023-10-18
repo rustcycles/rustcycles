@@ -80,13 +80,16 @@ where
     }
 }
 
+// It might be tempting to save 2 bytes by using u16
+// but init/update in RustCycles can easily get large enough to overflow it.
 type MsgLen = u32;
 const HEADER_LEN: usize = mem::size_of::<MsgLen>();
 
 #[derive(Debug, Clone)]
 pub struct NetworkMessage {
-    content_len: [u8; HEADER_LEN],
-    buf: Vec<u8>,
+    /// Serialized message prefixed by length.
+    /// The length includes the length field itself.
+    pub bytes: Vec<u8>,
 }
 
 /// A trait to abstract over local and remove connections.
@@ -160,7 +163,7 @@ where
         let res = self.receiver.try_recv();
         match res {
             Ok(msg) => {
-                let msg = bincode::deserialize(&msg.buf).unwrap();
+                let msg = bincode::deserialize(&msg.bytes).unwrap();
                 (Some(msg), false)
             }
             Err(TryRecvError::Empty) => (None, false),
@@ -200,9 +203,7 @@ where
         //       General purpose compression could help a bit,
         //       but using what we know about the data should give much better results.
 
-        // Prefix data by length so it's easy to parse on the other side.
-        self.stream.write_all(&net_msg.content_len)?;
-        self.stream.write_all(&net_msg.buf)?;
+        self.stream.write_all(&net_msg.bytes)?;
         self.stream.flush()?; // LATER No idea if necessary or how it interacts with set_nodelay
 
         Ok(())
@@ -233,7 +234,8 @@ where
     }
 }
 
-pub fn tcp_connect(cvars: &Cvars, addr: &str) -> TcpConnection {
+/// LATER This blocks, fix or remove entirely.
+pub fn tcp_connect_blocking(cvars: &Cvars, addr: &str) -> TcpConnection {
     let addr = SocketAddr::from_str(addr).unwrap();
 
     let mut connect_attempts = 0;
@@ -260,13 +262,16 @@ pub fn serialize<M>(msg: M) -> NetworkMessage
 where
     M: Serialize,
 {
-    let buf = bincode::serialize(&msg).expect("bincode failed to serialize message");
-    let content_len = MsgLen::try_from(buf.len())
-        .unwrap_or_else(|err| {
-            panic!("bincode message length ({} bytes) overflowed its type: {:?}", buf.len(), err)
-        })
-        .to_le_bytes();
-    NetworkMessage { content_len, buf }
+    let mut buf = vec![0; HEADER_LEN];
+    bincode::serialize_into(&mut buf, &msg).expect("bincode failed to serialize message");
+
+    let len = MsgLen::try_from(buf.len()).unwrap_or_else(|err| {
+        panic!("bincode message length ({} bytes) overflowed its type: {:?}", buf.len(), err)
+    });
+    let len_bytes = len.to_le_bytes();
+    buf[0..HEADER_LEN].copy_from_slice(&len_bytes);
+
+    NetworkMessage { bytes: buf }
 }
 
 /// Read all available bytes until the stream would block.
@@ -310,18 +315,15 @@ where
         return None;
     }
 
-    // There's no convenient way to make this generic over msg len 2 and 4,
-    // just keep one version commented out.
-    //let len_bytes = [buffer[0], buffer[1]];
-    //let content_len = usize::from(MsgLen::from_le_bytes(len_bytes));
     let len_bytes = [buffer[0], buffer[1], buffer[2], buffer[3]];
-    let content_len = usize::try_from(MsgLen::from_le_bytes(len_bytes)).unwrap();
+    let len = usize::try_from(MsgLen::from_le_bytes(len_bytes)).unwrap();
 
-    if buffer.len() < HEADER_LEN + content_len {
+    if buffer.len() < len {
         // Not enough bytes in buffer for a full message.
         return None;
     }
 
+    let content_len = len - HEADER_LEN;
     buffer.drain(0..HEADER_LEN);
     let bytes: Vec<_> = buffer.drain(0..content_len).collect();
     let msg = bincode::deserialize(&bytes).unwrap();

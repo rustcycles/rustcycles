@@ -110,7 +110,7 @@ impl ClientProcess {
 
             (Some(sg), cg)
         } else {
-            let conn = net::tcp_connect(&cvars, "127.0.0.1:26000");
+            let conn = net::tcp_connect_blocking(&cvars, "127.0.0.1:26000");
             let cg =
                 ClientGame::new(&cvars, &mut engine, debug_text, Box::new(conn), &mut gs).await;
 

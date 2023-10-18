@@ -249,6 +249,7 @@ impl ClientFrameCtx<'_> {
 
         for msg in msgs {
             match msg {
+                ServerMessage::Version(_) => todo!(),
                 ServerMessage::Init(_) => {
                     // LATER Make this type safe? Init part of handshake?
                     panic!("Received unexpected init")

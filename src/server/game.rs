@@ -129,6 +129,7 @@ impl ServerFrameCtx<'_> {
             // even though for some, such as player input, it doesn't affect anything.
             for msg in msgs {
                 match msg {
+                    ClientMessage::Version(_) => todo!(),
                     ClientMessage::Input(input) => {
                         // LATER (server reconciliation) handle more inputs arriving in one frame
                         self.gs.players[client.player_handle].input = input;

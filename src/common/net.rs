@@ -163,7 +163,7 @@ where
         let res = self.receiver.try_recv();
         match res {
             Ok(msg) => {
-                let msg = bincode::deserialize(&msg.bytes).unwrap();
+                let msg = bincode::deserialize(&msg.bytes[HEADER_LEN..]).unwrap();
                 (Some(msg), false)
             }
             Err(TryRecvError::Empty) => (None, false),

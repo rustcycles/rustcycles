@@ -273,140 +273,145 @@ fn client_server_main(cvar_args: Vec<String>) {
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
 fn client_main(cvars: Cvars, local_game: bool) {
-    let event_loop = EventLoop::new();
     let engine = init_engine_client(&cvars);
-    let use_graphics = !cvars.cl_headless;
-
     let mut client = executor::block_on(ClientProcess::new(cvars, engine, local_game));
-    event_loop.run(move |event, window_target, control_flow| {
-        // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
-        *control_flow = ControlFlow::Poll;
-        // This is great because we get events almost immediately,
-        // e.g. 70-80 times each *milli*second when doing nothing else beside printing their times.
-        // The downside is we occupy a full CPU core just for input.
-        // LATER Offload gamelogic and rendering to another thread so input can be received at any time and sent to server immediately.
-        // LATER Is there a way to not waste CPU cycles so much?
 
-        // Exhaustively match all variants so we notice if the enum changes.
-        #[allow(clippy::single_match)]
-        match event {
-            Event::NewEvents(_) => {}
-            Event::WindowEvent { event, .. } => {
-                if let Some(os_event) = translate_event(&event) {
-                    client.engine.user_interface.process_os_event(&os_event);
+    let event_loop = EventLoop::new().unwrap();
+    // We have to use Poll instead of the default Wait because we need the main "loop" (i.e. this event handler)
+    // to run as fast as possible so gamelogic updates run as soon as they should and don't lag behind real time.
+    // Additionally, with Wait a headless process or a window which doesn't redraw wouldn't receive any events
+    // unless the user moved the mouse or presses a key.
+    // So the dedicated server and probably headless clients on CI need polling anyway.
+    //
+    // Polling gives events 70-80 times each *milli*second when doing nothing else beside printing their times.
+    // With it, we can use AboutToWait to run updates as soon as needed.
+    // The downside is we occupy a full CPU core (or 2 when there's also a server process).
+    // LATER Offload gamelogic and rendering to another thread so input can be received at any time and sent to server immediately.
+    // LATER Is there a way to not waste CPU cycles so much? WaitUntil and calculate how much time till next frame?
+    //
+    // This comment also applies to server_main.
+    event_loop.set_control_flow(ControlFlow::Poll);
+    event_loop
+        .run(move |event, window_target| {
+            // Exhaustively match all variants so we notice if the enum changes.
+            #[allow(clippy::single_match)]
+            match event {
+                Event::NewEvents(_) => {}
+                Event::WindowEvent { event, .. } => {
+                    if let Some(os_event) = translate_event(&event) {
+                        client.engine.user_interface.process_os_event(&os_event);
+                    }
+
+                    match event {
+                        WindowEvent::Resized(size) => {
+                            client.resized(size);
+                        }
+                        WindowEvent::CloseRequested => {
+                            window_target.exit();
+                        }
+                        WindowEvent::Focused(focus) => {
+                            client.focused(focus);
+                        }
+                        WindowEvent::KeyboardInput { event, .. } => {
+                            client.keyboard_input(&event);
+                        }
+                        WindowEvent::MouseWheel { delta, phase, .. } => {
+                            client.mouse_wheel(delta, phase);
+                        }
+                        WindowEvent::MouseInput { state, button, .. } => {
+                            client.mouse_input(state, button);
+                        }
+                        WindowEvent::RedrawRequested => {
+                            client.engine.render().unwrap(); // LATER only crash if failed multiple times
+                            if client.exit {
+                                window_target.exit();
+                            }
+                        }
+                        _ => {}
+                    }
                 }
-
-                match event {
-                    WindowEvent::Resized(size) => {
-                        client.resized(size);
-                    }
-                    WindowEvent::CloseRequested => {
-                        *control_flow = ControlFlow::Exit;
-                    }
-                    WindowEvent::Focused(focus) => {
-                        client.focused(focus);
-                    }
-                    WindowEvent::KeyboardInput { event, .. } => {
-                        client.keyboard_input(&event);
-                    }
-                    WindowEvent::MouseWheel { delta, phase, .. } => {
-                        client.mouse_wheel(delta, phase);
-                    }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        client.mouse_input(state, button);
+                // Using device event for mouse motion because
+                // - it reports delta, not position
+                // - it doesn't care whether we're at the edge of the screen
+                Event::DeviceEvent { event, .. } => match event {
+                    DeviceEvent::MouseMotion { delta } => {
+                        client.mouse_motion(delta);
                     }
                     _ => {}
+                },
+                Event::UserEvent(_) => {}
+                // LATER test suspend/resume
+                Event::Suspended => {
+                    if !client.cvars.cl_headless {
+                        client.engine.destroy_graphics_context().unwrap();
+                    }
                 }
-            }
-            // Using device event for mouse motion because
-            // - it reports delta, not position
-            // - it doesn't care whether we're at the edge of the screen
-            Event::DeviceEvent { event, .. } => match event {
-                DeviceEvent::MouseMotion { delta } => {
-                    client.mouse_motion(delta);
+                Event::Resumed => {
+                    if !client.cvars.cl_headless {
+                        client.engine.initialize_graphics_context(window_target).unwrap();
+                    }
                 }
-                _ => {}
-            },
-            Event::UserEvent(_) => {}
-            // LATER test suspend/resume
-            Event::Suspended => {
-                if use_graphics {
-                    client.engine.destroy_graphics_context().unwrap();
+                Event::AboutToWait => {
+                    while let Some(msg) = client.engine.user_interface.poll_message() {
+                        client.ui_message(&msg);
+                    }
+                    client.update(window_target);
                 }
-            }
-            Event::Resumed => {
-                if use_graphics {
-                    client.engine.initialize_graphics_context(window_target).unwrap();
+                Event::LoopExiting => {
+                    client.loop_exiting();
                 }
+                Event::MemoryWarning => {}
             }
-            Event::MainEventsCleared => {
-                while let Some(msg) = client.engine.user_interface.poll_message() {
-                    client.ui_message(&msg);
-                }
-                client.update();
-            }
-            Event::RedrawRequested(_) => {
-                client.engine.render().unwrap(); // LATER only crash if failed multiple times
-            }
-            Event::RedrawEventsCleared => {
-                if client.exit {
-                    *control_flow = ControlFlow::Exit;
-                }
-            }
-            Event::LoopDestroyed => {
-                client.loop_destroyed();
-            }
-        }
-    });
+        })
+        .unwrap();
 }
 
 fn server_main(cvars: Cvars) {
-    let event_loop = EventLoop::new();
     let engine = init_engine_server();
-    let use_graphics = !cvars.sv_headless;
-
     let mut server = executor::block_on(ServerProcess::new(cvars, engine));
-    event_loop.run(move |event, window_target, control_flow| {
-        // Default control_flow is ControllFlow::Poll but let's be explicit in case it changes.
-        *control_flow = ControlFlow::Poll;
 
-        // Exhaustively match all variants so we notice if the enum changes.
-        #[allow(clippy::single_match)]
-        match event {
-            Event::NewEvents(_) => {}
-            Event::WindowEvent { event, .. } => {
-                if let Some(os_event) = translate_event(&event) {
-                    server.engine.user_interface.process_os_event(&os_event);
-                }
-
-                match event {
-                    WindowEvent::CloseRequested => {
-                        *control_flow = ControlFlow::Exit;
+    let event_loop = EventLoop::new().unwrap();
+    // See client_main for explanation.
+    event_loop.set_control_flow(ControlFlow::Poll);
+    event_loop
+        .run(move |event, window_target| {
+            // Exhaustively match all variants so we notice if the enum changes.
+            #[allow(clippy::single_match)]
+            match event {
+                Event::NewEvents(_) => {}
+                Event::WindowEvent { event, .. } => {
+                    if let Some(os_event) = translate_event(&event) {
+                        server.engine.user_interface.process_os_event(&os_event);
                     }
-                    _ => {}
+
+                    match event {
+                        WindowEvent::CloseRequested => {
+                            window_target.exit();
+                        }
+                        _ => {}
+                    }
                 }
-            }
-            Event::DeviceEvent { .. } => {}
-            Event::UserEvent(_) => {}
-            Event::Suspended => {
-                if use_graphics {
-                    server.engine.destroy_graphics_context().unwrap();
+                Event::DeviceEvent { .. } => {}
+                Event::UserEvent(_) => {}
+                Event::Suspended => {
+                    if !server.cvars.cl_headless {
+                        server.engine.destroy_graphics_context().unwrap();
+                    }
                 }
-            }
-            Event::Resumed => {
-                if use_graphics {
-                    server.engine.initialize_graphics_context(window_target).unwrap();
+                Event::Resumed => {
+                    if !server.cvars.cl_headless {
+                        server.engine.initialize_graphics_context(window_target).unwrap();
+                    }
                 }
+                Event::AboutToWait => {
+                    while let Some(_msg) = server.engine.user_interface.poll_message() {}
+                    server.update(window_target);
+                }
+                Event::LoopExiting => dbg_logf!("bye"),
+                Event::MemoryWarning => {}
             }
-            Event::MainEventsCleared => {
-                server.update();
-                while let Some(_msg) = server.engine.user_interface.poll_message() {}
-            }
-            Event::RedrawRequested(_) => {}
-            Event::RedrawEventsCleared => {}
-            Event::LoopDestroyed => dbg_logf!("bye"),
-        }
-    });
+        })
+        .unwrap();
 }
 
 fn init_engine_client(cvars: &Cvars) -> Engine {

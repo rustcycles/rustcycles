@@ -2,7 +2,7 @@
 
 use std::net::TcpListener;
 
-use fyrox::core::instant::Instant;
+use fyrox::{core::instant::Instant, event_loop::EventLoopWindowTarget};
 
 use crate::{
     debug,
@@ -12,7 +12,7 @@ use crate::{
 
 /// The process that runs a dedicated server.
 pub struct ServerProcess {
-    cvars: Cvars,
+    pub cvars: Cvars,
     pub clock: Instant,
     pub engine: Engine,
     gs: GameState,
@@ -44,7 +44,7 @@ impl ServerProcess {
 
     /// This is similar to Client::update,
     /// see that for more information.
-    pub fn update(&mut self) {
+    pub fn update(&mut self, window_target: &EventLoopWindowTarget<()>) {
         let game_time_target = self.real_time();
 
         let dt_update = game_time_target - self.gs.game_time;
@@ -64,12 +64,10 @@ impl ServerProcess {
             self.ctx().tick_before_physics(dt);
 
             // There's currently no need to split this into pre_ and post_update like on the client.
-            // Dummy control flow and lag since we don't use fyrox plugins.
-            let mut cf = fyrox::event_loop::ControlFlow::Poll;
+            // Dummy lag since we don't use fyrox plugins.
             let mut lag = 0.0;
-            self.engine.update(dt, &mut cf, &mut lag, FxHashMap::default());
-            // Sanity check - if the engine starts doing something with these, we'll know.
-            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
+            self.engine.update(dt, window_target, &mut lag, FxHashMap::default());
+            // Sanity check - if the engine starts doing something with this, we'll know.
             assert_eq!(lag, 0.0);
 
             // `sys_send_update` sends debug shapes and text to client.

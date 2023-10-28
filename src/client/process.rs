@@ -12,6 +12,7 @@ use fyrox::{
     dpi::PhysicalSize,
     engine::GraphicsContext,
     event::{ElementState, KeyEvent, MouseButton, MouseScrollDelta, TouchPhase},
+    event_loop::EventLoopWindowTarget,
     gui::{
         brush::Brush,
         formatted_text::WrapMode,
@@ -20,7 +21,7 @@ use fyrox::{
         widget::{WidgetBuilder, WidgetMessage},
         UiNode,
     },
-    keyboard::KeyCode,
+    keyboard::{KeyCode, PhysicalKey},
     renderer::QualitySettings,
     window::CursorGrabMode,
 };
@@ -35,7 +36,7 @@ use crate::{
 
 /// The process that runs a player's game client.
 pub struct ClientProcess {
-    cvars: Cvars,
+    pub cvars: Cvars,
     clock: Instant,
     mouse_grabbed: bool,
     shift_pressed: bool,
@@ -204,11 +205,12 @@ impl ClientProcess {
     /// Input that is handled regardless of whether we're in menu/console/game.
     fn client_input(&mut self, event: &KeyEvent) {
         use KeyCode::*;
+        use PhysicalKey::*;
 
         let pressed = event.state == ElementState::Pressed;
 
         match event.physical_key {
-            Escape if pressed => {
+            Code(Escape) if pressed => {
                 if self.console.is_open() {
                     // With shift or without, ESC closes an open console.
                     self.close_console();
@@ -222,13 +224,13 @@ impl ClientProcess {
                     self.set_mouse_grab(false);
                 }
             }
-            Backquote if pressed => {
+            Code(Backquote) if pressed => {
                 // LATER Configurable console bind.
                 if !self.console.is_open() {
                     self.open_console();
                 }
             }
-            ShiftLeft => self.shift_pressed = pressed,
+            Code(ShiftLeft) => self.shift_pressed = pressed,
             _ => (),
         }
     }
@@ -247,27 +249,28 @@ impl ClientProcess {
     /// Input that is handdled only when we're in game.
     fn game_input(&mut self, event: &KeyEvent) {
         use KeyCode::*;
+        use PhysicalKey::*;
 
         let pressed = event.state == ElementState::Pressed;
 
         match event.physical_key {
-            KeyW => self.cg.input.forward = pressed,
-            KeyA => self.cg.input.left = pressed,
-            KeyS => self.cg.input.backward = pressed,
-            KeyD => self.cg.input.right = pressed,
-            Space => self.cg.input.up = pressed,
-            ShiftLeft => self.cg.input.down = pressed,
-            KeyQ => self.cg.input.prev_weapon = pressed,
-            KeyE => self.cg.input.next_weapon = pressed,
-            KeyR => self.cg.input.reload = pressed,
-            KeyF => self.cg.input.flag = pressed,
-            KeyG => self.cg.input.grenade = pressed,
-            KeyK => self.cg.input.kill = pressed,
-            KeyM => self.cg.input.map = pressed,
-            Tab => self.cg.input.score = pressed,
-            Enter => self.cg.input.chat = pressed,
-            Pause => self.cg.input.pause = pressed,
-            F12 => self.cg.input.screenshot = pressed,
+            Code(KeyW) => self.cg.input.forward = pressed,
+            Code(KeyA) => self.cg.input.left = pressed,
+            Code(KeyS) => self.cg.input.backward = pressed,
+            Code(KeyD) => self.cg.input.right = pressed,
+            Code(Space) => self.cg.input.up = pressed,
+            Code(ShiftLeft) => self.cg.input.down = pressed,
+            Code(KeyQ) => self.cg.input.prev_weapon = pressed,
+            Code(KeyE) => self.cg.input.next_weapon = pressed,
+            Code(KeyR) => self.cg.input.reload = pressed,
+            Code(KeyF) => self.cg.input.flag = pressed,
+            Code(KeyG) => self.cg.input.grenade = pressed,
+            Code(KeyK) => self.cg.input.kill = pressed,
+            Code(KeyM) => self.cg.input.map = pressed,
+            Code(Tab) => self.cg.input.score = pressed,
+            Code(Enter) => self.cg.input.chat = pressed,
+            Code(Pause) => self.cg.input.pause = pressed,
+            Code(F12) => self.cg.input.screenshot = pressed,
             _ => (),
         }
 
@@ -435,7 +438,7 @@ impl ClientProcess {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, window_target: &EventLoopWindowTarget<()>) {
         // LATER read these (again), verify what works best in practise:
         // https://gafferongames.com/post/fix_your_timestep/
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -466,12 +469,10 @@ impl ClientProcess {
             self.cl_ctx().tick_before_physics(dt);
 
             // Update animations, transformations, physics, ...
-            // Dummy control flow and lag since we don't use fyrox plugins.
-            let mut cf = fyrox::event_loop::ControlFlow::Poll;
+            // Dummy lag since we don't use fyrox plugins.
             let mut lag = 0.0;
-            self.engine.pre_update(dt, &mut cf, &mut lag, FxHashMap::default());
-            // Sanity check - if the engine starts doing something with these, we'll know.
-            assert_eq!(cf, fyrox::event_loop::ControlFlow::Poll);
+            self.engine.pre_update(dt, window_target, &mut lag, FxHashMap::default());
+            // Sanity check - if the engine starts doing something with this, we'll know.
             assert_eq!(lag, 0.0);
 
             // `tick_after_physics` tells the engine to draw debug shapes and text.
@@ -550,7 +551,7 @@ impl ClientProcess {
         }
     }
 
-    pub fn loop_destroyed(&self) {
+    pub fn loop_exiting(&self) {
         dbg_logf!("{} bye", self.real_time());
     }
 

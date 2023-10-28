@@ -323,9 +323,6 @@ fn client_main(cvars: Cvars, local_game: bool) {
                         }
                         WindowEvent::RedrawRequested => {
                             client.engine.render().unwrap(); // LATER only crash if failed multiple times
-                            if client.exit {
-                                window_target.exit();
-                            }
                         }
                         _ => {}
                     }
@@ -356,6 +353,9 @@ fn client_main(cvars: Cvars, local_game: bool) {
                         client.ui_message(&msg);
                     }
                     client.update(window_target);
+                    if client.exit {
+                        window_target.exit();
+                    }
                 }
                 Event::LoopExiting => {
                     client.loop_exiting();

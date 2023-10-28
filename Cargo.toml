@@ -44,7 +44,7 @@ codegen-units = 1
 [dependencies]
 bincode = "1.3.3"
 cvars = "0.4.2"
-cvars-console-fyrox = "0.3.0"
+cvars-console-fyrox = "0.4.0"
 fxhash = "0.2.1"
 fyrox = "0.32.0"
 inline_tweak = "1.0.9"
@@ -60,10 +60,10 @@ strum_macros = "0.25.3"
 # In general, if you override one of these, you need to override everything
 # so that cvars-console-fyrox uses the same version of cvars and fyrox-ui.
 
-cvars = { path = "../cvars/cvars" }
+#cvars = { path = "../cvars/cvars" }
 #cvars = { git = "https://github.com/martin-t/cvars", rev = "efb4f71422563d49813f21a67c3b9fb253e44387" }
 
-cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
+#cvars-console-fyrox = { path = "../cvars/cvars-console-fyrox" }
 #cvars-console-fyrox = { git = "https://github.com/martin-t/cvars", rev = "efb4f71422563d49813f21a67c3b9fb253e44387" }
 
 #fyrox = { git = "https://github.com/FyroxEngine/Fyrox", rev = "7307756adf3cbfa65ca158998fc2440df10b80b2" }

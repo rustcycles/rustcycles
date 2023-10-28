@@ -322,7 +322,10 @@ fn client_main(cvars: Cvars, local_game: bool) {
                             client.mouse_input(state, button);
                         }
                         WindowEvent::RedrawRequested => {
-                            client.engine.render().unwrap(); // LATER only crash if failed multiple times
+                            // This event never happens in headless mode.
+                            // So don't put anything here except rendering (duh).
+
+                            client.engine.render().unwrap();
                         }
                         _ => {}
                     }

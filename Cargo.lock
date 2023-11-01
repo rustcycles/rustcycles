@@ -959,9 +959,9 @@ dependencies = [
 
 [[package]]
 name = "fyrox"
-version = "0.32.0"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f63f099ff70e46019183a9fe4b2e0773d09138b1e4ec108989ade228a93d8ef3"
+checksum = "c0f789108c271c0b593b7b7ad9bc24ff3a00cf72a91efd82997bf8dda9fbd4dd"
 dependencies = [
  "bitflags 2.4.1",
  "clap",

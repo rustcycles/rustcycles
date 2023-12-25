@@ -1333,9 +1333,9 @@ dependencies = [
 
 [[package]]
 name = "inline_tweak"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb5714115b937a13a7d44b894f08dbabada434c2c1117904c2ead11fa8d4fafc"
+checksum = "509df93ec1b13bb1f22ad667f4a36c51d63159d737320d0b676f9eea000d89ba"
 dependencies = [
  "lazy_static",
 ]

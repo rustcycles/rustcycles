@@ -90,14 +90,14 @@ impl GameState {
 
         engine
             .resource_manager
-            .request::<Model, _>("data/arena/arena.rgs")
+            .request::<Model>("data/arena/arena.rgs")
             .await
             .unwrap()
             .instantiate(&mut scene);
 
         let cycle_model = engine
             .resource_manager
-            .request::<Model, _>("data/rustcycle/rustcycle.fbx")
+            .request::<Model>("data/rustcycle/rustcycle.fbx")
             .await
             .unwrap();
 

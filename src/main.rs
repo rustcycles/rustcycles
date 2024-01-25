@@ -20,6 +20,7 @@ use fyrox::{
     core::{
         futures::executor,
         log::{Log, MessageKind},
+        task::TaskPool,
     },
     dpi::{LogicalSize, PhysicalSize},
     engine::{Engine, EngineInitParams, GraphicsContextParams, SerializationContext},
@@ -430,13 +431,15 @@ fn init_engine_client(cvars: &Cvars) -> Engine {
     }
 
     // LATER no vsync
+    let task_pool = Arc::new(TaskPool::new());
     Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
             vsync: cvars.cl_vsync,
         },
         serialization_context: Arc::new(SerializationContext::new()),
-        resource_manager: ResourceManager::new(),
+        resource_manager: ResourceManager::new(task_pool.clone()),
+        task_pool,
     })
     .unwrap()
 }
@@ -446,13 +449,15 @@ fn init_engine_server() -> Engine {
         .with_title("RustCycles server")
         .with_inner_size(LogicalSize::new(400, 100));
 
+    let task_pool = Arc::new(TaskPool::new());
     Engine::new(EngineInitParams {
         graphics_context_params: GraphicsContextParams {
             window_attributes: window_builder.window_attributes().clone(),
             vsync: false, // Must be off when headless or weird things happen.
         },
         serialization_context: Arc::new(SerializationContext::new()),
-        resource_manager: ResourceManager::new(),
+        resource_manager: ResourceManager::new(task_pool.clone()),
+        task_pool,
     })
     .unwrap()
 }

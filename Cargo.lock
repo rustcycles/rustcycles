@@ -1350,11 +1350,12 @@ dependencies = [
 
 [[package]]
 name = "inline_tweak"
-version = "1.0.11"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0af55456b6effef89fe011ee0316a749984fd3ff0bcc3cd6ae0a3f3a4d752edf"
+checksum = "b7b57581af32af1202434451167ba6b6a0456f4370955c0a85d3ce6a8bfb27ef"
 dependencies = [
  "lazy_static",
+ "rustc-hash",
 ]
 
 [[package]]

@@ -7,7 +7,7 @@ use fyrox::{core::instant::Instant, event_loop::EventLoopWindowTarget};
 use crate::{
     debug,
     prelude::*,
-    server::game::{ServerFrameCtx, ServerGame},
+    server::game::ServerGame,
 };
 
 /// The process that runs a dedicated server.

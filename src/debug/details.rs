@@ -7,8 +7,7 @@
 // Some items in this file could trivially be inlined into debug.rs.
 // Usually, they're here because they differ between RecWars and RustCycles.
 
-use fxhash::FxHashMap;
-use fyrox::{core::algebra::Vector3, scene::debug::Line};
+use fyrox::scene::debug::Line;
 
 use crate::{debug::DEBUG_SHAPES, prelude::*};
 

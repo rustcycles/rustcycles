@@ -4,11 +4,7 @@ use std::net::TcpListener;
 
 use fyrox::{core::instant::Instant, event_loop::EventLoopWindowTarget};
 
-use crate::{
-    debug,
-    prelude::*,
-    server::game::ServerGame,
-};
+use crate::{debug, prelude::*, server::game::ServerGame};
 
 /// The process that runs a dedicated server.
 pub struct ServerProcess {

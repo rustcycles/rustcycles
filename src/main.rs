@@ -23,7 +23,7 @@ use fyrox::{
         task::TaskPool,
     },
     dpi::{LogicalSize, PhysicalSize},
-    engine::{Engine, EngineInitParams, GraphicsContextParams, SerializationContext},
+    engine::{EngineInitParams, GraphicsContextParams, SerializationContext},
     event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     utils::translate_event,

@@ -27,7 +27,7 @@ use fyrox::{
 };
 
 use crate::{
-    client::game::{ClientFrameCtx, ClientGame},
+    client::game::ClientGame,
     common::net::{self, LocalConnection, LocalListener},
     debug,
     prelude::*,

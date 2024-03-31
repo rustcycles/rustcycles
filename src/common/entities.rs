@@ -13,7 +13,8 @@ use crate::{common::Input, prelude::*};
 /// A client connected to a server. Can be observing, spectating or playing.
 #[derive(Debug)]
 pub struct Player {
-    pub name: String,
+    #[allow(dead_code)]
+    pub name: String, // TODO Use, remove allow
     pub state: PlayerState,
     pub input: Input,
     pub cycle_handle: Option<Handle<Cycle>>,

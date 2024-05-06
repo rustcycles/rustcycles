@@ -2,7 +2,7 @@
 name = "rustcycles"
 version = "0.0.0"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.73"
 resolver = "2"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 

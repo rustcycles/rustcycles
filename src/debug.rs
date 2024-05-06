@@ -515,16 +515,18 @@ thread_local! {
     // whether the thread is a client or a server. If you see it in stdout/stderr,
     // something is wrong - it's very early in startup or somebody spawned
     // more threads without setting this.
-    static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = RefCell::new(DebugEndpoint{
-        name: "??cl/sv",
-        default_color: WHITE,
-    });
+    static DEBUG_ENDPOINT: RefCell<DebugEndpoint> = const {
+        RefCell::new(DebugEndpoint {
+            name: "??cl/sv",
+            default_color: WHITE,
+        })
+    };
 
     static DEBUG_GAME_TIME: Cell<fl> = const { Cell::new(-1.0) };
 
-    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
-    pub static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = RefCell::new(Vec::new());
+    pub static DEBUG_TEXTS: RefCell<Vec<String>> = const { RefCell::new(Vec::new()) };
+    pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> =const { RefCell::new(Vec::new()) };
+    pub static DEBUG_SHAPES: RefCell<Vec<DebugShape>> = const { RefCell::new(Vec::new()) };
 }
 
 #[derive(Debug, Clone)]

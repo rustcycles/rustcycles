@@ -797,8 +797,10 @@ mod tests {
 
     #[test]
     fn test_soft_unreachable() {
-        (|| soft_unreachable!())();
-        (|| soft_unreachable!("custom message {}", 42))();
+        let f1: fn() -> () = || soft_unreachable!();
+        let f2: fn() -> () = || soft_unreachable!("custom message {}", 42);
+        f1();
+        f2();
 
         fn int1(option: Option<i32>) -> i32 {
             let Some(x) = option else { soft_unreachable!() };

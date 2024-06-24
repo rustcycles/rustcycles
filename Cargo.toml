@@ -52,7 +52,7 @@ rand = { version = "0.8.5", default-features = false }
 rand_distr = { version = "0.4.3", default-features = false }
 rand_xoshiro = "0.6.0"
 serde = { version = "1.0.203", features = ["derive"] }
-strum = "0.26.2"
+strum = "0.26.3"
 strum_macros = "0.26.2"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.

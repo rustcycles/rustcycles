@@ -269,6 +269,10 @@ fn client_server_main(cvar_args: Vec<String>) {
     client.wait().unwrap();
     dbg_logf!("Client exited, killing server");
     server.kill().unwrap();
+
+    // LATER This is to silence clippy. It is correct in all cases? Does not doing this produce zombies?
+    // https://stackoverflow.com/questions/67167845/reaping-children-subprocesses-in-rust-how-to-lookup-child-by-pid
+    server.wait().unwrap();
 }
 
 /// LATER Do we want a shared game state or just running both

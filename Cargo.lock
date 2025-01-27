@@ -230,7 +230,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "shlex",
  "syn 2.0.90",
 ]
@@ -1369,12 +1369,12 @@ dependencies = [
 
 [[package]]
 name = "inline_tweak"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6acddbefae08bfba73e27f55513f491f35c365d84bf3002bf85ba9b916c5e5f"
+checksum = "61af5ac52eec42f4c149b741c7b2387ab29d20cf551fd8decd949e2b8adc82fa"
 dependencies = [
  "lazy_static",
- "rustc-hash",
+ "rustc-hash 2.1.0",
 ]
 
 [[package]]
@@ -1986,7 +1986,7 @@ dependencies = [
  "nalgebra",
  "num-derive 0.4.2",
  "num-traits",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "simba",
  "slab",
  "smallvec",
@@ -2007,7 +2007,7 @@ dependencies = [
  "nalgebra",
  "num-derive 0.4.2",
  "num-traits",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "simba",
  "slab",
  "smallvec",
@@ -2191,7 +2191,7 @@ dependencies = [
  "num-derive 0.3.3",
  "num-traits",
  "parry2d",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "simba",
 ]
 
@@ -2211,7 +2211,7 @@ dependencies = [
  "num-derive 0.3.3",
  "num-traits",
  "parry3d",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "simba",
 ]
 
@@ -2344,6 +2344,12 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
+name = "rustc-hash"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
 
 [[package]]
 name = "rustcycles"

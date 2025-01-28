@@ -48,7 +48,7 @@ cvars-console-fyrox = "0.5.0"
 fxhash = "0.2.1"
 fyrox = "0.33.1"
 inline_tweak = "1.1.1"
-rand = { version = "0.8.5", default-features = false }
+rand = { version = "0.9.0", default-features = false }
 rand_distr = { version = "0.4.3", default-features = false }
 rand_xoshiro = "0.6.0"
 serde = { version = "1.0.217", features = ["derive"] }

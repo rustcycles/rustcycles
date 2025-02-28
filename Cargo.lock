@@ -1369,13 +1369,9 @@ dependencies = [
 
 [[package]]
 name = "inline_tweak"
-version = "1.1.1"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6acddbefae08bfba73e27f55513f491f35c365d84bf3002bf85ba9b916c5e5f"
-dependencies = [
- "lazy_static",
- "rustc-hash",
-]
+checksum = "b908ed8408e8ce7d79863ef4a8e34d289525cad442adfec964e4fe6f5cb6f614"
 
 [[package]]
 name = "inotify"

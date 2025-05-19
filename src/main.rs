@@ -92,7 +92,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     // LATER Would be nice to show a window with this message for people not using the terminal.
     //  This might also happen on MacOS due to their treatement of unsigned programs
     //  but we'll cross that bridge when we get there.
-    if std::fs::read_dir("data").unwrap().count() == 0 {
+    let rd = std::fs::read_dir("data");
+    if rd.is_err() {
+        println!("The data directory is not accessible, this usually happens when the game is intalled without its assets.");
+        println!("Make sure the data directory is present in the search path by downloading it manually. Automatic download is a planned feature.");
+        println!();
+        println!("The exact error was: {}", rd.unwrap_err());
+        println!("Exiting...");
+        std::process::exit(1);
+    } else if rd.unwrap().count() == 0 {
         println!("The data directory is empty, this usually happens when the repository is cloned without submodules.");
         println!("Make sure to initialize the git submodule after cloning - run `git submodule update --init --recursive`.");
         println!("See README.md for details. Exiting...");
